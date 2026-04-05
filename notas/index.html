@@ -511,10 +511,10 @@ async function syncNow() {
   setSyncStatus('busy', 'sincronizando…');
 
   try {
-    // 1. Fetch remote omega (manifest)
+    // 1. Fetch remote omega — archivo estático directo (sin overhead PHP)
     let remoteOmega = {};
     try {
-      const res = await fetch(SAVE_URL + '?key=manifest', { cache: 'no-store' });
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
       if (res.ok) remoteOmega = await res.json();
     } catch (_) {
       setSyncStatus('error', 'sin conexión');
@@ -535,29 +535,35 @@ async function syncNow() {
       else if (tsR > tsL) toPull.push(key);
     }
 
-    // 3. PUSH
+    // 3. PUSH — una entidad a la vez + manifest separado (contrato canónico)
     if (toPush.length > 0) {
-      const items = [];
       for (const key of toPush) {
         const payload = await idbGet(key);
-        if (payload !== undefined) {
-          items.push({ key, payload, ts: localOmega[key] });
-        }
-      }
-      if (items.length > 0) {
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
         await fetch(SAVE_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'push', items })
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
         });
       }
+      // Guardar manifest con merge local+remote (last-write-wins por key)
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
     }
 
-    // 4. PULL
+    // 4. PULL — archivos estáticos directos
     let pulled = 0;
     for (const key of toPull) {
       try {
-        const res = await fetch(SAVE_URL + '?key=' + encodeURIComponent(key), { cache: 'no-store' });
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
         if (res.ok) {
           const payload = await res.json();
           await idbSet(key, payload);
@@ -568,9 +574,6 @@ async function syncNow() {
     }
 
     // 5. Update local omega
-    for (const key of toPush) {
-      localOmega[key] = localOmega[key] || 0;
-    }
     await saveOmega(localOmega);
 
     // 6. Render only if pulled (I5)

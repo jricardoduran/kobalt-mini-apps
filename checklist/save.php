@@ -1,245 +1,92 @@
 <?php
-// ── Kobalt-Checklist · save.php ────────────────────────────────────────────
-// SAVE_URL = './save.php'
-// DATA_URL = './data'
-// Prefijos soportados: 'a' (ítems), 'b' (reservado), 'c' (listas)
-// LOCK_EX en todos los file_put_contents
+/**
+ * save.php — Kobalt-Checklist
+ *
+ * Contrato pasivo del servidor (S ∩ K = ∅):
+ *   GET  ?check              ← diagnóstico: verifica permisos y estructura
+ *   POST {action:"manifest"} ← guarda Ω remoto completo
+ *   POST {action:"put"}      ← guarda entidad individual (a/, b/, c/)
+ *
+ * Lecturas: los clientes leen directamente /data/manifest.json y /data/a/id.json
+ * El servidor solo escribe — nunca interpreta semántica del payload.
+ */
 
-header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
+$DATA_DIR = __DIR__ . '/data';
+$SUBDIRS  = ['c', 'a', 'b'];
+
+function ensureDir($path) {
+    $dir = is_dir($path) ? $path : dirname($path);
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+}
+
+function initDirs($base, $subs) {
+    if (!is_dir($base)) mkdir($base, 0755, true);
+    foreach ($subs as $s) {
+        $p = $base . '/' . $s;
+        if (!is_dir($p)) mkdir($p, 0755, true);
+    }
+}
+
+initDirs($DATA_DIR, $SUBDIRS);
+
+function out($data, $code = 200) {
+    http_response_code($code);
+    header('Content-Type: application/json');
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// ── DIRECTORIOS ────────────────────────────────────────────────────────────
-define('DATA_DIR', __DIR__ . '/data');
-
-function initDirs() {
-    $dirs = [
-        DATA_DIR,
-        DATA_DIR . '/a',
-        DATA_DIR . '/b',
-        DATA_DIR . '/c',
-    ];
-    foreach ($dirs as $dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-    }
-}
-
-initDirs();
-
-// ── HELPERS ────────────────────────────────────────────────────────────────
-
-/**
- * Devuelve la ruta de archivo para una clave dada.
- * Claves válidas: 'manifest', 'a:ID', 'b:ID', 'c:ID'
- */
-function keyToPath(string $key): ?string {
-    if ($key === 'manifest') {
-        return DATA_DIR . '/manifest.json';
-    }
-
-    if (!preg_match('/^([abc]):([a-z0-9_]+)$/i', $key, $m)) {
-        return null;
-    }
-
-    $prefix = $m[1];
-    $id     = $m[2];
-
-    // Sanitizar id para evitar path traversal
-    $id = preg_replace('/[^a-zA-Z0-9_\-]/', '', $id);
-    if ($id === '') return null;
-
-    return DATA_DIR . '/' . $prefix . '/' . $id . '.json';
-}
-
-/**
- * Escribe un archivo de forma atómica usando LOCK_EX.
- */
-function atomicWrite(string $path, string $content): bool {
-    $tmp = $path . '.tmp.' . mt_rand(100000, 999999);
-    $ok  = file_put_contents($tmp, $content, LOCK_EX);
-    if ($ok === false) return false;
-    return rename($tmp, $path);
-}
-
-/**
- * Lee el manifest actual (array key → ts).
- */
-function readManifest(): array {
-    $path = DATA_DIR . '/manifest.json';
-    if (!file_exists($path)) return [];
-    $raw = file_get_contents($path);
-    if ($raw === false) return [];
-    $data = json_decode($raw, true);
-    return is_array($data) ? $data : [];
-}
-
-/**
- * Guarda el manifest.
- */
-function writeManifest(array $manifest): bool {
-    $path = DATA_DIR . '/manifest.json';
-    return atomicWrite($path, json_encode($manifest, JSON_UNESCAPED_UNICODE));
-}
-
-// ── DIAGNÓSTICO ────────────────────────────────────────────────────────────
-if (isset($_GET['check'])) {
-    $dirs = [
-        'data'   => DATA_DIR,
-        'data/a' => DATA_DIR . '/a',
-        'data/b' => DATA_DIR . '/b',
-        'data/c' => DATA_DIR . '/c',
-    ];
-    $status = [];
-    foreach ($dirs as $label => $path) {
-        $status[$label] = [
-            'exists'   => is_dir($path),
-            'writable' => is_writable($path),
-        ];
-    }
-
-    $manifest = readManifest();
-    echo json_encode([
-        'ok'            => true,
-        'app'           => 'Kobalt-Checklist',
-        'save_url'      => './save.php',
-        'data_url'      => './data',
-        'dirs'          => $status,
-        'manifest_keys' => count($manifest),
-        'php'           => PHP_VERSION,
-        'ts'            => time(),
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-// ── GET ────────────────────────────────────────────────────────────────────
+// ── GET ?check — diagnóstico ──────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $key = isset($_GET['key']) ? trim($_GET['key']) : '';
+    global $DATA_DIR, $SUBDIRS;
+    $c = [];
+    $c['data_exists']   = is_dir($DATA_DIR);
+    $c['data_writable'] = is_writable($DATA_DIR);
+    foreach ($SUBDIRS as $s) $c["dir_$s"] = is_dir($DATA_DIR . "/$s");
+    $c['manifest'] = file_exists($DATA_DIR . '/manifest.json');
 
-    if ($key === '') {
-        http_response_code(400);
-        echo json_encode(['error' => 'missing key']);
-        exit;
-    }
+    $t = $DATA_DIR . '/.test';
+    $w = @file_put_contents($t, '1') !== false;
+    if ($w) @unlink($t);
+    $c['write_test'] = $w;
 
-    // manifest
-    if ($key === 'manifest') {
-        $manifest = readManifest();
-        echo json_encode($manifest, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    // entidad
-    $path = keyToPath($key);
-    if ($path === null) {
-        http_response_code(400);
-        echo json_encode(['error' => 'invalid key']);
-        exit;
-    }
-
-    if (!file_exists($path)) {
-        http_response_code(404);
-        echo json_encode(['error' => 'not found']);
-        exit;
-    }
-
-    $raw = file_get_contents($path);
-    if ($raw === false) {
-        http_response_code(500);
-        echo json_encode(['error' => 'read error']);
-        exit;
-    }
-
-    echo $raw;
-    exit;
+    out(['ok' => $c['data_writable'] && $w, 'checks' => $c,
+         'php' => PHP_VERSION, 'data_dir' => $DATA_DIR, 'cwd' => __DIR__]);
 }
 
-// ── POST ───────────────────────────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $body = file_get_contents('php://input');
-    if (!$body) {
-        http_response_code(400);
-        echo json_encode(['error' => 'empty body']);
-        exit;
-    }
+// ── POST — parsear body ───────────────────────────────────────
+$ct     = $_SERVER['CONTENT_TYPE'] ?? '';
+$isJson = str_contains($ct, 'application/json');
+$input  = $isJson ? (json_decode(file_get_contents('php://input'), true) ?? []) : [];
+$action = $input['action'] ?? '';
 
-    $data = json_decode($body, true);
-    if (!is_array($data) || !isset($data['action'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'invalid json or missing action']);
-        exit;
-    }
-
-    if ($data['action'] === 'push') {
-        if (!isset($data['items']) || !is_array($data['items'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'missing items array']);
-            exit;
-        }
-
-        $manifest = readManifest();
-        $saved    = 0;
-        $errors   = [];
-
-        foreach ($data['items'] as $item) {
-            if (!isset($item['key']) || !isset($item['payload']) || !isset($item['ts'])) {
-                $errors[] = 'item missing key/payload/ts';
-                continue;
-            }
-
-            $key = trim($item['key']);
-            $ts  = (int) $item['ts'];
-
-            $path = keyToPath($key);
-            if ($path === null) {
-                $errors[] = 'invalid key: ' . $key;
-                continue;
-            }
-
-            // Serializar payload
-            $encoded = json_encode($item['payload'], JSON_UNESCAPED_UNICODE);
-            if ($encoded === false) {
-                $errors[] = 'encode error for key: ' . $key;
-                continue;
-            }
-
-            if (!atomicWrite($path, $encoded)) {
-                $errors[] = 'write error for key: ' . $key;
-                continue;
-            }
-
-            // Actualizar manifest solo si ts es mayor o igual (PUSH gana si igual)
-            $currentTs = isset($manifest[$key]) ? (int)$manifest[$key] : 0;
-            if ($ts >= $currentTs) {
-                $manifest[$key] = $ts;
-            }
-
-            $saved++;
-        }
-
-        writeManifest($manifest);
-
-        echo json_encode([
-            'ok'     => true,
-            'saved'  => $saved,
-            'errors' => $errors,
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    http_response_code(400);
-    echo json_encode(['error' => 'unknown action: ' . $data['action']]);
-    exit;
+// ── MANIFEST ─────────────────────────────────────────────────
+if ($action === 'manifest') {
+    $data = $input['data'] ?? null;
+    if (!is_array($data)) out(['error' => 'data must be object'], 400);
+    $n = file_put_contents($DATA_DIR . '/manifest.json',
+             json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    if ($n === false) out(['error' => 'write failed'], 500);
+    out(['ok' => true, 'bytes' => $n]);
 }
 
-// ── MÉTODO NO SOPORTADO ────────────────────────────────────────────────────
-http_response_code(405);
-echo json_encode(['error' => 'method not allowed']);
-exit;
+// ── PUT — entidad individual ──────────────────────────────────
+if ($action === 'put') {
+    $rp = $input['path'] ?? '';
+    if (!preg_match('/^[abc]\/[a-z0-9_\-]+\.json$/i', $rp))
+        out(['error' => 'invalid path: ' . $rp], 400);
+    $data = $input['data'] ?? null;
+    if ($data === null) out(['error' => 'data required'], 400);
+    $fp = $DATA_DIR . '/' . $rp;
+    ensureDir($fp);
+    $n = file_put_contents($fp, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    if ($n === false) out(['error' => 'write failed: ' . $rp], 500);
+    out(['ok' => true, 'path' => $rp, 'bytes' => $n]);
+}
+
+out(['error' => 'unknown action: ' . $action], 400);

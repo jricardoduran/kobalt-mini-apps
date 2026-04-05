@@ -502,20 +502,27 @@ async function syncNow() {
       else if (tsR > tsL) toPull.push(key);
     }
 
-    // ── PUSH ──
+    // ── PUSH — una entidad a la vez + manifest separado (contrato canónico)
     if (toPush.length) {
-      const items = [];
       for (const key of toPush) {
         const val = await idbGet(key);
-        if (val) items.push({ key, payload: val, ts: omegaL[key] });
-      }
-      if (items.length) {
+        if (!val) continue;
+        const [prefix, id] = key.split(':');
         await fetch(SAVE_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'push', items })
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: val })
         });
       }
+      // Guardar manifest con merge local+remote (last-write-wins por key)
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(omegaL[k] || 0, omegaR[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
     }
 
     // ── PULL ──
