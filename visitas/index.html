@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kobalt Visitas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0f0f0f;
+    --surface:  #1a1a1a;
+    --border:   #2a2a2a;
+    --text:     #e8e8e8;
+    --muted:    #666;
+    --accent:   #4f8ef7;
+    --pending:  #ff9800;
+    --done:     #4caf50;
+    --cancel:   #ef5350;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  #app { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+  }
+  header h1 { font-size: 18px; font-weight: 600; flex: 1; }
+  #sync-status {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+  #sync-status.syncing { color: var(--accent); }
+  #sync-status.error   { color: var(--cancel); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-title { font-weight: 600; margin-bottom: 4px; }
+  .card-sub   { font-size: 12px; color: var(--muted); }
+
+  /* ── Badge estado ── */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .badge-pendiente  { background: #ff980022; color: var(--pending); border: 1px solid #ff980055; }
+  .badge-realizada  { background: #4caf5022; color: var(--done);    border: 1px solid #4caf5055; }
+  .badge-cancelada  { background: #ef535022; color: var(--cancel);  border: 1px solid #ef535055; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-primary  { background: var(--accent); color: #fff; }
+  .btn-ghost    { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-sm       { padding: 5px 12px; font-size: 13px; }
+  .btn-estado   { padding: 6px 12px; font-size: 13px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+  .btn-estado.active-pendiente { border-color: var(--pending); color: var(--pending); }
+  .btn-estado.active-realizada { border-color: var(--done);    color: var(--done);    }
+  .btn-estado.active-cancelada { border-color: var(--cancel);  color: var(--cancel);  }
+
+  /* ── Toolbar row ── */
+  .toolbar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+
+  /* ── Back button ── */
+  .back-btn {
+    background: none; border: none; color: var(--accent);
+    font-size: 14px; cursor: pointer; padding: 0; font-family: inherit;
+    display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+  }
+
+  /* ── Section header ── */
+  .section-label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin: 20px 0 8px;
+  }
+
+  /* ── Visita detalle ── */
+  .detail-field { margin-bottom: 14px; }
+  .detail-label { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .detail-value { font-size: 15px; }
+
+  .estado-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  /* ── Photo grid ── */
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .photo-thumb {
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    width: 100%;
+    cursor: pointer;
+    display: block;
+  }
+  .photo-placeholder {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 28px;
+    cursor: pointer;
+  }
+
+  /* ── Modal ── */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: #000a;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    width: 100%;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+
+  /* ── Form ── */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select option { background: var(--surface); }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── Empty ── */
+  .empty { color: var(--muted); font-size: 14px; padding: 20px 0; text-align: center; }
+
+  /* ── Zona card counter ── */
+  .zona-meta { display: flex; align-items: center; justify-content: space-between; }
+  .zona-counter {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: #4f8ef711;
+    border: 1px solid #4f8ef733;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+
+  /* ── Visita card row ── */
+  .visita-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .visita-info { flex: 1; min-width: 0; }
+  .visita-fecha { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: #000d;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    cursor: zoom-out;
+  }
+  .lightbox img { max-width: 95vw; max-height: 92vh; border-radius: 6px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 id="header-title">Kobalt Visitas</h1>
+    <span id="sync-status">—</span>
+  </header>
+  <div id="view-container"></div>
+</div>
+
+<!-- Modal crear visita -->
+<div id="modal-visita" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Nueva visita</h2>
+    <div class="field">
+      <label>Cliente</label>
+      <input id="f-cliente" type="text" placeholder="Nombre del cliente">
+    </div>
+    <div class="field">
+      <label>Dirección</label>
+      <input id="f-direccion" type="text" placeholder="Dirección">
+    </div>
+    <div class="field">
+      <label>Notas</label>
+      <textarea id="f-notas" placeholder="Notas adicionales..."></textarea>
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input id="f-fecha" type="date">
+    </div>
+    <div class="field">
+      <label>Zona (opcional)</label>
+      <select id="f-zona">
+        <option value="">Sin zona</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitVisita()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal crear zona -->
+<div id="modal-zona" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Nueva zona</h2>
+    <div class="field">
+      <label>Nombre</label>
+      <input id="f-zona-nombre" type="text" placeholder="Nombre de la zona">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitZona()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── Constantes ──────────────────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Visitas';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function newId() { return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
+function now()   { return Math.floor(Date.now() / 1000); }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// ── IDB ─────────────────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('kv')) {
+        db.createObjectStore('kv');
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx  = _db.transaction('kv', 'readonly');
+    const req = tx.objectStore('kv').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, value) {
+  return new Promise((resolve, reject) => {
+    const tx  = _db.transaction('kv', 'readwrite');
+    const req = tx.objectStore('kv').put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const tx    = _db.transaction('kv', 'readonly');
+    const store = tx.objectStore('kv');
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const req   = store.getAll(range);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAllWithKeys(prefix) {
+  return new Promise((resolve, reject) => {
+    const tx    = _db.transaction('kv', 'readonly');
+    const store = tx.objectStore('kv');
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const req   = store.openCursor(range);
+    const result = {};
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { result[cursor.key] = cursor.value; cursor.continue(); }
+      else resolve(result);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── Omega (manifest local) ───────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── saveEntity ───────────────────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── Operaciones de negocio ───────────────────────────────────────────────────
+async function createZona(nombre) {
+  const id = newId();
+  const zona = { id, nombre, members: [], ts: now() };
+  await saveEntity('c', zona);
+  return zona;
+}
+
+async function createVisita(cliente, direccion, notas, fecha, zonaId) {
+  const id = newId();
+  const visita = {
+    id, cliente, direccion, notas,
+    estado: 'pendiente',
+    fecha: fecha || todayStr(),
+    zonaId: zonaId || null,
+    ts: now()
+  };
+  await saveEntity('a', visita);
+  // Agregar a zona si corresponde
+  if (zonaId) {
+    const zona = await idbGet('c:' + zonaId);
+    if (zona) {
+      if (!zona.members) zona.members = [];
+      if (!zona.members.includes(id)) {
+        zona.members.push(id);
+        zona.ts = now();
+        await saveEntity('c', zona);
+      }
+    }
+  }
+  return visita;
+}
+
+async function updateEstado(visitaId, estado) {
+  const visita = await idbGet('a:' + visitaId);
+  if (!visita) return;
+  visita.estado = estado;
+  visita.ts = now();
+  await saveEntity('a', visita);
+}
+
+async function addFoto(visitaId, file) {
+  const id  = newId();
+  const ext = (file.name.split('.').pop().toLowerCase()) || 'jpg';
+
+  // 1. Leer como ArrayBuffer y guardar en IDB
+  const buf = await file.arrayBuffer();
+  await idbSet('blob:' + id, buf);
+
+  // 2. Guardar metadata + omega (solo 'b:*', NO 'blob:*')
+  const meta = { id, visitaId, mime: file.type || 'image/jpeg', ext, ts: now() };
+  await saveEntity('b', meta);
+
+  // 3. Subir binario al servidor via FormData
+  try {
+    const form = new FormData();
+    form.append('photo', file);
+    form.append('id', id);
+    form.append('ext', ext);
+    await fetch(SAVE_URL, { method: 'POST', body: form });
+  } catch (e) {
+    console.warn('Upload foto falló (offline?):', e);
+  }
+
+  return meta;
+}
+
+async function getFotosDeVisita(visitaId) {
+  const all = await idbGetAll('b:');
+  return all.filter(f => f.visitaId === visitaId);
+}
+
+async function getZonas() {
+  return idbGetAll('c:');
+}
+
+async function getVisitasDe(zonaId) {
+  const all = await idbGetAll('a:');
+  return all.filter(v => v.zonaId === zonaId);
+}
+
+async function getVisitasSinZona() {
+  const all = await idbGetAll('a:');
+  return all.filter(v => !v.zonaId);
+}
+
+// ── Sync ─────────────────────────────────────────────────────────────────────
+let _syncTimer = null;
+
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className   = cls || '';
+}
+
+async function syncNow() {
+  setSyncStatus('syncing…', 'syncing');
+  try {
+    // ── Fetch manifest remoto ──
+    const res = await fetch(DATA_URL + '/manifest.json?t=' + Date.now());
+    let omegaR = {};
+    if (res.ok) {
+      try { omegaR = await res.json(); } catch (_) { omegaR = {}; }
+    }
+
+    const omegaL = await getOmega();
+
+    // ── Calcular delta (solo a:, b:, c: — NO blob:) ──
+    const allKeys = new Set([
+      ...Object.keys(omegaL).filter(k => /^[abc]:/.test(k)),
+      ...Object.keys(omegaR).filter(k => /^[abc]:/.test(k))
+    ]);
+
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = omegaL[key] || 0;
+      const tsR = omegaR[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    // ── PUSH ──
+    if (toPush.length) {
+      const items = [];
+      for (const key of toPush) {
+        const val = await idbGet(key);
+        if (val) items.push({ key, payload: val, ts: omegaL[key] });
+      }
+      if (items.length) {
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'push', items })
+        });
+      }
+    }
+
+    // ── PULL ──
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const r = await fetch(DATA_URL + '/' + key.replace(':', '/') + '.json?t=' + Date.now());
+        if (r.ok) {
+          const entity = await r.json();
+          await idbSet(key, entity);
+          omegaL[key] = omegaR[key];
+          pulled++;
+        }
+      } catch (_) { /* offline */ }
+    }
+
+    if (pulled > 0) {
+      await saveOmega(omegaL);
+      await render(); // I5: solo repintar si hubo pull
+    }
+
+    setSyncStatus('sync ' + new Date().toLocaleTimeString(), '');
+  } catch (e) {
+    console.warn('Sync error:', e);
+    setSyncStatus('offline', 'error');
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  _syncTimer = setInterval(syncNow, 30000);
+}
+
+// ── Estado de navegación ──────────────────────────────────────────────────────
+let view           = 'zonas';
+let currentZonaId  = null;
+let currentVisitaId = null;
+
+// ── Render ───────────────────────────────────────────────────────────────────
+async function render() {
+  const container = document.getElementById('view-container');
+  const header    = document.getElementById('header-title');
+
+  if (view === 'zonas') {
+    header.textContent = 'Kobalt Visitas';
+    container.innerHTML = await renderZonas();
+  } else if (view === 'zona-detalle') {
+    const zona = await idbGet('c:' + currentZonaId);
+    header.textContent = zona ? zona.nombre : 'Zona';
+    container.innerHTML = await renderZonaDetalle(currentZonaId);
+  } else if (view === 'visita-detalle') {
+    const visita = await idbGet('a:' + currentVisitaId);
+    header.textContent = visita ? visita.cliente : 'Visita';
+    container.innerHTML = await renderVisitaDetalle(currentVisitaId);
+  }
+
+  attachEvents();
+}
+
+async function renderZonas() {
+  const zonas        = await getZonas();
+  const sinZona      = await getVisitasSinZona();
+
+  let html = `
+    <div class="toolbar">
+      <button class="btn btn-primary btn-sm" onclick="openModalZona()">+ Zona</button>
+      <button class="btn btn-ghost btn-sm"   onclick="openModalVisita()">+ Visita</button>
+    </div>
+  `;
+
+  if (zonas.length === 0 && sinZona.length === 0) {
+    html += `<p class="empty">No hay zonas ni visitas. Crea una zona o visita para empezar.</p>`;
+    return html;
+  }
+
+  if (zonas.length) {
+    html += `<div class="section-label">Zonas</div>`;
+    for (const z of zonas.sort((a,b) => a.nombre.localeCompare(b.nombre))) {
+      const visitas = await getVisitasDe(z.id);
+      html += `
+        <div class="card" data-action="open-zona" data-id="${esc(z.id)}">
+          <div class="zona-meta">
+            <div class="card-title">${esc(z.nombre)}</div>
+            <span class="zona-counter">${visitas.length} visita${visitas.length !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (sinZona.length) {
+    html += `<div class="section-label">Sin zona</div>`;
+    for (const v of sinZona.sort((a,b) => b.ts - a.ts)) {
+      html += renderVisitaCard(v);
+    }
+  }
+
+  return html;
+}
+
+async function renderZonaDetalle(zonaId) {
+  const visitas = await getVisitasDe(zonaId);
+
+  let html = `
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+    <div class="toolbar">
+      <button class="btn btn-ghost btn-sm" onclick="openModalVisitaConZona('${esc(zonaId)}')">+ Visita</button>
+    </div>
+  `;
+
+  if (visitas.length === 0) {
+    html += `<p class="empty">No hay visitas en esta zona.</p>`;
+    return html;
+  }
+
+  html += `<div class="section-label">Visitas</div>`;
+  for (const v of visitas.sort((a,b) => b.ts - a.ts)) {
+    html += renderVisitaCard(v);
+  }
+  return html;
+}
+
+async function renderVisitaDetalle(visitaId) {
+  const visita = await idbGet('a:' + visitaId);
+  if (!visita) return `<button class="back-btn" onclick="goBack()">← Volver</button><p class="empty">Visita no encontrada.</p>`;
+
+  const fotos = await getFotosDeVisita(visitaId);
+
+  let fotoGrid = '';
+  for (const f of fotos) {
+    const buf  = await idbGet('blob:' + f.id);
+    let src = '';
+    if (buf) {
+      const blob = new Blob([buf], { type: f.mime });
+      src = URL.createObjectURL(blob);
+    } else {
+      // Si no hay blob local, intentar URL del servidor
+      src = DATA_URL + '/photos/' + encodeURIComponent(f.id) + '.' + encodeURIComponent(f.ext);
+    }
+    fotoGrid += `<img class="photo-thumb" src="${src}" alt="foto" data-action="lightbox" data-src="${src}">`;
+  }
+
+  const estadoActual = visita.estado || 'pendiente';
+
+  let html = `
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+
+    <div class="detail-field">
+      <div class="detail-label">Estado</div>
+      <div class="estado-row">
+        <button class="btn btn-estado btn-sm ${estadoActual==='pendiente'?'active-pendiente':''}" data-action="set-estado" data-id="${esc(visitaId)}" data-estado="pendiente">Pendiente</button>
+        <button class="btn btn-estado btn-sm ${estadoActual==='realizada'?'active-realizada':''}"  data-action="set-estado" data-id="${esc(visitaId)}" data-estado="realizada">Realizada</button>
+        <button class="btn btn-estado btn-sm ${estadoActual==='cancelada'?'active-cancelada':''}"  data-action="set-estado" data-id="${esc(visitaId)}" data-estado="cancelada">Cancelada</button>
+      </div>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">Cliente</div>
+      <div class="detail-value">${esc(visita.cliente)}</div>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">Dirección</div>
+      <div class="detail-value">${esc(visita.direccion)}</div>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">Fecha</div>
+      <div class="detail-value" style="font-family:'JetBrains Mono',monospace">${esc(visita.fecha)}</div>
+    </div>
+  `;
+
+  if (visita.notas) {
+    html += `
+      <div class="detail-field">
+        <div class="detail-label">Notas</div>
+        <div class="detail-value" style="white-space:pre-wrap">${esc(visita.notas)}</div>
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="detail-field">
+      <div class="detail-label">Fotos (${fotos.length})</div>
+      <div class="photo-grid">
+        ${fotoGrid}
+        <div class="photo-placeholder" data-action="add-foto" data-id="${esc(visitaId)}">📷</div>
+      </div>
+    </div>
+    <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" data-visita-id="${esc(visitaId)}">
+  `;
+
+  return html;
+}
+
+function renderVisitaCard(v) {
+  return `
+    <div class="card" data-action="open-visita" data-id="${esc(v.id)}">
+      <div class="visita-row">
+        <div class="visita-info">
+          <div class="card-title">${esc(v.cliente)}</div>
+          <div class="card-sub">${esc(v.direccion)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="badge badge-${esc(v.estado || 'pendiente')}">${esc(v.estado || 'pendiente')}</span>
+          <div class="visita-fecha">${esc(v.fecha || '')}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Escaping ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── Event delegation ─────────────────────────────────────────────────────────
+function attachEvents() {
+  const container = document.getElementById('view-container');
+
+  // Delegación click
+  container.onclick = async (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const action = el.dataset.action;
+
+    if (action === 'open-zona') {
+      currentZonaId = el.dataset.id;
+      view = 'zona-detalle';
+      await render();
+
+    } else if (action === 'open-visita') {
+      currentVisitaId = el.dataset.id;
+      view = 'visita-detalle';
+      await render();
+
+    } else if (action === 'set-estado') {
+      await updateEstado(el.dataset.id, el.dataset.estado);
+      await render();
+      syncNow();
+
+    } else if (action === 'add-foto') {
+      const input = document.getElementById('foto-input');
+      if (input) {
+        input.dataset.visitaId = el.dataset.id;
+        input.click();
+      }
+
+    } else if (action === 'lightbox') {
+      const lb = document.createElement('div');
+      lb.className = 'lightbox';
+      lb.innerHTML = `<img src="${el.dataset.src}" alt="foto">`;
+      lb.onclick = () => lb.remove();
+      document.body.appendChild(lb);
+    }
+  };
+
+  // Input foto
+  const fotoInput = document.getElementById('foto-input');
+  if (fotoInput) {
+    fotoInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const vid = fotoInput.dataset.visitaId;
+      await addFoto(vid, file);
+      await render();
+      syncNow();
+      fotoInput.value = '';
+    };
+  }
+}
+
+// ── Navegación ───────────────────────────────────────────────────────────────
+async function goBack() {
+  if (view === 'visita-detalle') {
+    view = currentZonaId ? 'zona-detalle' : 'zonas';
+  } else if (view === 'zona-detalle') {
+    view = 'zonas';
+    currentZonaId = null;
+  } else {
+    view = 'zonas';
+  }
+  await render();
+}
+
+// ── Modales ───────────────────────────────────────────────────────────────────
+function openModalVisita(zonaId) {
+  // Rellenar select de zonas
+  _populateZonaSelect(zonaId || '');
+  document.getElementById('f-cliente').value    = '';
+  document.getElementById('f-direccion').value  = '';
+  document.getElementById('f-notas').value      = '';
+  document.getElementById('f-fecha').value      = todayStr();
+  document.getElementById('modal-visita').style.display = 'flex';
+}
+
+function openModalVisitaConZona(zonaId) {
+  openModalVisita(zonaId);
+}
+
+async function _populateZonaSelect(selectedId) {
+  const sel   = document.getElementById('f-zona');
+  const zonas = await getZonas();
+  sel.innerHTML = `<option value="">Sin zona</option>`;
+  for (const z of zonas.sort((a,b) => a.nombre.localeCompare(b.nombre))) {
+    sel.innerHTML += `<option value="${esc(z.id)}" ${z.id === selectedId ? 'selected' : ''}>${esc(z.nombre)}</option>`;
+  }
+}
+
+function openModalZona() {
+  document.getElementById('f-zona-nombre').value = '';
+  document.getElementById('modal-zona').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-visita').style.display = 'none';
+  document.getElementById('modal-zona').style.display   = 'none';
+}
+
+async function submitVisita() {
+  const cliente   = document.getElementById('f-cliente').value.trim();
+  const direccion = document.getElementById('f-direccion').value.trim();
+  const notas     = document.getElementById('f-notas').value.trim();
+  const fecha     = document.getElementById('f-fecha').value || todayStr();
+  const zonaId    = document.getElementById('f-zona').value || null;
+  if (!cliente) { document.getElementById('f-cliente').focus(); return; }
+  closeModal();
+  await createVisita(cliente, direccion, notas, fecha, zonaId);
+  await render();
+  syncNow();
+}
+
+async function submitZona() {
+  const nombre = document.getElementById('f-zona-nombre').value.trim();
+  if (!nombre) { document.getElementById('f-zona-nombre').focus(); return; }
+  closeModal();
+  await createZona(nombre);
+  await render();
+  syncNow();
+}
+
+// Cerrar modales al click fuera
+document.getElementById('modal-visita').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.getElementById('modal-zona').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+init();
+</script>
+</body>
+</html>

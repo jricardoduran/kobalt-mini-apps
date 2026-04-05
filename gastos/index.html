@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Gastos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e8e8e8;
+      --muted: #666;
+      --accent: #4f8ef7;
+      --green: #4caf50;
+      --red: #ef5350;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .app-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .total-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .total-display.positive { color: var(--red); }
+    .total-display.negative { color: var(--green); }
+    .total-display.zero     { color: var(--muted); }
+
+    .sync-indicator {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sync-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+    .sync-dot.syncing  { background: var(--accent); animation: pulse 1s infinite; }
+    .sync-dot.ok       { background: var(--green); }
+    .sync-dot.error    { background: var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* CHIPS */
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .chip:hover  { border-color: var(--accent); color: var(--accent); }
+    .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+
+    /* LIST */
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 16px 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .empty-state .icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .movimiento-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .movimiento-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+      align-items: center;
+    }
+
+    .mov-concepto {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      grid-column: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mov-monto {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: right;
+      grid-column: 2;
+      grid-row: 1 / 3;
+      align-self: center;
+    }
+    .mov-monto.gasto   { color: var(--red); }
+    .mov-monto.ingreso { color: var(--green); }
+
+    .mov-meta {
+      grid-column: 1;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .mov-categoria {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(79, 142, 247, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      z-index: 200;
+      line-height: 1;
+    }
+    .fab:hover  { transform: scale(1.08); box-shadow: 0 6px 28px rgba(79, 142, 247, 0.55); }
+    .fab:active { transform: scale(0.95); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 300;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      padding: 28px 24px 36px;
+      width: 100%;
+      max-width: 520px;
+      transform: translateY(40px);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+
+    input[type="number"] {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    select option { background: #1a1a1a; }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .form-hint.positive { color: var(--red); }
+    .form-hint.negative { color: var(--green); }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-submit:hover  { opacity: 0.92; }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span class="app-title">Kobalt Gastos</span>
+    <span class="total-display zero" id="total-display">$0.00</span>
+    <div class="sync-indicator">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">—</span>
+    </div>
+  </div>
+  <div class="chips" id="chips">
+    <button class="chip active" data-cat="todos">Todos</button>
+    <button class="chip" data-cat="alimentacion">Alimentacion</button>
+    <button class="chip" data-cat="transporte">Transporte</button>
+    <button class="chip" data-cat="servicios">Servicios</button>
+    <button class="chip" data-cat="otro">Otro</button>
+  </div>
+</header>
+
+<main>
+  <div id="list-container">
+    <div class="empty-state">
+      <div class="icon">💸</div>
+      <div>Cargando...</div>
+    </div>
+  </div>
+</main>
+
+<button class="fab" id="fab" title="Nuevo movimiento">+</button>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Nuevo Movimiento</span>
+      <button class="modal-close" id="modal-close" aria-label="Cerrar">&#x2715;</button>
+    </div>
+    <form id="gasto-form" autocomplete="off">
+      <div class="form-group">
+        <label for="f-concepto">Concepto</label>
+        <input type="text" id="f-concepto" placeholder="Ej: Supermercado" required maxlength="120" />
+      </div>
+      <div class="form-group">
+        <label for="f-monto">Monto</label>
+        <input type="number" id="f-monto" placeholder="0.00" step="0.01" required />
+        <div class="form-hint" id="monto-hint">Positivo = gasto &nbsp;/&nbsp; Negativo = ingreso</div>
+      </div>
+      <div class="form-group">
+        <label for="f-categoria">Categoria</label>
+        <select id="f-categoria" required>
+          <option value="alimentacion">Alimentacion</option>
+          <option value="transporte">Transporte</option>
+          <option value="servicios">Servicios</option>
+          <option value="otro" selected>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="f-fecha">Fecha</label>
+        <input type="date" id="f-fecha" required />
+      </div>
+      <button type="submit" class="btn-submit" id="btn-guardar">Guardar</button>
+    </form>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Gastos';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const STORE    = 'kv';
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function formatMonto(n) {
+  return (n < 0 ? '-' : '') + '$' + Math.abs(n).toFixed(2);
+}
+function fmtFecha(s) {
+  if (!s) return '';
+  const [y, m, d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ─── INDEXEDDB ───────────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore(STORE);
+    };
+    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
+    req.onerror   = (e) => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).get(key);
+    req.onsuccess = () => resolve(req.result ?? null);
+    req.onerror   = (e) => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = (e) => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const tx    = _db.transaction(STORE, 'readonly');
+    const store = tx.objectStore(STORE);
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const req   = store.getAll(range);
+    req.onsuccess = () => resolve(req.result ?? []);
+    req.onerror   = (e) => reject(e.target.error);
+  });
+}
+
+// ─── OMEGA (MANIFEST LOCAL) ───────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ─── ENTITY HELPERS ──────────────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key   = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key]  = entity.ts;
+  await saveOmega(omega);
+}
+
+// ─── SYNC ────────────────────────────────────────────────────────────────────
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + state;
+  if (lbl) lbl.textContent = label;
+}
+
+async function syncNow() {
+  setSyncStatus('syncing', 'Sincronizando…');
+  try {
+    // 1. Fetch remote manifest
+    const resp = await fetch(SAVE_URL + '?key=manifest', { cache: 'no-store' });
+    if (!resp.ok) throw new Error('manifest ' + resp.status);
+    const omegaR = await resp.json();   // { key: ts, ... }
+
+    const omegaL = await getOmega();
+
+    // 2. Compute delta
+    const allKeys = new Set([...Object.keys(omegaL), ...Object.keys(omegaR)]);
+    const toPush  = [];
+    const toPull  = [];
+
+    for (const key of allKeys) {
+      const tsL = omegaL[key] ?? 0;
+      const tsR = omegaR[key] ?? 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    // 3. PUSH
+    if (toPush.length > 0) {
+      const items = [];
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload !== null) items.push({ key, payload, ts: omegaL[key] });
+      }
+      if (items.length > 0) {
+        const pr = await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'push', items }),
+        });
+        if (!pr.ok) throw new Error('push ' + pr.status);
+      }
+    }
+
+    // 4. PULL
+    let pulled = 0;
+    for (const key of toPull) {
+      const pr = await fetch(SAVE_URL + '?key=' + encodeURIComponent(key), { cache: 'no-store' });
+      if (!pr.ok) continue;
+      const payload = await pr.json();
+      await idbSet(key, payload);
+      omegaL[key] = omegaR[key];
+      pulled++;
+    }
+    if (toPull.length > 0) await saveOmega(omegaL);
+
+    setSyncStatus('ok', 'Sincronizado');
+
+    // I5: sync ≠ repaint — render SOLO si hubo pull
+    if (pulled > 0) await render();
+
+  } catch (err) {
+    console.warn('[sync]', err);
+    setSyncStatus('error', 'Sin conexión');
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ─── DOMAIN OPERATIONS ───────────────────────────────────────────────────────
+async function createGasto(concepto, monto, categoria, fecha) {
+  const entity = {
+    id: newId(),
+    concepto:  String(concepto).trim(),
+    monto:     Number(monto),
+    categoria: categoria,
+    fecha:     fecha,
+    ts:        now(),
+  };
+  await saveEntity('a', entity);
+  return entity;
+}
+
+async function getAllGastos() {
+  const items = await idbGetAll('a:');
+  items.sort((a, b) => {
+    if (b.fecha > a.fecha) return 1;
+    if (b.fecha < a.fecha) return -1;
+    return b.ts - a.ts;
+  });
+  return items;
+}
+
+function getTotal(gastos) {
+  return gastos.reduce((sum, g) => sum + (g.monto || 0), 0);
+}
+
+// ─── UI STATE ─────────────────────────────────────────────────────────────────
+let filtroCategoria = 'todos';
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+async function render() {
+  const allGastos  = await getAllGastos();
+  const total      = getTotal(allGastos);
+
+  // Total display
+  const totalEl = document.getElementById('total-display');
+  totalEl.textContent = formatMonto(total);
+  totalEl.className   = 'total-display ' + (total > 0 ? 'positive' : total < 0 ? 'negative' : 'zero');
+
+  // Filter
+  const visible = filtroCategoria === 'todos'
+    ? allGastos
+    : allGastos.filter(g => g.categoria === filtroCategoria);
+
+  // List
+  const container = document.getElementById('list-container');
+  if (visible.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">💸</div>
+        <div>${filtroCategoria === 'todos' ? 'Sin movimientos aún. Pulsa + para agregar.' : 'Sin movimientos en esta categoría.'}</div>
+      </div>`;
+    return;
+  }
+
+  const html = visible.map(g => {
+    const isGasto   = g.monto >= 0;
+    const montoClass = isGasto ? 'gasto' : 'ingreso';
+    return `
+      <div class="movimiento-card">
+        <div class="mov-concepto">${escHtml(g.concepto)}</div>
+        <div class="mov-monto ${montoClass}">${formatMonto(g.monto)}</div>
+        <div class="mov-meta">
+          <span class="mov-categoria">${escHtml(g.categoria)}</span>
+          <span>${fmtFecha(g.fecha)}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `<div class="movimiento-list">${html}</div>`;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('f-fecha').value = todayISO();
+  document.getElementById('f-concepto').value = '';
+  document.getElementById('f-monto').value = '';
+  document.getElementById('f-categoria').value = 'otro';
+  document.getElementById('monto-hint').textContent = 'Positivo = gasto  /  Negativo = ingreso';
+  document.getElementById('monto-hint').className = 'form-hint';
+  document.getElementById('btn-guardar').disabled = false;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-concepto').focus(), 250);
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ─── EVENT LISTENERS ─────────────────────────────────────────────────────────
+document.getElementById('fab').addEventListener('click', openModal);
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+document.getElementById('f-monto').addEventListener('input', (e) => {
+  const v    = parseFloat(e.target.value);
+  const hint = document.getElementById('monto-hint');
+  if (isNaN(v) || e.target.value === '') {
+    hint.textContent = 'Positivo = gasto  /  Negativo = ingreso';
+    hint.className   = 'form-hint';
+  } else if (v > 0) {
+    hint.textContent = 'Gasto';
+    hint.className   = 'form-hint positive';
+  } else if (v < 0) {
+    hint.textContent = 'Ingreso';
+    hint.className   = 'form-hint negative';
+  } else {
+    hint.textContent = 'Monto cero';
+    hint.className   = 'form-hint';
+  }
+});
+
+document.getElementById('gasto-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  const concepto  = document.getElementById('f-concepto').value.trim();
+  const monto     = parseFloat(document.getElementById('f-monto').value);
+  const categoria = document.getElementById('f-categoria').value;
+  const fecha     = document.getElementById('f-fecha').value;
+
+  if (!concepto || isNaN(monto) || !fecha) {
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+    return;
+  }
+
+  try {
+    await createGasto(concepto, monto, categoria, fecha);
+    closeModal();
+    await render();
+    // Trigger a sync after creating, non-blocking
+    syncNow().catch(() => {});
+  } catch (err) {
+    console.error('[createGasto]', err);
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+  }
+});
+
+// Chips
+document.getElementById('chips').addEventListener('click', async (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  filtroCategoria = chip.dataset.cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  await render();
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>

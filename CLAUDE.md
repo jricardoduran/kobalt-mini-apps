@@ -225,6 +225,10 @@ Subagente (Claude Code via Ruflo):
 | App | Fase | Conector | Store IDB | Auth | Estado |
 |-----|------|----------|-----------|------|--------|
 | Kobalt-Offline-Abril2026 | α | PHP-plain | data_Kobalt-Offline-Abril2026 | SHA-256/BORGES | ✓ funcionando |
+| Kobalt-Notas | α | PHP-plain | data_Kobalt-Notas | no | ✓ funcionando |
+| Kobalt-Gastos | α | PHP-plain | data_Kobalt-Gastos | no | ✓ funcionando |
+| Kobalt-Checklist | α | PHP-plain | data_Kobalt-Checklist | no | ✓ funcionando |
+| Kobalt-Visitas | α | PHP-plain | data_Kobalt-Visitas | no | ✓ funcionando |
 
 ---
 
@@ -287,3 +291,13 @@ curl https://mi-servidor.com/data/manifest.json
 - Invariantes I1–I10 definidos
 - Error SAVE_URL/DATA_URL documentado como crítico
 - Error ensureDir/photos documentado como crítico
+
+### 2026-04-05 (sesión 2)
+- Hub portal /index.html creado (sin IDB, sin sync, solo navegación)
+- Hub usa indexedDB.databases() para detectar datos locales por app (punto verde)
+- Primera tanda de 4 mini apps producidas en paralelo con subagentes:
+  Kobalt-Notas, Kobalt-Gastos, Kobalt-Checklist, Kobalt-Visitas
+- Estructura de carpetas: /[app]/index.html + /[app]/save.php + /[app]/data/
+- Aislamiento confirmado: IDB store distinto por app, /data/ por carpeta
+- blob:* keys excluidas del sync manifest en Visitas (solo binarios locales + upload directo)
+- toggleItem en Checklist: flip boolean + actualiza ts, id no cambia (I2 verificado)

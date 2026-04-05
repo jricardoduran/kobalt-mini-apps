@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Notas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f0f0f;
+      --surface: #1a1a1a;
+      --border:  #2a2a2a;
+      --text:    #e8e8e8;
+      --muted:   #666;
+      --accent:  #4f8ef7;
+      --danger:  #e05555;
+      --radius:  8px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      flex: 1;
+    }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    #sync-status.ok    { color: #4caf7d; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── SEARCH ── */
+    #search-wrap {
+      margin-bottom: 16px;
+    }
+    #search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9rem;
+      padding: 9px 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    #search-input:focus { border-color: var(--accent); }
+    #search-input::placeholder { color: var(--muted); }
+
+    /* ── NOTE CARDS ── */
+    #notes-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .note-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .note-card .card-title {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .note-card .card-body {
+      font-size: .82rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 8px;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag-chip {
+      background: #1e2d45;
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: .72rem;
+      font-weight: 500;
+    }
+    .card-ts {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── EMPTY STATE ── */
+    #empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      display: none;
+    }
+    #empty-state p { font-size: .9rem; }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+
+    /* ── DETAIL VIEW ── */
+    #detail-view {
+      display: none;
+    }
+
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .detail-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    .btn-save {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-delete:hover { border-color: var(--danger); }
+
+    .detail-field-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+    .detail-field { margin-bottom: 18px; }
+
+    .field-input, .field-textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+      resize: none;
+    }
+    .field-input:focus, .field-textarea:focus { border-color: var(--accent); }
+
+    .field-textarea { min-height: 220px; line-height: 1.55; }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+    }
+
+    #modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .modal-field { margin-bottom: 14px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .detail-toolbar { flex-wrap: wrap; }
+      .btn-save { width: 100%; text-align: center; order: -1; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Kobalt Notas</h1>
+  <span id="sync-status">—</span>
+  <button id="btn-sync">Sync</button>
+</header>
+
+<main>
+  <!-- LIST VIEW -->
+  <div id="list-view">
+    <div id="search-wrap">
+      <input id="search-input" type="search" placeholder="Buscar notas…" autocomplete="off" />
+    </div>
+    <div id="notes-list"></div>
+    <div id="empty-state"><p>Sin notas. Pulsa <strong>+</strong> para crear la primera.</p></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="detail-view">
+    <div class="detail-toolbar">
+      <button class="btn-back" id="btn-back">← Volver</button>
+      <span class="detail-meta" id="detail-meta"></span>
+      <button class="btn-delete" id="btn-delete">Eliminar</button>
+      <button class="btn-save" id="btn-save-detail">Guardar</button>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Título</div>
+      <input class="field-input" id="detail-titulo" type="text" maxlength="120" placeholder="Título de la nota…" />
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Cuerpo</div>
+      <textarea class="field-textarea" id="detail-cuerpo" placeholder="Escribe aquí…"></textarea>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Tags (separados por comas)</div>
+      <input class="field-input" id="detail-tags" type="text" placeholder="trabajo, ideas, personal…" />
+    </div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nueva nota">+</button>
+
+<!-- MODAL CREAR -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Nueva nota">
+  <div id="modal-box">
+    <h2>Nueva nota</h2>
+    <div class="modal-field">
+      <div class="detail-field-label">Título</div>
+      <input class="field-input" id="m-titulo" type="text" maxlength="120" placeholder="Título…" />
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Cuerpo</div>
+      <textarea class="field-textarea" id="m-cuerpo" placeholder="Contenido…" style="min-height:140px"></textarea>
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Tags (separados por comas)</div>
+      <input class="field-input" id="m-tags" type="text" placeholder="ej: trabajo, ideas" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-modal-create">Crear nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Notas';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbDelete(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando…');
+
+  try {
+    // 1. Fetch remote omega (manifest)
+    let remoteOmega = {};
+    try {
+      const res = await fetch(SAVE_URL + '?key=manifest', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexión');
+      return;
+    }
+
+    const localOmega = await getOmega();
+
+    // 2. Compute delta
+    const allKeys = new Set([...Object.keys(localOmega), ...Object.keys(remoteOmega)]);
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    // 3. PUSH
+    if (toPush.length > 0) {
+      const items = [];
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload !== undefined) {
+          items.push({ key, payload, ts: localOmega[key] });
+        }
+      }
+      if (items.length > 0) {
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'push', items })
+        });
+      }
+    }
+
+    // 4. PULL
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const res = await fetch(SAVE_URL + '?key=' + encodeURIComponent(key), { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    // 5. Update local omega
+    for (const key of toPush) {
+      localOmega[key] = localOmega[key] || 0;
+    }
+    await saveOmega(localOmega);
+
+    // 6. Render only if pulled (I5)
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN ─────────────────────────────────────────────────────
+async function createNota(titulo, cuerpo, tags) {
+  const nota = {
+    id:     newId(),
+    titulo: titulo.trim(),
+    cuerpo: cuerpo.trim(),
+    tags:   tags,
+    ts:     now()
+  };
+  await saveEntity('a', nota);
+  return nota;
+}
+
+async function updateNota(id, cambios) {
+  const key = 'a:' + id;
+  const nota = await idbGet(key);
+  if (!nota) throw new Error('Nota no encontrada: ' + id);
+  const updated = Object.assign({}, nota, cambios, { ts: now() });
+  await saveEntity('a', updated);
+  return updated;
+}
+
+async function getAllNotas() {
+  const all = await idbGetAll('a:');
+  return all.sort((a, b) => b.ts - a.ts);
+}
+
+async function deleteNota(id) {
+  const key = 'a:' + id;
+  await idbDelete(key);
+  const omega = await getOmega();
+  // Mark as deleted by setting ts to 0 so it doesn't re-pull; simpler: remove from omega
+  delete omega[key];
+  await saveOmega(omega);
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view        = 'list';
+let currentId   = null;
+let searchQuery = '';
+
+// ── HELPERS ────────────────────────────────────────────────────
+function parseTags(str) {
+  return str.split(',').map(t => t.trim()).filter(Boolean);
+}
+
+function formatTs(ts) {
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function matchQuery(nota, q) {
+  if (!q) return true;
+  const lq = q.toLowerCase();
+  return (nota.titulo || '').toLowerCase().includes(lq)
+      || (nota.cuerpo || '').toLowerCase().includes(lq)
+      || (nota.tags || []).some(t => t.toLowerCase().includes(lq));
+}
+
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  const listView   = document.getElementById('list-view');
+  const detailView = document.getElementById('detail-view');
+
+  if (view === 'list') {
+    listView.style.display   = 'block';
+    detailView.style.display = 'none';
+    document.getElementById('fab').style.display = 'flex';
+    await renderList();
+  } else if (view === 'detail') {
+    listView.style.display   = 'none';
+    detailView.style.display = 'block';
+    document.getElementById('fab').style.display = 'none';
+    await renderDetail();
+  }
+}
+
+async function renderList() {
+  const notas  = await getAllNotas();
+  const filtered = notas.filter(n => matchQuery(n, searchQuery));
+  const container = document.getElementById('notes-list');
+  const emptyEl   = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = filtered.map(nota => {
+    const tagsHtml = (nota.tags || []).map(t =>
+      `<span class="tag-chip">${escHtml(t)}</span>`
+    ).join('');
+    const cuerpoPreview = (nota.cuerpo || '').replace(/\n/g, ' ').slice(0, 120);
+    return `
+      <div class="note-card" data-id="${escHtml(nota.id)}">
+        <div class="card-title">${escHtml(nota.titulo || '(sin título)')}</div>
+        <div class="card-body">${escHtml(cuerpoPreview)}</div>
+        <div class="card-footer">
+          ${tagsHtml}
+          <span class="card-ts">${formatTs(nota.ts)}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.note-card').forEach(card => {
+    card.addEventListener('click', () => {
+      currentId = card.dataset.id;
+      view = 'detail';
+      render();
+    });
+  });
+}
+
+async function renderDetail() {
+  if (!currentId) { view = 'list'; render(); return; }
+  const nota = await idbGet('a:' + currentId);
+  if (!nota) { view = 'list'; render(); return; }
+
+  document.getElementById('detail-titulo').value = nota.titulo || '';
+  document.getElementById('detail-cuerpo').value = nota.cuerpo || '';
+  document.getElementById('detail-tags').value   = (nota.tags || []).join(', ');
+  document.getElementById('detail-meta').textContent =
+    'id:' + nota.id + '  ·  ' + formatTs(nota.ts);
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// Search
+document.getElementById('search-input').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderList();
+});
+
+// Sync button
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// FAB → open modal
+document.getElementById('fab').addEventListener('click', () => {
+  document.getElementById('m-titulo').value = '';
+  document.getElementById('m-cuerpo').value = '';
+  document.getElementById('m-tags').value   = '';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-titulo').focus(), 50);
+});
+
+// Modal cancel
+document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// Modal overlay click outside
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget)
+    e.currentTarget.classList.remove('open');
+});
+
+// Modal create
+document.getElementById('btn-modal-create').addEventListener('click', async () => {
+  const titulo = document.getElementById('m-titulo').value.trim();
+  const cuerpo = document.getElementById('m-cuerpo').value.trim();
+  const tags   = parseTags(document.getElementById('m-tags').value);
+
+  if (!titulo) { document.getElementById('m-titulo').focus(); return; }
+
+  await createNota(titulo, cuerpo, tags);
+  document.getElementById('modal-overlay').classList.remove('open');
+  showToast('Nota creada');
+  await renderList();
+});
+
+// Back
+document.getElementById('btn-back').addEventListener('click', () => {
+  view = 'list';
+  currentId = null;
+  render();
+});
+
+// Save detail
+document.getElementById('btn-save-detail').addEventListener('click', async () => {
+  if (!currentId) return;
+  const titulo = document.getElementById('detail-titulo').value.trim();
+  const cuerpo = document.getElementById('detail-cuerpo').value.trim();
+  const tags   = parseTags(document.getElementById('detail-tags').value);
+
+  await updateNota(currentId, { titulo, cuerpo, tags });
+  await renderDetail();
+  showToast('Nota guardada');
+});
+
+// Delete
+document.getElementById('btn-delete').addEventListener('click', async () => {
+  if (!currentId) return;
+  if (!confirm('¿Eliminar esta nota?')) return;
+  await deleteNota(currentId);
+  view = 'list';
+  currentId = null;
+  showToast('Nota eliminada');
+  render();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-overlay');
+    if (modal.classList.contains('open')) {
+      modal.classList.remove('open');
+    } else if (view === 'detail') {
+      view = 'list';
+      currentId = null;
+      render();
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>
