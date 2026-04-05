@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open-Claw · Búsqueda IA — Kobalt Red</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/style.css">
+<script>window.KB_NAV_ACTIVE = 'open-claw';</script>
+</head>
+<body>
+<script src="../../shared/nav.js"></script>
+
+<!-- ████████ HERO ████████ -->
+<section id="hero">
+  <div class="blob" style="width:520px;height:520px;top:-90px;left:-130px;background:radial-gradient(circle,var(--blob-a),transparent 70%);animation:pulse 4.5s ease-in-out infinite;"></div>
+  <div class="blob" style="width:400px;height:400px;bottom:-50px;right:-100px;background:radial-gradient(circle,var(--blob-b),transparent 70%);animation:pulse 6s ease-in-out infinite;"></div>
+
+  <div class="inn" style="text-align:center;">
+    <div class="pill fu"><span class="pdot-v pdot"></span>Motor de búsqueda · Open-Claw IA</div>
+
+    <h1 class="fu d1" style="font-size:clamp(2.4rem,5vw,4.4rem);font-weight:800;letter-spacing:-.035em;line-height:1.06;margin-bottom:20px;">
+      Encuentra lo que necesitas.<br><span class="gv">Instantáneo. Offline.</span>
+    </h1>
+
+    <p class="fu d2" style="font-size:1rem;color:var(--muted);max-width:520px;margin:0 auto 34px;line-height:1.78;">
+      Open-Claw es el motor de búsqueda inteligente del ecosistema Kobalt. Busca productos, precios, proveedores y oportunidades en tiempo real — sin internet, sin fricción, sin algoritmos que te manipulan.
+    </p>
+
+    <div class="fu d3" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:56px;">
+      <button class="btn btn-p" onclick="s2('como-funciona')">🔍 Ver cómo funciona</button>
+      <button class="btn btn-s" onclick="s2('casos')">Casos de uso →</button>
+    </div>
+
+    <div class="fu d4 stat-bar" style="margin:0 auto;display:inline-flex;">
+      <div class="stat-item"><div class="stat-num gv">Offline</div><div class="stat-lbl">Funciona sin internet</div></div>
+      <div class="stat-item"><div class="stat-num gb">< 1s</div><div class="stat-lbl">Tiempo de respuesta</div></div>
+      <div class="stat-item"><div class="stat-num gf">↑D</div><div class="stat-lbl">Mejora tu decisión</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ████████ DEMO VISUAL ████████ -->
+<section id="demo" style="background:var(--bg2);transition:background .3s;">
+  <div class="inn" style="text-align:center;">
+    <div class="pill"><span class="pdot-v pdot"></span>Búsqueda inteligente</div>
+    <h2 style="font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:40px;line-height:1.1;">
+      No buscas productos.<br><span class="gv">Buscas la mejor decisión.</span>
+    </h2>
+
+    <div class="kb" style="max-width:640px;margin:0 auto 48px;">
+      <div class="kb-in" style="padding:28px;">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:10px;margin-bottom:20px;transition:background .3s,border-color .3s;">
+          <span style="color:var(--muted);font-size:1rem;">🔍</span>
+          <span style="color:var(--muted);font-size:.9rem;font-style:italic;">"arroz por mayor más barato con entrega hoy"</span>
+          <span style="margin-left:auto;font-size:.7rem;color:var(--k-cyan);font-weight:600;">↵</span>
+        </div>
+        <div style="text-align:left;display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--bg);border:1px solid rgba(76,201,240,.3);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;transition:background .3s;">
+            <div>
+              <div style="font-size:.85rem;font-weight:600;">Distribuidora Andina · Arroz 50kg</div>
+              <div style="font-size:.75rem;color:var(--muted);">Entrega hoy · 4.8★ · 1.2km</div>
+            </div>
+            <div style="font-size:1rem;font-weight:800;" class="gb">$85K</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;opacity:.75;transition:background .3s,border-color .3s;">
+            <div>
+              <div style="font-size:.85rem;font-weight:600;">Mercado Central · Arroz 50kg</div>
+              <div style="font-size:.75rem;color:var(--muted);">Entrega mañana · 4.5★ · 3.1km</div>
+            </div>
+            <div style="font-size:1rem;font-weight:800;color:var(--muted);">$91K</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;opacity:.55;transition:background .3s,border-color .3s;">
+            <div>
+              <div style="font-size:.85rem;font-weight:600;">Supertienda Norte · Arroz 50kg</div>
+              <div style="font-size:.75rem;color:var(--muted);">Entrega en 2 días · 4.2★ · 5.8km</div>
+            </div>
+            <div style="font-size:1rem;font-weight:800;color:var(--muted);">$98K</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;font-size:.72rem;color:var(--dim);text-align:left;">
+          <span style="color:var(--k-cyan);">✦</span> Resultado optimizado por: precio × calificación × proximidad × tiempo de entrega
+        </div>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);max-width:480px;margin:0 auto;font-size:.88rem;line-height:1.78;">
+      El ranking no lo determina quién paga más visibilidad. Lo determina quién te da el mejor resultado para tu necesidad concreta.
+    </p>
+  </div>
+</section>
+
+<!-- ████████ CÓMO FUNCIONA ████████ -->
+<section id="como-funciona">
+  <div class="blob" style="width:400px;height:400px;bottom:-60px;right:-70px;background:radial-gradient(circle,var(--blob-a),transparent 70%);"></div>
+
+  <div class="inn">
+    <div class="pill"><span class="pdot-v pdot"></span>La tecnología detrás</div>
+    <h2 style="font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:40px;line-height:1.1;">
+      Diseñado para trabajar<br><span class="gv">donde otros fallan</span>
+    </h2>
+
+    <div class="grid-3" style="gap:16px;margin-bottom:40px;">
+      <div class="card">
+        <div class="ibox" style="background:rgba(114,9,183,.1);">📴</div>
+        <div style="font-weight:700;margin-bottom:8px;">Offline-first</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.65;">Funciona sin conexión a internet. El índice de búsqueda vive en tu dispositivo. Perfecto para zonas con señal irregular.</div>
+      </div>
+      <div class="card">
+        <div class="ibox" style="background:rgba(67,97,238,.1);">⚡</div>
+        <div style="font-weight:700;margin-bottom:8px;">Búsqueda semántica</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.65;">Entiende lenguaje natural. No necesitas saber el nombre exacto del producto. Busca como hablas.</div>
+      </div>
+      <div class="card">
+        <div class="ibox" style="background:rgba(76,201,240,.1);">🧮</div>
+        <div style="font-weight:700;margin-bottom:8px;">Ranking por utilidad</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.65;">Los resultados se ordenan por lo que mejor resuelve tu necesidad, no por publicidad pagada. Siempre transparente.</div>
+      </div>
+      <div class="card">
+        <div class="ibox" style="background:rgba(248,181,0,.1);">🗺️</div>
+        <div style="font-weight:700;margin-bottom:8px;">Contexto local</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.65;">Considera tu ubicación, proveedores cercanos y horarios de entrega para darte resultados que realmente puedes usar hoy.</div>
+      </div>
+      <div class="card">
+        <div class="ibox" style="background:rgba(247,37,133,.1);">🔒</div>
+        <div style="font-weight:700;margin-bottom:8px;">Sin rastreo</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.65;">Tus búsquedas no se venden a anunciantes. No hay perfiles de comportamiento. La privacidad es la configuración por defecto.</div>
+      </div>
+      <div class="card">
+        <div class="ibox" style="background:rgba(76,201,240,.1);">🔄</div>
+        <div style="font-weight:700;margin-bottom:8px;">Sincronización inteligente</div>
+        <div style="font-size:.82rem;color:var(--muted);line-height:1.65;">Cuando hay conexión, el índice se actualiza en segundo plano. Siempre tienes la versión más reciente sin hacer nada.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ████████ CASOS DE USO ████████ -->
+<section id="casos" style="background:var(--bg2);transition:background .3s;">
+  <div class="inn">
+    <div class="pill"><span class="pdot"></span>Casos de uso</div>
+    <h2 style="font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:800;letter-spacing:-.03em;margin-bottom:40px;line-height:1.1;">
+      Una herramienta.<br><span class="gb">Múltiples problemas resueltos.</span>
+    </h2>
+
+    <div style="overflow-x:auto;">
+      <table class="rtable" style="min-width:520px;">
+        <thead>
+          <tr>
+            <th>Quién</th>
+            <th>Problema</th>
+            <th>Cómo Open-Claw ayuda</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--k-cyan);font-weight:600;">Comprador</td>
+            <td>No sé dónde comprar más barato</td>
+            <td>Compara precios en tiempo real del ecosistema completo</td>
+          </tr>
+          <tr>
+            <td style="color:var(--k-gold);font-weight:600;">Comerciante</td>
+            <td>No sé qué está pidiendo el mercado</td>
+            <td>Analiza tendencias de búsqueda de tu categoría</td>
+          </tr>
+          <tr>
+            <td style="color:var(--k-pink);font-weight:600;">Proveedor</td>
+            <td>Mis clientes no me encuentran</td>
+            <td>Indexación automática en el motor de búsqueda del ecosistema</td>
+          </tr>
+          <tr>
+            <td style="color:var(--k-violet);font-weight:600;">Emprendedor</td>
+            <td>No sé si hay demanda para mi idea</td>
+            <td>Muestra volumen de búsquedas reales por categoría y zona</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted);font-weight:600;">Negocio existente</td>
+            <td>Quiero saber cómo me comparo</td>
+            <td>Benchmark de precio y calidad vs. competidores del mercado</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ████████ CTA ████████ -->
+<section id="cta">
+  <div class="blob" style="width:460px;height:460px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,var(--blob-a),transparent 70%);animation:pulse 4s ease-in-out infinite;"></div>
+  <div class="inn" style="text-align:center;">
+    <h2 class="fu" style="font-size:clamp(2rem,4vw,3.4rem);font-weight:800;letter-spacing:-.03em;margin-bottom:16px;line-height:1.08;">
+      La información correcta<br><span class="gv">en el momento correcto.</span>
+    </h2>
+    <p class="fu d1" style="color:var(--muted);max-width:440px;margin:0 auto 32px;line-height:1.78;">Open-Claw no te da más datos. Te da la decisión correcta, rápido.</p>
+    <div class="fu d2" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a class="btn btn-p" href="../../apps/ecosistema/">Ver el ecosistema completo →</a>
+      <a class="btn btn-s" href="../../apps/mercado/">Ver Mercado →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span class="gf" style="font-weight:800;font-size:.95rem;">Kobalt Red</span>
+    <span class="footer-copy">Open-Claw · Búsqueda IA offline-first</span>
+    <a href="../../index.html" style="font-size:.78rem;color:var(--dim);">← Inicio</a>
+  </div>
+</footer>
+
+</body>
+</html>
