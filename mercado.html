@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark" data-app="mercado">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercado Kobalt — Compra mejor, siempre</title>
+<meta name="description" content="El mercado que trabaja para ti. Comparación real, sin algoritmos pagados.">
+<link rel="stylesheet" href="./shared/style.css">
+<script>window.KB_APP = 'mercado';</script>
+</head>
+<body>
+<script src="./shared/nav.js"></script>
+
+<!-- ██ HERO ██ -->
+<section id="hero">
+  <div class="blob blob-app" style="width:560px;height:560px;top:-100px;left:-140px;animation:pulse 4.5s ease-in-out infinite;"></div>
+  <div class="blob blob-d"   style="width:420px;height:420px;bottom:-60px;right:-110px;animation:pulse 6s ease-in-out infinite;"></div>
+
+  <div class="inn hero-center">
+    <div class="pill pill-app fu hero-eyebrow"><span class="dot"></span>Para compradores · Mercado Kobalt</div>
+    <h1 class="fu d1 hero-title">El mercado que trabaja<br><span class="g-teal">para ti, no para el vendedor.</span></h1>
+    <p class="fu d2 hero-sub">Encuentra lo que necesitas al mejor precio disponible. Comparación real y transparente. El sistema optimiza para tu bienestar, no para el margen del intermediario.</p>
+    <div class="fu d3 hero-cta">
+      <button class="btn btn-app btn-lg" onclick="s2('modos')">🧭 Cómo comprar mejor</button>
+      <button class="btn btn-ghost btn-lg" onclick="s2('filosofia')">Nuestra filosofía →</button>
+    </div>
+    <div class="fu d4 stat-bar">
+      <div class="stat-item"><div class="stat-num g-teal">Uc↑</div><div class="stat-lbl">Tu utilidad, primero</div></div>
+      <div class="stat-item"><div class="stat-num g-pink">0</div><div class="stat-lbl">Algoritmos pagados</div></div>
+      <div class="stat-item"><div class="stat-num g-gold">100%</div><div class="stat-lbl">Transparencia</div></div>
+      <div class="stat-item"><div class="stat-num g-blue">Gratis</div><div class="stat-lbl">Para compradores</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="glow-line">
+
+<!-- ██ MODOS DE COMPRA ██ -->
+<section id="modos" class="section-alt">
+  <div class="blob blob-app" style="width:360px;height:360px;top:30%;right:-60px;animation:pulse 5s ease-in-out infinite;"></div>
+  <div class="inn">
+    <div class="pill pill-app fu"><span class="dot"></span>Tu modo de compra</div>
+    <h2 class="fu d1">Dile qué quieres maximizar.<br><span class="g-teal">El sistema hace el resto.</span></h2>
+    <p class="fu d2" style="max-width:500px;margin-top:var(--s3);margin-bottom:var(--s7);">No todos compran igual. El Mercado Kobalt se adapta a tu criterio, no al revés.</p>
+
+    <div class="grid-3 fu d3" style="margin-bottom:var(--s7);">
+      <div class="app-border flt">
+        <div class="app-border-in" style="padding:var(--s6);text-align:center;">
+          <div style="font-size:2.6rem;margin-bottom:var(--s4);">💰</div>
+          <div style="font-weight:700;font-size:var(--text-lg);margin-bottom:var(--s3);">Maximizar ahorro</div>
+          <p style="font-size:var(--text-sm);">La opción más económica disponible en el ecosistema, sin sacrificar calidad mínima garantizada.</p>
+        </div>
+      </div>
+      <div class="app-border" style="animation-delay:.2s;">
+        <div class="app-border-in" style="padding:var(--s6);text-align:center;">
+          <div style="font-size:2.6rem;margin-bottom:var(--s4);">⭐</div>
+          <div style="font-weight:700;font-size:var(--text-lg);margin-bottom:var(--s3);">Maximizar calidad</div>
+          <p style="font-size:var(--text-sm);">Filtra por calificación real de compradores anteriores. Sin reseñas falsas. Sin estrellas compradas.</p>
+        </div>
+      </div>
+      <div class="app-border" style="animation-delay:.4s;">
+        <div class="app-border-in" style="padding:var(--s6);text-align:center;">
+          <div style="font-size:2.6rem;margin-bottom:var(--s4);">⚖️</div>
+          <div style="font-weight:700;font-size:var(--text-lg);margin-bottom:var(--s3);">Mejor relación</div>
+          <p style="font-size:var(--text-sm);">Equilibrio óptimo entre precio, calidad, proximidad y tiempo de entrega. La elección más popular.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="fu d4 rcard" style="max-width:660px;">
+      <div class="rcin">
+        <div class="label" style="margin-bottom:var(--s3);">Cómo se calcula el ranking</div>
+        <div style="font-size:var(--text-lg);font-weight:700;margin-bottom:var(--s3);">
+          Score = w₁(precio) + w₂(calidad) + w₃(proximidad) + w₄(tiempo)
+        </div>
+        <p style="font-size:var(--text-sm);">Cada comprador tiene sus propios pesos (wᵢ). El resultado es personalizado para ti, no para el promedio del mercado. Y siempre explicamos por qué te recomendamos algo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="glow-line">
+
+<!-- ██ FILOSOFÍA ██ -->
+<section id="filosofia">
+  <div class="blob blob-b" style="width:400px;height:400px;bottom:-50px;left:-80px;"></div>
+  <div class="inn">
+    <div class="pill pill-app fu"><span class="dot"></span>Por qué somos diferentes</div>
+    <h2 class="fu d1">Un mercado que no<br><span class="g-pink">manipula tu decisión</span></h2>
+
+    <div class="grid-2 fu d2" style="margin-top:var(--s6);">
+      <div>
+        <div class="label" style="color:var(--k-pink);margin-bottom:var(--s4);">Mercado tradicional</div>
+        <div class="comp-no" style="display:flex;flex-direction:column;gap:var(--s3);">
+          <div class="card"><p style="font-size:var(--text-sm);">❌ El que paga más sale primero</p></div>
+          <div class="card"><p style="font-size:var(--text-sm);">❌ Reseñas compradas o manipuladas</p></div>
+          <div class="card"><p style="font-size:var(--text-sm);">❌ Algoritmo diseñado para maximizar clics</p></div>
+          <div class="card"><p style="font-size:var(--text-sm);">❌ Tus datos vendidos a anunciantes</p></div>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="color:var(--app-a);margin-bottom:var(--s4);">Mercado Kobalt</div>
+        <div class="comp-yes" style="display:flex;flex-direction:column;gap:var(--s3);">
+          <div class="card"><p style="font-size:var(--text-sm);color:var(--text);">✓ El que más te conviene sale primero</p></div>
+          <div class="card"><p style="font-size:var(--text-sm);color:var(--text);">✓ Calificaciones reales de compradores verificados</p></div>
+          <div class="card"><p style="font-size:var(--text-sm);color:var(--text);">✓ Ranking por utilidad del cliente, siempre</p></div>
+          <div class="card"><p style="font-size:var(--text-sm);color:var(--text);">✓ Tu historial no se vende ni comparte</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="glow-line">
+
+<!-- ██ CATEGORÍAS ██ -->
+<section id="categorias" class="section-alt">
+  <div class="inn">
+    <div class="pill pill-app fu"><span class="dot"></span>Qué encuentras</div>
+    <h2 class="fu d1">Todo lo que necesita<br><span class="g-gold">tu negocio o tu hogar</span></h2>
+    <div class="grid-4 fu d2" style="margin-top:var(--s6);">
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">🍽️</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Alimentos</div>
+        <div class="label" style="margin-top:var(--s1);">Mayor y detal</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">🧹</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Limpieza</div>
+        <div class="label" style="margin-top:var(--s1);">Hogar y negocio</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">👕</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Ropa y moda</div>
+        <div class="label" style="margin-top:var(--s1);">Todas las tallas</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">🔧</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Herramientas</div>
+        <div class="label" style="margin-top:var(--s1);">Ferretería y más</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">📱</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Tecnología</div>
+        <div class="label" style="margin-top:var(--s1);">Accesorios y equipos</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">💆</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Servicios</div>
+        <div class="label" style="margin-top:var(--s1);">Profesionales locales</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">🌿</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Salud</div>
+        <div class="label" style="margin-top:var(--s1);">Natural y farmacia</div>
+      </div>
+      <div class="card card-app" style="text-align:center;cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:var(--s2);">🏠</div>
+        <div style="font-weight:700;font-size:var(--text-sm);">Hogar</div>
+        <div class="label" style="margin-top:var(--s1);">Muebles y decoración</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ██ CTA ██ -->
+<section id="cta">
+  <div class="blob blob-app" style="width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 4s ease-in-out infinite;"></div>
+  <div class="inn hero-center">
+    <h2 class="fu">Compra mejor.<br><span class="g-teal">Siempre.</span></h2>
+    <p class="fu d1 hero-sub">El Mercado Kobalt es gratis para compradores. Siempre lo será.</p>
+    <div class="fu d2 hero-cta">
+      <a class="btn btn-app btn-lg" href="./ecosistema.html">Ver el ecosistema →</a>
+      <a class="btn btn-ghost btn-lg" href="./open-claw.html">Buscar con Open-Claw →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span class="g-full" style="font-weight:800;">Kobalt Red</span>
+    <nav class="footer-links">
+      <a href="./index.html">Inicio</a>
+      <a href="./open-claw.html">Open-Claw</a>
+      <a href="./marketplace.html">Marketplace</a>
+      <a href="./ecosistema.html">Ecosistema</a>
+    </nav>
+    <span class="footer-copy">Mercado · El sistema trabaja para ti</span>
+  </div>
+</footer>
+</body>
+</html>

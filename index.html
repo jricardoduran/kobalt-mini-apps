@@ -1,185 +1,223 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark">
+<html lang="es" data-theme="dark" data-app="home">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kobalt Red — Ecosistema de valor real</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="description" content="Mikuna: el ecosistema que nutre tu potencial. IA, mercado e infraestructura para crecer de verdad.">
 <link rel="stylesheet" href="./shared/style.css">
+<script>window.KB_APP = 'home';</script>
 </head>
 <body>
-
 <script src="./shared/nav.js"></script>
 
-<!-- ████████ §1 HERO ████████ -->
+<!-- ██ HERO ██ -->
 <section id="hero">
-  <div class="blob" style="width:560px;height:560px;top:-90px;left:-140px;background:radial-gradient(circle,var(--blob-a),transparent 70%);animation:pulse 4s ease-in-out infinite;"></div>
-  <div class="blob" style="width:460px;height:460px;bottom:-60px;right:-110px;background:radial-gradient(circle,var(--blob-b),transparent 70%);animation:pulse 5.5s ease-in-out infinite;"></div>
+  <div class="blob blob-app" style="width:600px;height:600px;top:-120px;left:-160px;animation:pulse 4s ease-in-out infinite;"></div>
+  <div class="blob blob-b"   style="width:480px;height:480px;bottom:-80px;right:-120px;animation:pulse 5.5s ease-in-out infinite;"></div>
 
-  <div class="inn" style="text-align:center;">
-    <div class="pill fu"><span class="pdot"></span>Kobalt Red · Ecosistema de valor real</div>
+  <div class="inn hero-center">
+    <div class="pill pill-app fu hero-eyebrow"><span class="dot"></span>Kobalt Red · Ecosistema de valor real</div>
 
-    <h1 class="fu d1" style="font-size:clamp(2.5rem,5.2vw,4.8rem);font-weight:800;letter-spacing:-.035em;line-height:1.06;margin-bottom:20px;">
-      Alimento para<br><span class="gf">tu potencial real</span>
+    <h1 class="fu d1 hero-title">
+      Alimento para<br><span class="g-full">tu potencial real</span>
     </h1>
 
-    <p class="fu d2" style="font-size:1rem;color:var(--muted);max-width:520px;margin:0 auto 34px;line-height:1.78;">
-      Mikuna —comida en quechua— es el ecosistema que nutre cada etapa de tu crecimiento. IA, mercado, infraestructura y expansión de capacidad, todo alineado a tu bienestar real.
+    <p class="fu d2 hero-sub">
+      Mikuna —comida en quechua— nutre cada etapa de tu crecimiento. IA, mercado, infraestructura y expansión de capacidad, alineados a tu bienestar real.
     </p>
 
-    <div class="fu d3" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:60px;">
-      <button class="btn btn-p" onclick="s2('apps')">🚀 Explorar el ecosistema</button>
-      <button class="btn btn-s" onclick="s2('filosofia')">Ver la filosofía →</button>
+    <div class="fu d3 hero-cta">
+      <button class="btn btn-app btn-lg" onclick="s2('apps')">🚀 Explorar el ecosistema</button>
+      <button class="btn btn-ghost btn-lg" onclick="s2('filosofia')">Ver la filosofía →</button>
     </div>
 
-    <div class="fu d4 stat-bar" style="margin:0 auto;display:inline-flex;">
-      <div class="stat-item"><div class="stat-num gg">Wᵤ</div><div class="stat-lbl">Bienestar optimizado</div></div>
-      <div class="stat-item"><div class="stat-num gb">7</div><div class="stat-lbl">Módulos integrados</div></div>
-      <div class="stat-item"><div class="stat-num gp">10%</div><div class="stat-lbl">Solo cobras si vendes</div></div>
-      <div class="stat-item"><div class="stat-num gf">∞</div><div class="stat-lbl">Escalabilidad real</div></div>
+    <div class="fu d4 stat-bar">
+      <div class="stat-item"><div class="stat-num g-gold">Wᵤ</div><div class="stat-lbl">Bienestar optimizado</div></div>
+      <div class="stat-item"><div class="stat-num g-blue">7</div><div class="stat-lbl">Módulos integrados</div></div>
+      <div class="stat-item"><div class="stat-num g-pink">10%</div><div class="stat-lbl">Solo cobras si vendes</div></div>
+      <div class="stat-item"><div class="stat-num g-full">∞</div><div class="stat-lbl">Escalabilidad real</div></div>
     </div>
   </div>
 </section>
 
-<!-- ████████ §2 FILOSOFÍA ████████ -->
-<section id="filosofia" style="background:var(--bg2);transition:background .3s;">
-  <div class="blob" style="width:360px;height:360px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,var(--blob-c),transparent 70%);animation:pulse 6s ease-in-out infinite;"></div>
+<hr class="glow-line">
+
+<!-- ██ FILOSOFÍA ██ -->
+<section id="filosofia" class="section-alt">
+  <div class="blob blob-c" style="width:380px;height:380px;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 6s ease-in-out infinite;"></div>
 
   <div class="inn">
-    <div class="pill"><span class="pdot-p pdot"></span>Filosofía central</div>
-    <h2 style="font-size:clamp(1.8rem,3.6vw,3rem);font-weight:800;letter-spacing:-.03em;margin-bottom:14px;line-height:1.1;">
-      No maximizamos ventas.<br><span class="gp">Maximizamos tu bienestar.</span>
-    </h2>
-    <p style="color:var(--muted);max-width:540px;margin-bottom:44px;line-height:1.78;">
-      El objetivo correcto no es vender más porque sí. Es que cada compra, cada venta y cada decisión te acerque a una vida económica más sólida, más libre y más tuya.
-    </p>
+    <div style="max-width:700px;">
+      <div class="pill fu"><span class="dot"></span>Filosofía central</div>
+      <h2 class="fu d1">No maximizamos ventas.<br><span class="g-pink">Maximizamos tu bienestar.</span></h2>
+      <p class="fu d2" style="max-width:540px;margin-top:var(--s3);margin-bottom:var(--s6);">El objetivo correcto no es vender más porque sí. Es que cada compra, venta y decisión te acerque a una vida económica más sólida, libre y tuya.</p>
+    </div>
 
-    <div class="kb" style="max-width:620px;margin:0 auto 48px;">
-      <div class="kb-in" style="padding:32px 36px;text-align:center;">
-        <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.11em;color:var(--dim);margin-bottom:10px;font-weight:600;">Objetivo del sistema</div>
-        <div style="font-size:clamp(1.2rem,2.6vw,1.8rem);font-weight:700;letter-spacing:-.02em;">
-          <span class="gb">max W</span><sub style="color:var(--k-cyan);font-size:.62em;-webkit-text-fill-color:var(--k-cyan);">u</sub>
+    <div class="fu d3 kb" style="max-width:640px;margin-bottom:var(--s7);">
+      <div class="kb-in" style="padding:var(--s6) var(--s7);text-align:center;">
+        <div class="label" style="margin-bottom:var(--s3);">Objetivo del sistema</div>
+        <div style="font-size:clamp(1.3rem,2.8vw,2rem);font-weight:700;letter-spacing:-.02em;">
+          <span class="g-blue">max W</span><sub style="color:var(--k-cyan);font-size:.6em;">u</sub>
           <span style="color:var(--dim);margin:0 10px;">=</span>
-          <span class="gf">f(C, I, D, E, R↓)</span>
+          <span class="g-full">f(C, I, D, E, R↓)</span>
         </div>
-        <div style="display:flex;gap:24px;justify-content:center;margin-top:22px;flex-wrap:wrap;">
-          <div style="text-align:center;"><div style="font-weight:700;color:var(--k-pink);">C</div><div style="font-size:.68rem;color:var(--dim);">Capacidad</div></div>
-          <div style="text-align:center;"><div style="font-weight:700;color:var(--k-gold);">I</div><div style="font-size:.68rem;color:var(--dim);">Ingresos</div></div>
-          <div style="text-align:center;"><div style="font-weight:700;color:var(--k-blue);">D</div><div style="font-size:.68rem;color:var(--dim);">Decisión</div></div>
-          <div style="text-align:center;"><div style="font-weight:700;color:var(--k-cyan);">E</div><div style="font-size:.68rem;color:var(--dim);">Eficiencia</div></div>
-          <div style="text-align:center;"><div style="font-weight:700;color:var(--muted);">R↓</div><div style="font-size:.68rem;color:var(--dim);">Riesgo</div></div>
+        <div style="display:flex;gap:var(--s6);justify-content:center;margin-top:var(--s5);flex-wrap:wrap;">
+          <div style="text-align:center;"><div style="font-weight:800;color:var(--k-pink);">C</div><div class="label">Capacidad</div></div>
+          <div style="text-align:center;"><div style="font-weight:800;color:var(--k-gold);">I</div><div class="label">Ingresos</div></div>
+          <div style="text-align:center;"><div style="font-weight:800;color:var(--k-blue);">D</div><div class="label">Decisión</div></div>
+          <div style="text-align:center;"><div style="font-weight:800;color:var(--k-cyan);">E</div><div class="label">Eficiencia</div></div>
+          <div style="text-align:center;"><div style="font-weight:800;color:var(--muted);">R↓</div><div class="label">Riesgo</div></div>
         </div>
-        <div style="margin-top:14px;font-size:.74rem;color:var(--dim);">sujeto a: presupuesto · tiempo · conocimiento · contexto</div>
+        <div style="margin-top:var(--s3);" class="label">sujeto a: presupuesto · tiempo · conocimiento · contexto</div>
       </div>
     </div>
 
-    <div class="grid-4">
-      <div class="card"><div class="ibox" style="background:rgba(247,37,133,.1);">🎯</div><div style="font-size:.88rem;font-weight:700;margin-bottom:5px;">Demanda</div><div style="font-size:.78rem;color:var(--muted);margin-bottom:13px;">Optimiza cada decisión de compra</div><div class="wubar"><div class="wufill" style="width:95%;background:linear-gradient(90deg,var(--k-pink),var(--k-violet));"></div></div></div>
-      <div class="card"><div class="ibox" style="background:rgba(67,97,238,.1);">🏪</div><div style="font-size:.88rem;font-weight:700;margin-bottom:5px;">Oferta</div><div style="font-size:.78rem;color:var(--muted);margin-bottom:13px;">Genera ventas reales a comercios</div><div class="wubar"><div class="wufill" style="width:88%;background:linear-gradient(90deg,var(--k-blue),var(--k-cyan));"></div></div></div>
-      <div class="card"><div class="ibox" style="background:rgba(76,201,240,.1);">🚀</div><div style="font-size:.88rem;font-weight:700;margin-bottom:5px;">Bootstrap</div><div style="font-size:.78rem;color:var(--muted);margin-bottom:13px;">Negocios operativos desde el día 1</div><div class="wubar"><div class="wufill" style="width:80%;background:linear-gradient(90deg,var(--k-cyan),var(--k-gold));"></div></div></div>
-      <div class="card"><div class="ibox" style="background:rgba(248,181,0,.1);">🎓</div><div style="font-size:.88rem;font-weight:700;margin-bottom:5px;">Capacitación</div><div style="font-size:.78rem;color:var(--muted);margin-bottom:13px;">Aumenta tu capacidad con IA</div><div class="wubar"><div class="wufill" style="width:75%;background:linear-gradient(90deg,var(--k-gold),var(--k-pink));"></div></div></div>
-      <div class="card" style="grid-column:span 1;"><div class="ibox" style="background:rgba(114,9,183,.1);">🤖</div><div style="font-size:.88rem;font-weight:700;margin-bottom:5px;">IA Operativa</div><div style="font-size:.78rem;color:var(--muted);margin-bottom:13px;">Automatiza procesos continuamente</div><div class="wubar"><div class="wufill" style="width:92%;background:linear-gradient(90deg,var(--k-violet),var(--k-blue));"></div></div></div>
+    <div class="grid-4 fu d4">
+      <div class="card card-app"><div class="ibox">🎯</div><div style="font-weight:700;margin-bottom:var(--s1);">Demanda</div><p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Optimiza decisiones de compra</p><div class="wubar"><div class="wufill" style="width:95%;"></div></div></div>
+      <div class="card card-app"><div class="ibox">🏪</div><div style="font-weight:700;margin-bottom:var(--s1);">Oferta</div><p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Genera ventas reales</p><div class="wubar"><div class="wufill" style="width:88%;"></div></div></div>
+      <div class="card card-app"><div class="ibox">🚀</div><div style="font-weight:700;margin-bottom:var(--s1);">Bootstrap</div><p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Operativo desde el día 1</p><div class="wubar"><div class="wufill" style="width:80%;"></div></div></div>
+      <div class="card card-app"><div class="ibox">🎓</div><div style="font-weight:700;margin-bottom:var(--s1);">Capacitación</div><p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Aumenta tu capacidad con IA</p><div class="wubar"><div class="wufill" style="width:75%;"></div></div></div>
+      <div class="card card-app"><div class="ibox">🤖</div><div style="font-weight:700;margin-bottom:var(--s1);">IA Operativa</div><p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Automatiza continuamente</p><div class="wubar"><div class="wufill" style="width:92%;"></div></div></div>
     </div>
   </div>
 </section>
 
-<!-- ████████ §3 APPS ████████ -->
+<hr class="glow-line">
+
+<!-- ██ APPS ██ -->
 <section id="apps">
-  <div class="blob" style="width:440px;height:440px;bottom:0;right:-70px;background:radial-gradient(circle,var(--blob-b),transparent 70%);"></div>
+  <div class="blob blob-b" style="width:460px;height:460px;bottom:0;right:-80px;"></div>
 
   <div class="inn">
-    <div class="pill"><span class="pdot"></span>El ecosistema completo</div>
-    <h2 style="font-size:clamp(1.8rem,3.6vw,3rem);font-weight:800;letter-spacing:-.03em;margin-bottom:10px;">
-      Cada módulo aumenta<br><span class="gb">una dimensión de tu bienestar</span>
-    </h2>
-    <p style="color:var(--muted);margin-bottom:44px;max-width:480px;">Elige tu punto de entrada. Todos convergen hacia Wᵤ↑</p>
+    <div class="pill fu"><span class="dot"></span>El ecosistema completo</div>
+    <h2 class="fu d1">Cada módulo aumenta<br><span class="g-blue">una dimensión de tu bienestar</span></h2>
+    <p class="fu d2" style="max-width:460px;margin-top:var(--s3);margin-bottom:var(--s7);">Elige tu punto de entrada. Todos convergen hacia Wᵤ↑</p>
 
-    <div class="grid-2" style="gap:20px;">
+    <!-- App cards con color propio -->
+    <div class="grid-2 fu d3" style="gap:var(--s5);">
 
-      <!-- Marketplace -->
-      <a href="./apps/marketplace/" class="kb flt" style="text-decoration:none;display:block;">
-        <div class="kb-in" style="padding:28px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-            <div class="ibox" style="background:rgba(67,97,238,.1);margin:0;">🛒</div>
-            <div>
-              <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;">Motor de ventas</div>
-              <div style="font-weight:700;font-size:.98rem;">Marketplace Kobalt</div>
+      <!-- Marketplace — azul -->
+      <a href="./marketplace.html" style="display:block;text-decoration:none;" class="flt">
+        <div style="border-radius:var(--r-xl);padding:2px;background:linear-gradient(135deg,#4361ee,#4cc9f0);">
+          <div class="kb-in" style="padding:var(--s6);">
+            <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);">
+              <div class="ibox" style="background:rgba(67,97,238,.12);margin:0;color:#4361ee;">🛒</div>
+              <div>
+                <div class="label">Motor de ventas</div>
+                <div style="font-weight:700;">Marketplace Kobalt</div>
+              </div>
+              <div style="margin-left:auto;font-size:var(--text-xs);background:rgba(67,97,238,.15);border:1px solid rgba(67,97,238,.3);color:#4361ee;padding:3px 10px;border-radius:var(--r-full);font-weight:600;">Gratis</div>
             </div>
-          </div>
-          <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;line-height:1.65;">Solo ganamos si tú ganas. Ranking por utilidad del cliente, nunca por pago. Comisión del 10% por venta.</p>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span class="tag-b">↑I Ingresos</span>
-            <span class="tag-c">Gratis empezar</span>
-            <span class="tag-p">↓R Riesgo</span>
+            <p style="font-size:var(--text-sm);margin-bottom:var(--s4);">Solo ganamos si tú ganas. Ranking por utilidad del cliente, nunca por pago.</p>
+            <div class="flex-wrap">
+              <span style="background:rgba(67,97,238,.1);border:1px solid rgba(67,97,238,.25);color:#4361ee;" class="tag">↑I Ingresos</span>
+              <span style="background:rgba(76,201,240,.1);border:1px solid rgba(76,201,240,.25);color:#4cc9f0;" class="tag">10% comisión</span>
+            </div>
           </div>
         </div>
       </a>
 
-      <!-- Negocio -->
-      <a href="./apps/negocio/" class="kb" style="text-decoration:none;display:block;animation-delay:.3s;">
-        <div class="kb-in" style="padding:28px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-            <div class="ibox" style="background:rgba(247,37,133,.1);margin:0;">🏗️</div>
-            <div>
-              <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600;">Bootstrap</div>
-              <div style="font-weight:700;font-size:.98rem;">Negocio Prearmado</div>
+      <!-- Negocio — pink -->
+      <a href="./negocio.html" style="display:block;text-decoration:none;">
+        <div style="border-radius:var(--r-xl);padding:2px;background:linear-gradient(135deg,#f72585,#7209b7);">
+          <div class="kb-in" style="padding:var(--s6);">
+            <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);">
+              <div class="ibox" style="background:rgba(247,37,133,.12);margin:0;color:#f72585;">🏗️</div>
+              <div>
+                <div class="label">Bootstrap</div>
+                <div style="font-weight:700;">Negocio Prearmado</div>
+              </div>
+              <div style="margin-left:auto;font-size:var(--text-xs);background:rgba(247,37,133,.12);border:1px solid rgba(247,37,133,.3);color:#f72585;padding:3px 10px;border-radius:var(--r-full);font-weight:600;">$10M</div>
             </div>
-          </div>
-          <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;line-height:1.65;">$8M en inventario inteligente, web con pagos, imágenes y posts listos. Tráfico desde el día 1.</p>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <span class="tag-p">↑↑I Ingresos</span>
-            <span class="tag-c">↓↓R Riesgo</span>
-            <span class="tag-g">$10M paquete</span>
+            <p style="font-size:var(--text-sm);margin-bottom:var(--s4);">$8M en inventario inteligente, web con pagos, tráfico activo desde el día 1.</p>
+            <div class="flex-wrap">
+              <span style="background:rgba(247,37,133,.1);border:1px solid rgba(247,37,133,.25);color:#f72585;" class="tag">↑↑I Ingresos</span>
+              <span style="background:rgba(114,9,183,.1);border:1px solid rgba(114,9,183,.25);color:#7209b7;" class="tag">↓↓R Riesgo</span>
+            </div>
           </div>
         </div>
       </a>
 
-      <!-- Curso IA -->
-      <div class="card" style="cursor:pointer;" onclick="location.href='./apps/curso/'">
-        <div class="ibox" style="background:rgba(248,181,0,.1);">🎓</div>
-        <div style="font-weight:700;margin-bottom:6px;">Curso IA + Kit Digital</div>
-        <div style="font-size:.81rem;color:var(--muted);margin-bottom:12px;line-height:1.65;">Formación práctica en IA aplicada a negocios + página web lista para vender incluida. Empiezas a producir desde el día 1.</div>
-        <div style="font-size:1.55rem;font-weight:800;" class="gg">$500K</div>
-        <div style="font-size:.74rem;color:var(--dim);margin-bottom:12px;">pago único</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;"><span class="tag-g">↑C Capacidad</span><span class="tag-c">↑E Eficiencia</span></div>
-      </div>
-
-      <!-- Community -->
-      <div class="card" style="cursor:pointer;" onclick="location.href='./apps/community/'">
-        <div class="ibox" style="background:rgba(76,201,240,.1);">📱</div>
-        <div style="font-weight:700;margin-bottom:6px;">Community Manager IA</div>
-        <div style="font-size:.81rem;color:var(--muted);margin-bottom:12px;line-height:1.65;">Contenido, campañas y automatización mensual impulsados por IA. Tu marca activa sin esfuerzo.</div>
-        <div style="font-size:1.55rem;font-weight:800;" class="gg">$500K</div>
-        <div style="font-size:.74rem;color:var(--dim);margin-bottom:12px;">/mes · recurrente</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;"><span class="tag-c">↑↑I Ingresos</span><span class="tag-g">↑E Eficiencia</span></div>
-      </div>
-
-      <!-- Open-Claw -->
-      <div class="card" style="cursor:pointer;" onclick="location.href='./apps/open-claw/'">
-        <div class="ibox" style="background:rgba(114,9,183,.1);">🔍</div>
-        <div style="font-weight:700;margin-bottom:6px;">Open-Claw · Búsqueda IA</div>
-        <div style="font-size:.81rem;color:var(--muted);margin-bottom:12px;line-height:1.65;">Motor de búsqueda inteligente para tu negocio. Funciona offline. Encuentra productos, precios y oportunidades al instante.</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;"><span class="tag-v">↑D Decisión</span><span class="tag-c">Offline-first</span></div>
-      </div>
-
-      <!-- Mercado -->
-      <div class="card" style="cursor:pointer;" onclick="location.href='./apps/mercado/'">
-        <div class="ibox" style="background:rgba(76,201,240,.1);">🧭</div>
-        <div style="font-weight:700;margin-bottom:6px;">Mercado · Para compradores</div>
-        <div style="font-size:.81rem;color:var(--muted);margin-bottom:12px;line-height:1.65;">Encuentra lo que necesitas al mejor precio. Comparación transparente. El sistema trabaja para ti, no para el vendedor.</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;"><span class="tag-b">↑D Decisión</span><span class="tag-p">Ahorra más</span></div>
-      </div>
-
-      <!-- Ecosistema (full width) -->
-      <div class="rcard" style="grid-column:1 / -1;cursor:pointer;" onclick="location.href='./apps/ecosistema/'">
-        <div class="rcin" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+      <!-- Curso — gold -->
+      <div class="card card-app" style="cursor:pointer;" onclick="location.href='./curso.html'">
+        <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);">
+          <div class="ibox" style="background:rgba(248,181,0,.12);margin:0;">🎓</div>
           <div>
-            <div class="pill" style="margin-bottom:12px;"><span class="pdot"></span>Vista completa</div>
-            <div style="font-weight:800;font-size:1.2rem;margin-bottom:8px;">Ecosistema Kobalt Red</div>
-            <div style="font-size:.84rem;color:var(--muted);max-width:480px;line-height:1.65;">Mapa completo de cómo todos los módulos se conectan. Rutas de entrada, estrategia de crecimiento y proyección de bienestar.</div>
+            <div class="label">Capacitación</div>
+            <div style="font-weight:700;">Curso IA + Kit Digital</div>
           </div>
-          <button class="btn btn-p">Explorar mapa →</button>
+          <div style="margin-left:auto;font-size:var(--text-xl);font-weight:800;" class="g-gold">$500K</div>
+        </div>
+        <p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Formación práctica en IA + web lista para vender incluida. Produces desde el día 1.</p>
+        <div class="flex-wrap">
+          <span style="background:rgba(248,181,0,.1);border:1px solid rgba(248,181,0,.25);color:#f8b500;" class="tag">↑C Capacidad</span>
+          <span style="background:rgba(247,37,133,.1);border:1px solid rgba(247,37,133,.25);color:#f72585;" class="tag">↑E Eficiencia</span>
+        </div>
+      </div>
+
+      <!-- Community — cyan -->
+      <div class="card card-app" style="cursor:pointer;" onclick="location.href='./community.html'">
+        <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);">
+          <div class="ibox" style="background:rgba(76,201,240,.12);margin:0;">📱</div>
+          <div>
+            <div class="label">IA Operativa</div>
+            <div style="font-weight:700;">Community Manager IA</div>
+          </div>
+          <div style="margin-left:auto;font-size:var(--text-xl);font-weight:800;" class="g-teal">$500K<span style="font-size:var(--text-xs);color:var(--dim);font-weight:400;">/mes</span></div>
+        </div>
+        <p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Contenido, campañas y automatización mensual. Tu marca activa sin que muevas un dedo.</p>
+        <div class="flex-wrap">
+          <span style="background:rgba(76,201,240,.1);border:1px solid rgba(76,201,240,.25);color:#4cc9f0;" class="tag">↑↑I Ingresos</span>
+          <span style="background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.25);color:#06d6a0;" class="tag">30+ posts/mes</span>
+        </div>
+      </div>
+
+      <!-- Open-Claw — violet -->
+      <div class="card card-app" style="cursor:pointer;" onclick="location.href='./open-claw.html'">
+        <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);">
+          <div class="ibox" style="background:rgba(114,9,183,.12);margin:0;">🔍</div>
+          <div>
+            <div class="label">Búsqueda IA</div>
+            <div style="font-weight:700;">Open-Claw</div>
+          </div>
+          <div style="margin-left:auto;font-size:var(--text-xs);background:rgba(114,9,183,.12);border:1px solid rgba(114,9,183,.3);color:#7209b7;padding:3px 10px;border-radius:var(--r-full);font-weight:600;">Offline</div>
+        </div>
+        <p style="font-size:var(--text-sm);margin-bottom:var(--s3);">Búsqueda inteligente sin internet. Encuentra productos, precios y oportunidades al instante.</p>
+        <div class="flex-wrap">
+          <span style="background:rgba(114,9,183,.1);border:1px solid rgba(114,9,183,.25);color:#7209b7;" class="tag">↑D Decisión</span>
+          <span style="background:rgba(67,97,238,.1);border:1px solid rgba(67,97,238,.25);color:#4361ee;" class="tag">Offline-first</span>
+        </div>
+      </div>
+
+      <!-- Mercado — teal -->
+      <div class="card card-app" style="cursor:pointer;" onclick="location.href='./mercado.html'">
+        <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);">
+          <div class="ibox" style="background:rgba(6,214,160,.12);margin:0;">🧭</div>
+          <div>
+            <div class="label">Para compradores</div>
+            <div style="font-weight:700;">Mercado Kobalt</div>
+          </div>
+          <div style="margin-left:auto;font-size:var(--text-xs);background:rgba(6,214,160,.12);border:1px solid rgba(6,214,160,.3);color:#06d6a0;padding:3px 10px;border-radius:var(--r-full);font-weight:600;">Gratis</div>
+        </div>
+        <p style="font-size:var(--text-sm);margin-bottom:var(--s3);">El mercado trabaja para ti. Comparación real, transparente. Sin algoritmos de pago.</p>
+        <div class="flex-wrap">
+          <span style="background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.25);color:#06d6a0;" class="tag">↑D Decisión</span>
+          <span style="background:rgba(76,201,240,.1);border:1px solid rgba(76,201,240,.25);color:#4cc9f0;" class="tag">Ahorra más</span>
+        </div>
+      </div>
+
+      <!-- Ecosistema — full width -->
+      <div onclick="location.href='./ecosistema.html'" style="grid-column:1/-1;cursor:pointer;">
+        <div class="rcard">
+          <div class="rcin" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s5);">
+            <div>
+              <div class="pill pill-app" style="margin-bottom:var(--s3);"><span class="dot"></span>Mapa completo</div>
+              <div style="font-weight:800;font-size:var(--text-xl);margin-bottom:var(--s2);">Ecosistema Kobalt Red</div>
+              <p style="font-size:var(--text-sm);max-width:480px;">Cómo todos los módulos se conectan. Rutas de entrada, diagnóstico de perfil y proyección de bienestar.</p>
+            </div>
+            <button class="btn btn-app">Explorar el mapa →</button>
+          </div>
         </div>
       </div>
 
@@ -187,102 +225,65 @@
   </div>
 </section>
 
-<!-- ████████ §4 MODELO ████████ -->
-<section id="modelo" style="background:var(--bg2);transition:background .3s;">
-  <div class="blob" style="width:400px;height:400px;top:-50px;right:-80px;background:radial-gradient(circle,var(--blob-a),transparent 70%);animation:pulse 5s ease-in-out infinite;"></div>
+<hr class="glow-line">
 
+<!-- ██ MODELO ██ -->
+<section id="modelo" class="section-alt">
+  <div class="blob blob-a" style="width:420px;height:420px;top:-50px;right:-80px;animation:pulse 5s ease-in-out infinite;"></div>
   <div class="inn">
-    <div class="pill"><span class="pdot-g pdot"></span>Modelo de negocio</div>
-    <h2 style="font-size:clamp(1.8rem,3.6vw,3rem);font-weight:800;letter-spacing:-.03em;margin-bottom:14px;">
-      Alineación total.<br><span class="gg">Solo ganamos si tú ganas.</span>
-    </h2>
-    <p style="color:var(--muted);max-width:520px;margin-bottom:44px;line-height:1.78;">No hay cuotas mensuales obligatorias para empezar. No hay letra pequeña. La comisión se activa solo cuando hay ventas reales.</p>
+    <div class="pill fu"><span class="dot"></span>Modelo de negocio</div>
+    <h2 class="fu d1">Solo ganamos<br><span class="g-gold">si tú ganas.</span></h2>
+    <p class="fu d2" style="max-width:520px;margin-top:var(--s3);margin-bottom:var(--s6);">Sin cuotas obligatorias para empezar. La comisión se activa solo cuando hay ventas reales.</p>
 
-    <div style="overflow-x:auto;">
-      <table class="rtable" style="min-width:500px;">
-        <thead>
-          <tr>
-            <th>Nivel</th>
-            <th>Qué incluye</th>
-            <th>Costo</th>
-            <th>Activación</th>
-          </tr>
-        </thead>
+    <div class="fu d3 tscroll">
+      <table class="rtable" style="min-width:520px;">
+        <thead><tr><th>Nivel</th><th>Qué incluye</th><th>Costo</th><th>Se activa</th></tr></thead>
         <tbody>
-          <tr>
-            <td><span style="color:var(--k-cyan);font-weight:700;">Entrada</span></td>
-            <td>Perfil + productos desde fotos + publicación en Marketplace</td>
-            <td style="color:var(--k-gold);font-weight:700;">Gratis</td>
-            <td>Inmediata</td>
-          </tr>
-          <tr>
-            <td><span style="color:var(--k-pink);font-weight:700;">Venta</span></td>
-            <td>Comisión por cada venta generada por el sistema</td>
-            <td style="color:var(--k-pink);font-weight:700;">10%</td>
-            <td>Al cerrar venta</td>
-          </tr>
-          <tr>
-            <td><span style="color:var(--k-blue);font-weight:700;">Negocio</span></td>
-            <td>Inventario prearmado + web + pagos + tráfico</td>
-            <td style="color:var(--k-blue);font-weight:700;">$10M</td>
-            <td>Día 1</td>
-          </tr>
-          <tr>
-            <td><span style="color:var(--k-gold);font-weight:700;">Curso</span></td>
-            <td>IA aplicada + kit digital completo + web incluida</td>
-            <td style="color:var(--k-gold);font-weight:700;">$500K</td>
-            <td>Pago único</td>
-          </tr>
-          <tr>
-            <td><span style="color:var(--muted);font-weight:700;">Community</span></td>
-            <td>Contenido IA + campañas + automatización mensual</td>
-            <td style="color:var(--muted);font-weight:700;">$500K/mes</td>
-            <td>Mensual</td>
-          </tr>
+          <tr><td><strong style="color:var(--k-teal);">Entrada</strong></td><td>Perfil + productos desde fotos + Marketplace</td><td style="color:var(--k-teal);font-weight:700;">Gratis</td><td>Inmediato</td></tr>
+          <tr><td><strong style="color:var(--k-pink);">Venta</strong></td><td>Comisión por venta generada por el sistema</td><td style="color:var(--k-pink);font-weight:700;">10%</td><td>Al cerrar venta</td></tr>
+          <tr><td><strong style="color:var(--k-blue);">Negocio</strong></td><td>Inventario prearmado + web + pagos + tráfico</td><td style="color:var(--k-blue);font-weight:700;">$10M</td><td>Día 1</td></tr>
+          <tr><td><strong style="color:var(--k-gold);">Curso</strong></td><td>IA aplicada + kit digital + web incluida</td><td style="color:var(--k-gold);font-weight:700;">$500K</td><td>Pago único</td></tr>
+          <tr><td><strong style="color:var(--k-cyan);">Community</strong></td><td>Contenido IA + campañas + automatización</td><td style="color:var(--k-cyan);font-weight:700;">$500K/mes</td><td>Mensual</td></tr>
         </tbody>
       </table>
     </div>
 
-    <div style="margin-top:40px;text-align:center;">
-      <div style="font-size:1.3rem;font-weight:700;color:var(--dim);">dWᵤ/dt <span class="gb">&gt; 0</span></div>
-      <div style="font-size:.78rem;color:var(--dim);margin-top:5px;">El bienestar crece en el tiempo — esa es la propiedad más importante del sistema</div>
+    <div class="fu d4" style="margin-top:var(--s6);text-align:center;">
+      <div style="font-size:var(--text-2xl);font-weight:800;color:var(--dim);">dWᵤ/dt <span class="g-blue">&gt; 0</span></div>
+      <p style="font-size:var(--text-sm);margin-top:var(--s2);">El bienestar crece en el tiempo — esa es la propiedad más importante del sistema</p>
     </div>
   </div>
 </section>
 
-<!-- ████████ §5 CTA ████████ -->
+<hr class="glow-line">
+
+<!-- ██ CTA ██ -->
 <section id="cta">
-  <div class="blob" style="width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,var(--blob-b),transparent 70%);animation:pulse 4s ease-in-out infinite;"></div>
-
-  <div class="inn" style="text-align:center;">
-    <div class="pill fu"><span class="pdot-p pdot"></span>Tu punto de entrada</div>
-    <h2 class="fu d1" style="font-size:clamp(2rem,4vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.08;margin-bottom:16px;">
-      ¿Por dónde<br><span class="gf">empiezas hoy?</span>
-    </h2>
-    <p class="fu d2" style="color:var(--muted);max-width:460px;margin:0 auto 36px;line-height:1.78;">No hay un camino único. Hay el camino correcto para ti, con tus recursos actuales y tus metas reales.</p>
-    <div class="fu d3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-      <a class="btn btn-p" href="./apps/ecosistema/">🗺 Ver mi camino</a>
-      <a class="btn btn-s" href="./apps/marketplace/">Empezar gratis →</a>
+  <div class="blob blob-app" style="width:520px;height:520px;top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 4s ease-in-out infinite;"></div>
+  <div class="inn hero-center">
+    <div class="pill pill-app fu"><span class="dot"></span>Tu punto de entrada</div>
+    <h2 class="fu d1">¿Por dónde<br><span class="g-full">empiezas hoy?</span></h2>
+    <p class="fu d2 hero-sub">No hay un camino único. Hay el camino correcto para ti, con tus recursos actuales.</p>
+    <div class="fu d3 hero-cta">
+      <a class="btn btn-app btn-lg" href="./ecosistema.html">🗺 Ver mi camino</a>
+      <a class="btn btn-ghost btn-lg" href="./marketplace.html">Empezar gratis →</a>
     </div>
   </div>
 </section>
 
-<!-- ████████ FOOTER ████████ -->
 <footer>
   <div class="footer-inner">
-    <div style="display:flex;align-items:center;gap:9px;">
-      <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="kgf" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#f72585"/><stop offset="45%" stop-color="#4361ee"/><stop offset="100%" stop-color="#4cc9f0"/></linearGradient></defs><path d="M8 6L8 34M8 20L24 6M8 20L26 34" stroke="url(#kgf)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span class="gf" style="font-weight:800;font-size:.95rem;">Kobalt Red</span>
-    </div>
-    <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
-      <a href="./apps/marketplace/" style="font-size:.78rem;color:var(--dim);">Marketplace</a>
-      <a href="./apps/negocio/" style="font-size:.78rem;color:var(--dim);">Negocio</a>
-      <a href="./apps/curso/" style="font-size:.78rem;color:var(--dim);">Curso IA</a>
-      <a href="./apps/community/" style="font-size:.78rem;color:var(--dim);">Community</a>
-      <a href="./apps/open-claw/" style="font-size:.78rem;color:var(--dim);">Open-Claw</a>
-      <a href="./apps/ecosistema/" style="font-size:.78rem;color:var(--dim);">Ecosistema</a>
-    </div>
-    <div class="footer-copy">© 2026 Kobalt Red · Ecosistema Mikuna</div>
+    <span class="g-full" style="font-weight:800;font-size:.95rem;">Kobalt Red</span>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="./marketplace.html">Marketplace</a>
+      <a href="./negocio.html">Negocio</a>
+      <a href="./curso.html">Curso IA</a>
+      <a href="./community.html">Community</a>
+      <a href="./open-claw.html">Open-Claw</a>
+      <a href="./mercado.html">Mercado</a>
+      <a href="./ecosistema.html">Ecosistema</a>
+    </nav>
+    <span class="footer-copy">© 2026 Kobalt Red · Ecosistema Mikuna</span>
   </div>
 </footer>
 
