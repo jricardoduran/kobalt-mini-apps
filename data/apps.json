@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "sections": [
+    {
+      "id": "productividad",
+      "label": "Productividad",
+      "apps": [
+        {
+          "id": "notas",
+          "label": "Notas",
+          "desc": "Captura rápida de ideas y texto libre",
+          "icon": "📝",
+          "enabled": true
+        },
+        {
+          "id": "checklist",
+          "label": "Checklist",
+          "desc": "Listas de verificación y tareas rápidas",
+          "icon": "✅",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "finanzas",
+      "label": "Finanzas",
+      "apps": [
+        {
+          "id": "gastos",
+          "label": "Gastos",
+          "desc": "Registro offline de gastos e ingresos",
+          "icon": "💸",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "campo",
+      "label": "Campo",
+      "apps": [
+        {
+          "id": "visitas",
+          "label": "Visitas",
+          "desc": "Registro de visitas técnicas con evidencia",
+          "icon": "📍",
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}

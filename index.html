@@ -10,15 +10,15 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:       #0f0f0f;
-    --surface:  #1a1a1a;
-    --border:   #2a2a2a;
-    --text:     #e8e8e8;
-    --muted:    #666;
-    --accent:   #4f8ef7;
-    --green:    #4caf50;
-    --mono:     'JetBrains Mono', monospace;
-    --sans:     'IBM Plex Sans', system-ui, sans-serif;
+    --bg:      #0f0f0f;
+    --surface: #1a1a1a;
+    --border:  #2a2a2a;
+    --text:    #e8e8e8;
+    --muted:   #666;
+    --accent:  #4f8ef7;
+    --green:   #4caf50;
+    --mono:    'JetBrains Mono', monospace;
+    --sans:    'IBM Plex Sans', system-ui, sans-serif;
   }
 
   html, body {
@@ -29,15 +29,11 @@
   }
 
   header {
-    padding: 2.5rem 2rem 1rem;
+    padding: 2.5rem 2rem 1.25rem;
     border-bottom: 1px solid var(--border);
   }
 
-  header h1 {
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
+  header h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
 
   header p {
     margin-top: 0.35rem;
@@ -46,20 +42,34 @@
     font-family: var(--mono);
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
-    padding: 2rem;
-    max-width: 1000px;
+  main { padding: 2rem; max-width: 1040px; }
+
+  /* ── Sección ── */
+  .section { margin-bottom: 2.5rem; }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-family: var(--mono);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.85rem;
+    padding-left: 2px;
   }
 
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* ── Card activa ── */
   .card {
     display: block;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 1.5rem;
+    padding: 1.35rem 1.35rem 1rem;
     text-decoration: none;
     color: var(--text);
     transition: border-color 0.15s, background 0.15s;
@@ -67,58 +77,87 @@
     cursor: pointer;
   }
 
-  .card:hover {
-    border-color: #444;
-    background: #202020;
+  .card:hover { border-color: #3a3a3a; background: #1e1e1e; }
+
+  /* ── Card deshabilitada ── */
+  .card-disabled {
+    display: block;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 1.35rem 1.35rem 1rem;
+    color: var(--muted);
+    position: relative;
+    cursor: default;
+    opacity: 0.55;
   }
 
   .card-icon {
-    font-size: 2rem;
+    font-size: 1.75rem;
     line-height: 1;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.6rem;
     display: block;
+    filter: grayscale(0);
   }
 
-  .card-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-  }
+  .card-disabled .card-icon { filter: grayscale(1); }
+
+  .card-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
 
   .card-desc {
-    font-size: 0.825rem;
+    font-size: 0.8rem;
     color: var(--muted);
     line-height: 1.5;
   }
 
+  .card-disabled .card-desc { color: #444; }
+
+  /* ── Dot de datos locales ── */
   .card-dot {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 8px;
-    height: 8px;
+    top: 0.9rem;
+    right: 0.9rem;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--border);
-    transition: background 0.2s;
   }
 
   .card-dot.active {
     background: var(--green);
-    box-shadow: 0 0 6px var(--green);
+    box-shadow: 0 0 5px var(--green);
   }
 
-  .card-path {
-    margin-top: 1rem;
+  /* ── Badge "próximamente" ── */
+  .badge-soon {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
     font-family: var(--mono);
-    font-size: 0.7rem;
-    color: #444;
+    font-size: 0.6rem;
+    color: #555;
+    background: #1e1e1e;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
+  /* ── Footer ── */
   footer {
+    padding: 1.5rem 2rem 2rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: #333;
+  }
+
+  /* ── Error / cargando ── */
+  .hub-msg {
     padding: 2rem;
     font-family: var(--mono);
-    font-size: 0.7rem;
-    color: #333;
+    font-size: 0.8rem;
+    color: var(--muted);
   }
 </style>
 </head>
@@ -126,83 +165,128 @@
 
 <header>
   <h1>Kobalt</h1>
-  <p>sistema de mini apps · fase α</p>
+  <p id="subtitle">cargando…</p>
 </header>
 
-<div class="grid" id="grid"></div>
+<main id="main"><p class="hub-msg">cargando apps.json…</p></main>
 
-<footer id="footer">cargando...</footer>
+<footer id="footer"></footer>
 
 <script>
-const APPS = [
-  {
-    id:    'notas',
-    nombre:'Notas',
-    desc:  'Captura rápida de ideas y texto libre',
-    icono: '📝',
-    path:  './notas/',
-    idb:   'data_Kobalt-Notas',
-  },
-  {
-    id:    'gastos',
-    nombre:'Gastos',
-    desc:  'Registro offline de gastos e ingresos',
-    icono: '💸',
-    path:  './gastos/',
-    idb:   'data_Kobalt-Gastos',
-  },
-  {
-    id:    'checklist',
-    nombre:'Checklist',
-    desc:  'Listas de verificación y tareas rápidas',
-    icono: '✅',
-    path:  './checklist/',
-    idb:   'data_Kobalt-Checklist',
-  },
-  {
-    id:    'visitas',
-    nombre:'Visitas',
-    desc:  'Registro de visitas técnicas con evidencia',
-    icono: '📍',
-    path:  './visitas/',
-    idb:   'data_Kobalt-Visitas',
-  },
-]
+// ── Convención de derivación ──────────────────────────────────
+// id → path, idb, label   (sobrescribibles desde el JSON)
 
+function _capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function _deriveApp(raw) {
+  const label = raw.label || _capitalize(raw.id);
+  return {
+    id:      raw.id,
+    label:   label,
+    desc:    raw.desc  || '',
+    icon:    raw.icon  || '▪',
+    enabled: raw.enabled !== false,
+    path:    raw.path  || `./${raw.id}/`,
+    idb:     raw.idb   || `data_Kobalt-${label}`,
+  };
+}
+
+function _buildNav(config) {
+  return (config.sections || []).map(section => ({
+    id:    section.id,
+    label: section.label,
+    apps:  (section.apps || []).map(_deriveApp),
+  }));
+}
+
+// ── Detección de datos locales ────────────────────────────────
 async function hasLocalData(idbName) {
   try {
-    const dbs = await indexedDB.databases()
-    return dbs.some(d => d.name === idbName)
-  } catch { return false }
+    const dbs = await indexedDB.databases();
+    return dbs.some(d => d.name === idbName);
+  } catch { return false; }
 }
 
-async function renderGrid() {
-  const grid = document.getElementById('grid')
-  grid.innerHTML = ''
+// ── Render ────────────────────────────────────────────────────
+function renderCard(app, hasData) {
+  if (!app.enabled) {
+    return `
+      <div class="card-disabled">
+        <span class="badge-soon">próximamente</span>
+        <span class="card-icon">${app.icon}</span>
+        <div class="card-name">${app.label}</div>
+        <div class="card-desc">${app.desc}</div>
+      </div>`;
+  }
 
-  const states = await Promise.all(APPS.map(a => hasLocalData(a.idb)))
+  const dot = hasData
+    ? '<span class="card-dot active" title="datos locales presentes"></span>'
+    : '<span class="card-dot" title="sin datos locales"></span>';
 
-  APPS.forEach((app, i) => {
-    const hasData = states[i]
-    const card = document.createElement('a')
-    card.className = 'card'
-    card.href = app.path
-    card.innerHTML = `
-      <span class="card-dot ${hasData ? 'active' : ''}" title="${hasData ? 'datos locales presentes' : 'sin datos locales'}"></span>
-      <span class="card-icon">${app.icono}</span>
-      <div class="card-name">${app.nombre}</div>
+  return `
+    <a class="card" href="${app.path}">
+      ${dot}
+      <span class="card-icon">${app.icon}</span>
+      <div class="card-name">${app.label}</div>
       <div class="card-desc">${app.desc}</div>
-      <div class="card-path">${app.path}</div>
-    `
-    grid.appendChild(card)
-  })
-
-  const footer = document.getElementById('footer')
-  const active = states.filter(Boolean).length
-  footer.textContent = `${active} / ${APPS.length} apps con datos locales · ${new Date().toISOString().slice(0,10)}`
+    </a>`;
 }
 
-renderGrid()
+async function render(nav) {
+  const main = document.getElementById('main');
+
+  // Detectar datos locales en paralelo para todas las apps
+  const allApps = nav.flatMap(s => s.apps);
+  const states  = await Promise.all(allApps.map(a => hasLocalData(a.idb)));
+  const dataMap = Object.fromEntries(allApps.map((a, i) => [a.id, states[i]]));
+
+  let html = '';
+  for (const section of nav) {
+    const enabledApps = section.apps.filter(a => a.enabled);
+    const cards = section.apps.map(a => renderCard(a, dataMap[a.id])).join('');
+    html += `
+      <div class="section">
+        <div class="section-label">${section.label}</div>
+        <div class="section-grid">${cards}</div>
+      </div>`;
+  }
+
+  main.innerHTML = html;
+
+  // Footer
+  const total   = allApps.filter(a => a.enabled).length;
+  const active  = allApps.filter(a => a.enabled && dataMap[a.id]).length;
+  const soon    = allApps.filter(a => !a.enabled).length;
+  const extras  = soon > 0 ? ` · ${soon} próximamente` : '';
+  document.getElementById('footer').textContent =
+    `${active} / ${total} apps con datos locales${extras} · ${new Date().toISOString().slice(0,10)}`;
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('./data/apps.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`apps.json ${res.status}`);
+    const config = await res.json();
+    const nav    = _buildNav(config);
+
+    const total = nav.flatMap(s => s.apps).length;
+    const ver   = config.version ? `v${config.version}` : '';
+    document.getElementById('subtitle').textContent =
+      `sistema de mini apps · fase α · ${total} apps ${ver}`;
+
+    await render(nav);
+  } catch (err) {
+    document.getElementById('main').innerHTML =
+      `<p class="hub-msg">error cargando apps.json: ${err.message}</p>`;
+    document.getElementById('subtitle').textContent = 'error al cargar configuración';
+    console.error('[hub]', err);
+  }
+}
+
+init();
 </script>
 </body>
 </html>
