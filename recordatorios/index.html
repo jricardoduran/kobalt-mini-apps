@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Recordatorios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0f0f0f;
+      --surface:     #1a1a1a;
+      --border:      #2a2a2a;
+      --text:        #e8e8e8;
+      --muted:       #666;
+      --accent:      #4f8ef7;
+      --danger:      #ef5350;
+      --radius:      8px;
+      --st-pendiente:  #ff9800;
+      --st-completado: #4caf50;
+      --st-cancelado:  #ef5350;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      flex: 1;
+    }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    #sync-status.ok    { color: #4caf50; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── TAB NAV ── */
+    .tab-nav {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .8rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      padding: 9px 0;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 8px 0 6px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── REMINDER CARDS ── */
+    .reminder-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+    .reminder-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color .15s, background .15s;
+    }
+    .reminder-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .reminder-card.vencido { border-left: 3px solid var(--danger); }
+
+    .card-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 44px;
+    }
+
+    .card-body-wrap { flex: 1; min-width: 0; }
+
+    .card-title {
+      font-weight: 600;
+      font-size: .92rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .card-desc {
+      font-size: .78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .estado-badge {
+      font-size: .68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-radius: 4px;
+      padding: 2px 7px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .estado-badge.pendiente  { background: rgba(255,152,0,.15); color: var(--st-pendiente); }
+    .estado-badge.completado { background: rgba(76,175,80,.15); color: var(--st-completado); }
+    .estado-badge.cancelado  { background: rgba(239,83,80,.15); color: var(--st-cancelado); }
+
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+    .badge-vencido {
+      background: rgba(239,83,80,.2);
+      color: var(--danger);
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-radius: 4px;
+      padding: 2px 7px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      animation: pulse-red 1.4s ease-in-out infinite;
+    }
+
+    /* ── DATE GROUP HEADER ── */
+    .date-group-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: 10px 0 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+      margin-top: 12px;
+    }
+    .date-group-header:first-child { margin-top: 0; }
+
+    /* ── CHIP FILTERS ── */
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: .78rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── COLLAPSIBLE ── */
+    .collapsible-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 0 6px;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+      transition: color .15s;
+    }
+    .collapsible-btn:hover { color: var(--text); }
+    .collapsible-btn .arrow { transition: transform .2s; }
+    .collapsible-btn.open .arrow { transform: rotate(90deg); }
+
+    .collapsible-content { display: none; }
+    .collapsible-content.open { display: block; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted);
+    }
+    .empty-state p { font-size: .9rem; }
+
+    /* ── DETAIL VIEW ── */
+    #detail-view { display: none; }
+
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .detail-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      color: var(--muted);
+    }
+
+    .btn-save {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-delete:hover { border-color: var(--danger); }
+
+    .detail-field { margin-bottom: 16px; }
+
+    .detail-field-label {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
+    .field-input, .field-textarea, .field-select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .92rem;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--accent); }
+    .field-textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+    .field-select option { background: #1a1a1a; color: var(--text); }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Estado buttons */
+    .estado-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-estado {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 7px 16px;
+      font-size: .82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-estado:hover { opacity: .85; }
+    .btn-estado.completar { border-color: var(--st-completado); color: var(--st-completado); }
+    .btn-estado.completar:hover { background: rgba(76,175,80,.15); }
+    .btn-estado.cancelar  { border-color: var(--st-cancelado);  color: var(--st-cancelado);  }
+    .btn-estado.cancelar:hover  { background: rgba(239,83,80,.15); }
+    .btn-estado.reactivar { border-color: var(--st-pendiente);  color: var(--st-pendiente);  }
+    .btn-estado.reactivar:hover { background: rgba(255,152,0,.15); }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+      margin: auto;
+    }
+
+    #modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .modal-field { margin-bottom: 14px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .field-row { grid-template-columns: 1fr; }
+      .detail-toolbar { flex-wrap: wrap; }
+      .btn-save { width: 100%; text-align: center; order: -1; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>Kobalt Recordatorios</h1>
+    <span id="sync-status">—</span>
+    <button id="btn-sync">Sync</button>
+  </div>
+  <div class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" data-tab="hoy">HOY</button>
+    <button class="tab-btn" data-tab="todos">TODOS</button>
+  </div>
+</header>
+
+<main>
+  <!-- VIEW: HOY -->
+  <div id="view-hoy">
+    <div class="section-header">Hoy</div>
+    <div class="reminder-list" id="list-hoy"></div>
+    <div class="empty-state" id="empty-hoy" style="display:none"><p>Sin recordatorios para hoy. Pulsa <strong>+</strong> para crear uno.</p></div>
+
+    <!-- Próximos 7 días (collapsible) -->
+    <button class="collapsible-btn" id="btn-proximos">
+      <span class="arrow">▶</span> Próximos 7 días
+    </button>
+    <div class="collapsible-content" id="proximos-content">
+      <div class="reminder-list" id="list-proximos"></div>
+      <div class="empty-state" id="empty-proximos" style="display:none"><p>Sin recordatorios próximos.</p></div>
+    </div>
+  </div>
+
+  <!-- VIEW: TODOS -->
+  <div id="view-todos" style="display:none">
+    <div class="chip-row" id="chip-row">
+      <button class="chip active" data-filtro="todos">Todos</button>
+      <button class="chip" data-filtro="pendiente">Pendiente</button>
+      <button class="chip" data-filtro="completado">Completado</button>
+      <button class="chip" data-filtro="cancelado">Cancelado</button>
+    </div>
+    <div id="list-todos"></div>
+    <div class="empty-state" id="empty-todos" style="display:none"><p>Sin recordatorios.</p></div>
+  </div>
+
+  <!-- VIEW: DETALLE -->
+  <div id="detail-view">
+    <div class="detail-toolbar">
+      <button class="btn-back" id="btn-back">← Volver</button>
+      <span class="detail-meta" id="detail-meta"></span>
+      <button class="btn-delete" id="btn-delete">Eliminar</button>
+      <button class="btn-save" id="btn-save-detail">Guardar</button>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-field-label">Título</div>
+      <input class="field-input" id="d-titulo" type="text" maxlength="120" placeholder="Título del recordatorio…" />
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Descripción</div>
+      <textarea class="field-textarea" id="d-descripcion" placeholder="Descripción o notas…"></textarea>
+    </div>
+    <div class="detail-field">
+      <div class="field-row">
+        <div>
+          <div class="detail-field-label">Fecha</div>
+          <input class="field-input" id="d-fecha" type="date" />
+        </div>
+        <div>
+          <div class="detail-field-label">Hora</div>
+          <input class="field-input" id="d-hora" type="time" />
+        </div>
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Repetición</div>
+      <select class="field-select" id="d-repeticion">
+        <option value="ninguna">Ninguna</option>
+        <option value="diaria">Diaria</option>
+        <option value="semanal">Semanal</option>
+        <option value="mensual">Mensual</option>
+      </select>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Estado</div>
+      <div class="estado-btns">
+        <button class="btn-estado completar" id="btn-completar">Completar</button>
+        <button class="btn-estado cancelar"  id="btn-cancelar">Cancelar</button>
+        <button class="btn-estado reactivar" id="btn-reactivar">Reactivar</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nuevo recordatorio">+</button>
+
+<!-- MODAL CREAR -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Nuevo recordatorio">
+  <div id="modal-box">
+    <h2>Nuevo recordatorio</h2>
+    <div class="modal-field">
+      <div class="detail-field-label">Título</div>
+      <input class="field-input" id="m-titulo" type="text" maxlength="120" placeholder="Título…" />
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Descripción</div>
+      <textarea class="field-textarea" id="m-descripcion" placeholder="Descripción opcional…" style="min-height:80px"></textarea>
+    </div>
+    <div class="modal-field">
+      <div class="field-row">
+        <div>
+          <div class="detail-field-label">Fecha</div>
+          <input class="field-input" id="m-fecha" type="date" />
+        </div>
+        <div>
+          <div class="detail-field-label">Hora</div>
+          <input class="field-input" id="m-hora" type="time" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Repetición</div>
+      <select class="field-select" id="m-repeticion">
+        <option value="ninguna">Ninguna</option>
+        <option value="diaria">Diaria</option>
+        <option value="semanal">Semanal</option>
+        <option value="mensual">Mensual</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-modal-create">Crear recordatorio</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Recordatorios';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbDelete(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando…');
+
+  try {
+    let remoteOmega = {};
+    try {
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexión');
+      return;
+    }
+
+    const localOmega = await getOmega();
+    const allKeys = new Set([...Object.keys(localOmega), ...Object.keys(remoteOmega)]);
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    if (toPush.length > 0) {
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    await saveOmega(localOmega);
+
+    // I5: render solo si pulled > 0
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN ─────────────────────────────────────────────────────
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function createRecordatorio(titulo, descripcion, fechaISO, horaISO, repeticion) {
+  const e = {
+    id: newId(),
+    titulo: titulo.trim(),
+    descripcion: descripcion.trim(),
+    fechaISO,
+    horaISO,
+    repeticion,
+    estado: 'pendiente',
+    ts: now()
+  };
+  await saveEntity('a', e);
+  return e;
+}
+
+async function updateRecordatorio(id, cambios) {
+  const key = 'a:' + id;
+  const e = await idbGet(key);
+  if (!e) return;
+  const updated = Object.assign({}, e, cambios, { ts: now() });
+  await saveEntity('a', updated);
+  return updated;
+}
+
+async function setEstado(id, estado) {
+  const e = await idbGet('a:' + id);
+  if (!e) return;
+  e.estado = estado;
+  e.ts = now();
+  await saveEntity('a', e);
+}
+
+async function deleteRecordatorio(id) {
+  const key = 'a:' + id;
+  await idbDelete(key);
+  const omega = await getOmega();
+  delete omega[key];
+  await saveOmega(omega);
+}
+
+async function getTodayRecordatorios() {
+  const all = await idbGetAll('a:');
+  const today = todayISO();
+  return all.filter(r => r.fechaISO === today).sort((a, b) => a.horaISO.localeCompare(b.horaISO));
+}
+
+async function getUpcoming(days) {
+  const all = await idbGetAll('a:');
+  const today = todayISO();
+  const limit = new Date();
+  limit.setDate(limit.getDate() + days);
+  const limitISO = limit.toISOString().slice(0, 10);
+  return all
+    .filter(r => r.fechaISO > today && r.fechaISO <= limitISO && r.estado === 'pendiente')
+    .sort((a, b) => a.fechaISO.localeCompare(b.fechaISO) || a.horaISO.localeCompare(b.horaISO));
+}
+
+async function getAllRecordatorios() {
+  const all = await idbGetAll('a:');
+  return all.sort((a, b) => a.fechaISO.localeCompare(b.fechaISO) || a.horaISO.localeCompare(b.horaISO));
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view         = 'hoy';    // 'hoy' | 'todos' | 'detalle'
+let filtroEstado = 'todos';  // 'todos' | 'pendiente' | 'completado' | 'cancelado'
+let currentId    = null;
+
+// ── HELPERS ────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function formatDateLabel(isoDate) {
+  if (!isoDate) return '';
+  const [y, m, d] = isoDate.split('-');
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  return date.toLocaleDateString('es', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function isVencido(r) {
+  return r.fechaISO < todayISO() && r.estado === 'pendiente';
+}
+
+function badgeHtml(r) {
+  if (isVencido(r)) return `<span class="badge-vencido">VENCIDO</span>`;
+  return `<span class="estado-badge ${escHtml(r.estado)}">${escHtml(r.estado)}</span>`;
+}
+
+function reminderCardHtml(r) {
+  const vencidoClass = isVencido(r) ? ' vencido' : '';
+  return `
+    <div class="reminder-card${vencidoClass}" data-id="${escHtml(r.id)}">
+      <span class="card-time">${escHtml(r.horaISO || '--:--')}</span>
+      <div class="card-body-wrap">
+        <div class="card-title">${escHtml(r.titulo || '(sin título)')}</div>
+        ${r.descripcion ? `<div class="card-desc">${escHtml(r.descripcion)}</div>` : ''}
+      </div>
+      ${badgeHtml(r)}
+    </div>`;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  const viewHoy    = document.getElementById('view-hoy');
+  const viewTodos  = document.getElementById('view-todos');
+  const detailView = document.getElementById('detail-view');
+  const fab        = document.getElementById('fab');
+  const tabNav     = document.getElementById('tab-nav');
+
+  // Reset visibility
+  viewHoy.style.display    = 'none';
+  viewTodos.style.display  = 'none';
+  detailView.style.display = 'none';
+  tabNav.style.display     = 'flex';
+  fab.style.display        = 'flex';
+
+  if (view === 'hoy') {
+    viewHoy.style.display = 'block';
+    await renderHoy();
+  } else if (view === 'todos') {
+    viewTodos.style.display = 'block';
+    await renderTodos();
+  } else if (view === 'detalle') {
+    detailView.style.display = 'block';
+    tabNav.style.display     = 'none';
+    fab.style.display        = 'none';
+    await renderDetail();
+  }
+
+  // Sync active tab
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === view);
+  });
+}
+
+async function renderHoy() {
+  const today       = await getTodayRecordatorios();
+  const listHoy     = document.getElementById('list-hoy');
+  const emptyHoy    = document.getElementById('empty-hoy');
+
+  if (today.length === 0) {
+    listHoy.innerHTML = '';
+    emptyHoy.style.display = 'block';
+  } else {
+    emptyHoy.style.display = 'none';
+    listHoy.innerHTML = today.map(reminderCardHtml).join('');
+    bindCardClicks(listHoy);
+  }
+
+  // Próximos 7 días
+  const upcoming        = await getUpcoming(7);
+  const listProximos    = document.getElementById('list-proximos');
+  const emptyProximos   = document.getElementById('empty-proximos');
+
+  if (upcoming.length === 0) {
+    listProximos.innerHTML = '';
+    emptyProximos.style.display = 'block';
+  } else {
+    emptyProximos.style.display = 'none';
+    listProximos.innerHTML = upcoming.map(reminderCardHtml).join('');
+    bindCardClicks(listProximos);
+  }
+}
+
+async function renderTodos() {
+  let all = await getAllRecordatorios();
+  if (filtroEstado !== 'todos') {
+    all = all.filter(r => r.estado === filtroEstado);
+  }
+
+  const container  = document.getElementById('list-todos');
+  const emptyTodos = document.getElementById('empty-todos');
+
+  if (all.length === 0) {
+    container.innerHTML = '';
+    emptyTodos.style.display = 'block';
+    return;
+  }
+  emptyTodos.style.display = 'none';
+
+  // Group by date
+  const groups = {};
+  for (const r of all) {
+    const d = r.fechaISO || 'sin-fecha';
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(r);
+  }
+
+  let html = '';
+  for (const date of Object.keys(groups).sort()) {
+    const label = date === 'sin-fecha' ? 'Sin fecha' : formatDateLabel(date);
+    html += `<div class="date-group-header">${escHtml(label)}</div>`;
+    html += `<div class="reminder-list">`;
+    html += groups[date].map(reminderCardHtml).join('');
+    html += `</div>`;
+  }
+  container.innerHTML = html;
+  bindCardClicks(container);
+}
+
+async function renderDetail() {
+  if (!currentId) { view = 'hoy'; render(); return; }
+  const r = await idbGet('a:' + currentId);
+  if (!r) { view = 'hoy'; render(); return; }
+
+  document.getElementById('d-titulo').value       = r.titulo || '';
+  document.getElementById('d-descripcion').value  = r.descripcion || '';
+  document.getElementById('d-fecha').value        = r.fechaISO || '';
+  document.getElementById('d-hora').value         = r.horaISO || '';
+  document.getElementById('d-repeticion').value   = r.repeticion || 'ninguna';
+  document.getElementById('detail-meta').textContent =
+    'id:' + r.id + '  ·  ' + r.estado;
+}
+
+function bindCardClicks(container) {
+  container.querySelectorAll('.reminder-card').forEach(card => {
+    card.addEventListener('click', () => {
+      currentId = card.dataset.id;
+      view = 'detalle';
+      render();
+    });
+  });
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// Tab nav
+document.getElementById('tab-nav').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  view = btn.dataset.tab;
+  render();
+});
+
+// Chip filters
+document.getElementById('chip-row').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  filtroEstado = chip.dataset.filtro;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
+  renderTodos();
+});
+
+// Collapsible próximos
+document.getElementById('btn-proximos').addEventListener('click', () => {
+  const btn     = document.getElementById('btn-proximos');
+  const content = document.getElementById('proximos-content');
+  const open    = content.classList.toggle('open');
+  btn.classList.toggle('open', open);
+});
+
+// Sync button
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// FAB → open modal
+document.getElementById('fab').addEventListener('click', () => {
+  document.getElementById('m-titulo').value       = '';
+  document.getElementById('m-descripcion').value  = '';
+  document.getElementById('m-fecha').value        = todayISO();
+  document.getElementById('m-hora').value         = '';
+  document.getElementById('m-repeticion').value   = 'ninguna';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-titulo').focus(), 50);
+});
+
+// Modal cancel
+document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// Modal overlay click outside
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// Modal create
+document.getElementById('btn-modal-create').addEventListener('click', async () => {
+  const titulo      = document.getElementById('m-titulo').value.trim();
+  const descripcion = document.getElementById('m-descripcion').value.trim();
+  const fechaISO    = document.getElementById('m-fecha').value;
+  const horaISO     = document.getElementById('m-hora').value;
+  const repeticion  = document.getElementById('m-repeticion').value;
+
+  if (!titulo) { document.getElementById('m-titulo').focus(); return; }
+  if (!fechaISO) { document.getElementById('m-fecha').focus(); return; }
+
+  await createRecordatorio(titulo, descripcion, fechaISO, horaISO || '00:00', repeticion);
+  document.getElementById('modal-overlay').classList.remove('open');
+  showToast('Recordatorio creado');
+  await render();
+});
+
+// Back
+document.getElementById('btn-back').addEventListener('click', () => {
+  currentId = null;
+  view = (view === 'detalle') ? 'hoy' : view;
+  view = 'hoy';
+  render();
+});
+
+// Save detail
+document.getElementById('btn-save-detail').addEventListener('click', async () => {
+  if (!currentId) return;
+  const titulo      = document.getElementById('d-titulo').value.trim();
+  const descripcion = document.getElementById('d-descripcion').value.trim();
+  const fechaISO    = document.getElementById('d-fecha').value;
+  const horaISO     = document.getElementById('d-hora').value;
+  const repeticion  = document.getElementById('d-repeticion').value;
+
+  await updateRecordatorio(currentId, { titulo, descripcion, fechaISO, horaISO, repeticion });
+  await renderDetail();
+  showToast('Guardado');
+});
+
+// Delete
+document.getElementById('btn-delete').addEventListener('click', async () => {
+  if (!currentId) return;
+  if (!confirm('¿Eliminar este recordatorio?')) return;
+  await deleteRecordatorio(currentId);
+  currentId = null;
+  view = 'hoy';
+  showToast('Recordatorio eliminado');
+  render();
+});
+
+// Estado buttons
+document.getElementById('btn-completar').addEventListener('click', async () => {
+  if (!currentId) return;
+  await setEstado(currentId, 'completado');
+  await renderDetail();
+  showToast('Marcado como completado');
+});
+
+document.getElementById('btn-cancelar').addEventListener('click', async () => {
+  if (!currentId) return;
+  await setEstado(currentId, 'cancelado');
+  await renderDetail();
+  showToast('Marcado como cancelado');
+});
+
+document.getElementById('btn-reactivar').addEventListener('click', async () => {
+  if (!currentId) return;
+  await setEstado(currentId, 'pendiente');
+  await renderDetail();
+  showToast('Reactivado');
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-overlay');
+    if (modal.classList.contains('open')) {
+      modal.classList.remove('open');
+    } else if (view === 'detalle') {
+      currentId = null;
+      view = 'hoy';
+      render();
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>

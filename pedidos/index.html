@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Pedidos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f0f0f;
+      --surface:  #1a1a1a;
+      --border:   #2a2a2a;
+      --text:     #e8e8e8;
+      --muted:    #666;
+      --accent:   #4f8ef7;
+      --danger:   #e05555;
+      --radius:   8px;
+      --st-solicitado:  #2196f3;
+      --st-transito:    #ff9800;
+      --st-recibido:    #4caf50;
+      --st-cancelado:   #666;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      flex: 1;
+    }
+
+    #btn-proveedores {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 12px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+      white-space: nowrap;
+    }
+    #btn-proveedores:hover { border-color: var(--accent); color: var(--accent); }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    #sync-status.ok    { color: #4caf7d; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── CHIP FILTROS ── */
+    #filtro-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s;
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--text); }
+    .chip.active {
+      background: #1e2d45;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── PEDIDO CARDS ── */
+    #pedidos-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .pedido-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .pedido-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-weight: 600;
+      font-size: .95rem;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .estado-badge {
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .estado-solicitado { background: rgba(33,150,243,.18); color: var(--st-solicitado); }
+    .estado-en-transito { background: rgba(255,152,0,.18); color: var(--st-transito); }
+    .estado-recibido { background: rgba(76,175,80,.18); color: var(--st-recibido); }
+    .estado-cancelado { background: rgba(102,102,102,.18); color: var(--st-cancelado); }
+
+    .card-sub {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card-entrega {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    .badge-vence {
+      background: rgba(255,152,0,.2);
+      color: #ff9800;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: .7rem;
+      font-weight: 600;
+    }
+
+    .card-ts {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── EMPTY STATE ── */
+    #empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      display: none;
+    }
+    #empty-state p { font-size: .9rem; }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+
+    /* ── DETAIL VIEW ── */
+    #detail-view { display: none; }
+
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .detail-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    .btn-save {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+
+    /* ── FLUJO BUTTONS ── */
+    #flujo-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn-flujo {
+      border: none;
+      border-radius: var(--radius);
+      padding: 9px 20px;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-flujo:hover { opacity: .85; transform: translateY(-1px); }
+
+    .btn-flujo-avanzar {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-flujo-cancelar {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+    .btn-flujo-cancelar:hover { background: rgba(224,85,85,.1); }
+
+    .estado-badge-lg {
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+
+    .detail-field-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+    .detail-field { margin-bottom: 18px; }
+
+    .field-input, .field-textarea, .field-select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+      resize: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--accent); }
+    .field-textarea { min-height: 120px; line-height: 1.55; }
+    .field-select option { background: #1a1a1a; }
+
+    .fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* ── PROVEEDORES VIEW ── */
+    #proveedores-view { display: none; }
+
+    .prov-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    #proveedores-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .prov-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .prov-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .prov-nombre {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 4px;
+    }
+    .prov-contacto {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .prov-stats {
+      display: flex;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+    }
+    .prov-stat-active { color: var(--accent); }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 540px;
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    #modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .modal-field { margin-bottom: 14px; }
+    .modal-fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 520px) {
+      .fields-row, .modal-fields-row { grid-template-columns: 1fr; }
+      .detail-toolbar { flex-wrap: wrap; }
+      .btn-save { width: 100%; text-align: center; order: -1; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Kobalt Pedidos</h1>
+  <button id="btn-proveedores">Proveedores</button>
+  <span id="sync-status">—</span>
+  <button id="btn-sync">Sync</button>
+</header>
+
+<main>
+  <!-- LIST VIEW (pedidos) -->
+  <div id="list-view">
+    <div id="filtro-chips">
+      <button class="chip active" data-estado="todos">Todos</button>
+      <button class="chip" data-estado="solicitado">Solicitado</button>
+      <button class="chip" data-estado="en-transito">En tránsito</button>
+      <button class="chip" data-estado="recibido">Recibido</button>
+      <button class="chip" data-estado="cancelado">Cancelado</button>
+    </div>
+    <div id="pedidos-list"></div>
+    <div id="empty-state"><p>Sin pedidos. Pulsa <strong>+</strong> para crear el primero.</p></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="detail-view">
+    <div class="detail-toolbar">
+      <button class="btn-back" id="btn-back-detail">← Volver</button>
+      <span class="detail-meta" id="detail-meta"></span>
+      <button class="btn-save" id="btn-save-detail">Guardar</button>
+    </div>
+
+    <!-- Flujo bar -->
+    <div id="flujo-bar"></div>
+
+    <div class="detail-field">
+      <div class="detail-field-label">Descripción</div>
+      <input class="field-input" id="d-descripcion" type="text" maxlength="200" placeholder="¿Qué se pidió?" />
+    </div>
+    <div class="fields-row">
+      <div class="detail-field">
+        <div class="detail-field-label">Cantidad</div>
+        <input class="field-input" id="d-cantidad" type="number" min="0" step="any" placeholder="0" />
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Unidad</div>
+        <select class="field-select" id="d-unidad">
+          <option value="piezas">Piezas</option>
+          <option value="kg">kg</option>
+          <option value="litros">Litros</option>
+          <option value="cajas">Cajas</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Proveedor</div>
+      <select class="field-select" id="d-proveedor"></select>
+    </div>
+    <div class="fields-row">
+      <div class="detail-field">
+        <div class="detail-field-label">Fecha pedido</div>
+        <input class="field-input" id="d-fecha-pedido" type="date" />
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Fecha entrega estimada</div>
+        <input class="field-input" id="d-fecha-entrega" type="date" />
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Monto (opcional)</div>
+      <input class="field-input" id="d-monto" type="number" min="0" step="any" placeholder="0.00" />
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Notas</div>
+      <textarea class="field-textarea" id="d-notas" placeholder="Observaciones…"></textarea>
+    </div>
+  </div>
+
+  <!-- PROVEEDORES VIEW -->
+  <div id="proveedores-view">
+    <div class="prov-toolbar">
+      <button class="btn-back" id="btn-back-prov">← Volver</button>
+      <h2 style="font-size:.95rem;font-weight:600;flex:1;margin-left:4px;">Proveedores</h2>
+      <button class="btn-save" id="btn-nuevo-prov" style="margin-left:0;">+ Nuevo</button>
+    </div>
+    <div id="proveedores-list"></div>
+    <div id="empty-prov" style="text-align:center;padding:40px 20px;color:var(--muted);display:none;">
+      <p>Sin proveedores. Pulsa <strong>+ Nuevo</strong> para crear uno.</p>
+    </div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nuevo pedido">+</button>
+
+<!-- MODAL (pedido o proveedor) -->
+<div id="modal-overlay" role="dialog" aria-modal="true">
+  <div id="modal-box">
+    <h2 id="modal-title">Nuevo pedido</h2>
+
+    <!-- Pedido fields -->
+    <div id="modal-pedido-fields">
+      <div class="modal-field">
+        <div class="detail-field-label">Descripción *</div>
+        <input class="field-input" id="m-descripcion" type="text" maxlength="200" placeholder="¿Qué se pidió?" />
+      </div>
+      <div class="modal-fields-row">
+        <div>
+          <div class="detail-field-label">Cantidad *</div>
+          <input class="field-input" id="m-cantidad" type="number" min="0" step="any" placeholder="0" />
+        </div>
+        <div>
+          <div class="detail-field-label">Unidad</div>
+          <select class="field-select" id="m-unidad">
+            <option value="piezas">Piezas</option>
+            <option value="kg">kg</option>
+            <option value="litros">Litros</option>
+            <option value="cajas">Cajas</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Proveedor</div>
+        <select class="field-select" id="m-proveedor"></select>
+      </div>
+      <div class="modal-fields-row">
+        <div>
+          <div class="detail-field-label">Fecha pedido</div>
+          <input class="field-input" id="m-fecha-pedido" type="date" />
+        </div>
+        <div>
+          <div class="detail-field-label">Fecha entrega (opcional)</div>
+          <input class="field-input" id="m-fecha-entrega" type="date" />
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Monto (opcional)</div>
+        <input class="field-input" id="m-monto" type="number" min="0" step="any" placeholder="0.00" />
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Notas</div>
+        <textarea class="field-textarea" id="m-notas" placeholder="Observaciones…" style="min-height:80px"></textarea>
+      </div>
+    </div>
+
+    <!-- Proveedor fields -->
+    <div id="modal-prov-fields" style="display:none;">
+      <div class="modal-field">
+        <div class="detail-field-label">Nombre *</div>
+        <input class="field-input" id="m-prov-nombre" type="text" maxlength="120" placeholder="Nombre del proveedor…" />
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Contacto</div>
+        <input class="field-input" id="m-prov-contacto" type="text" maxlength="200" placeholder="Teléfono, email, etc." />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-modal-create">Crear pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Pedidos';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando…');
+
+  try {
+    let remoteOmega = {};
+    try {
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexión');
+      return;
+    }
+
+    const localOmega = await getOmega();
+
+    const allKeys = new Set([...Object.keys(localOmega), ...Object.keys(remoteOmega)]);
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    if (toPush.length > 0) {
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    await saveOmega(localOmega);
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN: PEDIDOS ────────────────────────────────────────────
+async function createPedido(descripcion, cantidad, unidad, proveedorId, fechaPedidoISO, fechaEntregaISO, monto, notas) {
+  const p = {
+    id: newId(),
+    proveedorId: proveedorId || null,
+    descripcion,
+    cantidad,
+    unidad,
+    fechaPedidoISO,
+    fechaEntregaISO: fechaEntregaISO || null,
+    estado: 'solicitado',
+    monto: monto || null,
+    notas,
+    ts: now()
+  };
+  await saveEntity('a', p);
+  if (proveedorId) {
+    const prov = await idbGet('c:' + proveedorId);
+    if (prov) {
+      prov.members = [...(prov.members || []), p.id];
+      prov.ts = now();
+      await saveEntity('c', prov);
+    }
+  }
+  return p;
+}
+
+async function updatePedido(id, cambios) {
+  const p = await idbGet('a:' + id);
+  if (!p) throw new Error('Pedido no encontrado: ' + id);
+  const updated = Object.assign({}, p, cambios, { ts: now() });
+  await saveEntity('a', updated);
+  return updated;
+}
+
+const FLUJO = { 'solicitado': 'en-transito', 'en-transito': 'recibido' };
+
+async function avanzarEstado(id) {
+  const p = await idbGet('a:' + id);
+  if (!p) return;
+  const siguiente = FLUJO[p.estado];
+  if (!siguiente) return;
+  p.estado = siguiente;
+  p.ts = now();
+  await saveEntity('a', p);
+}
+
+async function cancelarPedido(id) {
+  const p = await idbGet('a:' + id);
+  if (!p || p.estado === 'recibido') return;
+  p.estado = 'cancelado';
+  p.ts = now();
+  await saveEntity('a', p);
+}
+
+async function getAllPedidos() {
+  return await idbGetAll('a:');
+}
+
+// ── DOMAIN: PROVEEDORES ────────────────────────────────────────
+async function createProveedor(nombre, contacto) {
+  const e = { id: newId(), nombre, contacto, members: [], ts: now() };
+  await saveEntity('c', e);
+  return e;
+}
+
+async function getAllProveedores() {
+  return await idbGetAll('c:');
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view         = 'pedidos';   // 'pedidos' | 'detalle' | 'proveedores'
+let filtroEstado = 'todos';
+let filtroProvId = null;        // null = sin filtro por proveedor
+let currentId    = null;
+let _modalMode   = 'pedido';    // 'pedido' | 'proveedor'
+
+// ── HELPERS ────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function formatTs(ts) {
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function todayISO() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
+function diasHastaEntrega(fechaISO) {
+  if (!fechaISO) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const ent = new Date(fechaISO + 'T00:00:00');
+  return Math.round((ent - hoy) / 86400000);
+}
+
+function estadoLabel(estado) {
+  const map = {
+    'solicitado': 'Solicitado',
+    'en-transito': 'En tránsito',
+    'recibido': 'Recibido',
+    'cancelado': 'Cancelado'
+  };
+  return map[estado] || estado;
+}
+
+function estadoClass(estado) {
+  return 'estado-' + estado;
+}
+
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  const listView  = document.getElementById('list-view');
+  const detailView = document.getElementById('detail-view');
+  const provView  = document.getElementById('proveedores-view');
+  const fab       = document.getElementById('fab');
+
+  listView.style.display   = 'none';
+  detailView.style.display = 'none';
+  provView.style.display   = 'none';
+
+  if (view === 'pedidos') {
+    listView.style.display = 'block';
+    fab.style.display = 'flex';
+    await renderPedidos();
+  } else if (view === 'detalle') {
+    detailView.style.display = 'block';
+    fab.style.display = 'none';
+    await renderDetalle();
+  } else if (view === 'proveedores') {
+    provView.style.display = 'block';
+    fab.style.display = 'none';
+    await renderProveedores();
+  }
+}
+
+async function renderPedidos() {
+  const todos = await getAllPedidos();
+  let lista = todos;
+
+  if (filtroProvId) {
+    lista = lista.filter(p => p.proveedorId === filtroProvId);
+  }
+
+  if (filtroEstado !== 'todos') {
+    lista = lista.filter(p => p.estado === filtroEstado);
+  }
+
+  lista.sort((a, b) => {
+    const fa = a.fechaEntregaISO || '9999-99-99';
+    const fb = b.fechaEntregaISO || '9999-99-99';
+    return fa.localeCompare(fb) || b.ts - a.ts;
+  });
+
+  const proveedores = await getAllProveedores();
+  const provMap = {};
+  proveedores.forEach(p => { provMap[p.id] = p; });
+
+  const container = document.getElementById('pedidos-list');
+  const emptyEl   = document.getElementById('empty-state');
+
+  if (lista.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = lista.map(p => {
+    const prov = p.proveedorId ? provMap[p.proveedorId] : null;
+    const provNombre = prov ? prov.nombre : 'Sin proveedor';
+    const dias = diasHastaEntrega(p.fechaEntregaISO);
+    const venceBadge = (dias !== null && dias <= 3 && dias >= 0 && p.estado !== 'recibido' && p.estado !== 'cancelado')
+      ? `<span class="badge-vence">Vence pronto</span>` : '';
+    const entregaStr = p.fechaEntregaISO
+      ? `<span class="card-entrega">Entrega: ${escHtml(p.fechaEntregaISO)}</span>` : '';
+    return `
+      <div class="pedido-card" data-id="${escHtml(p.id)}">
+        <div class="card-top">
+          <span class="card-desc">${escHtml(p.descripcion || '(sin descripción)')}</span>
+          <span class="estado-badge ${estadoClass(p.estado)}">${estadoLabel(p.estado)}</span>
+        </div>
+        <div class="card-sub">${escHtml(p.cantidad)} ${escHtml(p.unidad)} · ${escHtml(provNombre)}</div>
+        <div class="card-footer">
+          ${entregaStr}
+          ${venceBadge}
+          <span class="card-ts">${formatTs(p.ts)}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.pedido-card').forEach(card => {
+    card.addEventListener('click', () => {
+      currentId = card.dataset.id;
+      view = 'detalle';
+      render();
+    });
+  });
+}
+
+async function renderDetalle() {
+  if (!currentId) { view = 'pedidos'; render(); return; }
+  const p = await idbGet('a:' + currentId);
+  if (!p) { view = 'pedidos'; render(); return; }
+
+  document.getElementById('detail-meta').textContent =
+    'id:' + p.id + '  ·  ' + formatTs(p.ts);
+
+  // Populate proveedor select
+  await populateProveedorSelect('d-proveedor', p.proveedorId);
+
+  document.getElementById('d-descripcion').value  = p.descripcion || '';
+  document.getElementById('d-cantidad').value     = p.cantidad != null ? p.cantidad : '';
+  document.getElementById('d-unidad').value       = p.unidad || 'piezas';
+  document.getElementById('d-fecha-pedido').value = p.fechaPedidoISO || '';
+  document.getElementById('d-fecha-entrega').value = p.fechaEntregaISO || '';
+  document.getElementById('d-monto').value        = p.monto != null ? p.monto : '';
+  document.getElementById('d-notas').value        = p.notas || '';
+
+  // Flujo bar
+  const flujoBar = document.getElementById('flujo-bar');
+  flujoBar.innerHTML = '';
+
+  if (p.estado === 'solicitado') {
+    flujoBar.innerHTML = `
+      <button class="btn-flujo btn-flujo-avanzar" id="btn-avanzar">→ Marcar En Tránsito</button>
+      <button class="btn-flujo btn-flujo-cancelar" id="btn-cancelar">Cancelar pedido</button>`;
+  } else if (p.estado === 'en-transito') {
+    flujoBar.innerHTML = `
+      <button class="btn-flujo btn-flujo-avanzar" id="btn-avanzar">→ Marcar Recibido</button>
+      <button class="btn-flujo btn-flujo-cancelar" id="btn-cancelar">Cancelar pedido</button>`;
+  } else if (p.estado === 'recibido') {
+    flujoBar.innerHTML = `<span class="estado-badge-lg estado-recibido">Recibido ✓</span>`;
+  } else if (p.estado === 'cancelado') {
+    flujoBar.innerHTML = `<span class="estado-badge-lg estado-cancelado">Cancelado</span>`;
+  }
+
+  const btnAv = document.getElementById('btn-avanzar');
+  if (btnAv) {
+    btnAv.addEventListener('click', async () => {
+      await avanzarEstado(currentId);
+      showToast('Estado actualizado');
+      await renderDetalle();
+      await renderPedidos();
+    });
+  }
+
+  const btnCan = document.getElementById('btn-cancelar');
+  if (btnCan) {
+    btnCan.addEventListener('click', async () => {
+      if (!confirm('¿Cancelar este pedido?')) return;
+      await cancelarPedido(currentId);
+      showToast('Pedido cancelado');
+      await renderDetalle();
+    });
+  }
+}
+
+async function renderProveedores() {
+  const provs = await getAllProveedores();
+  const pedidos = await getAllPedidos();
+
+  // Count members per proveedor
+  const countMap = {};
+  const activeMap = {};
+  provs.forEach(p => { countMap[p.id] = 0; activeMap[p.id] = 0; });
+  pedidos.forEach(ped => {
+    if (ped.proveedorId && countMap[ped.proveedorId] !== undefined) {
+      countMap[ped.proveedorId]++;
+      if (ped.estado !== 'recibido' && ped.estado !== 'cancelado') {
+        activeMap[ped.proveedorId]++;
+      }
+    }
+  });
+
+  const container = document.getElementById('proveedores-list');
+  const emptyEl   = document.getElementById('empty-prov');
+
+  if (provs.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = provs.sort((a,b) => a.nombre.localeCompare(b.nombre)).map(prov => `
+    <div class="prov-card" data-id="${escHtml(prov.id)}">
+      <div class="prov-nombre">${escHtml(prov.nombre)}</div>
+      <div class="prov-contacto">${escHtml(prov.contacto || 'Sin contacto')}</div>
+      <div class="prov-stats">
+        <span>Total: ${countMap[prov.id] || 0} pedidos</span>
+        <span class="prov-stat-active">Activos: ${activeMap[prov.id] || 0}</span>
+      </div>
+    </div>`
+  ).join('');
+
+  container.querySelectorAll('.prov-card').forEach(card => {
+    card.addEventListener('click', () => {
+      filtroProvId = card.dataset.id;
+      filtroEstado = 'todos';
+      view = 'pedidos';
+      updateChips();
+      render();
+    });
+  });
+}
+
+// ── PROVEEDOR SELECT HELPER ────────────────────────────────────
+async function populateProveedorSelect(selectId, selectedId) {
+  const sel = document.getElementById(selectId);
+  const provs = await getAllProveedores();
+  sel.innerHTML = `<option value="">Sin proveedor</option>` +
+    provs.sort((a,b) => a.nombre.localeCompare(b.nombre)).map(p =>
+      `<option value="${escHtml(p.id)}"${p.id === selectedId ? ' selected' : ''}>${escHtml(p.nombre)}</option>`
+    ).join('');
+}
+
+function updateChips() {
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.estado === filtroEstado);
+  });
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// Chips de filtro
+document.getElementById('filtro-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  filtroEstado = chip.dataset.estado;
+  filtroProvId = null;
+  updateChips();
+  renderPedidos();
+});
+
+// Sync
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// Proveedores link
+document.getElementById('btn-proveedores').addEventListener('click', () => {
+  view = 'proveedores';
+  render();
+});
+
+// Back desde detalle
+document.getElementById('btn-back-detail').addEventListener('click', () => {
+  view = 'pedidos';
+  currentId = null;
+  render();
+});
+
+// Back desde proveedores
+document.getElementById('btn-back-prov').addEventListener('click', () => {
+  view = 'pedidos';
+  render();
+});
+
+// Guardar detalle
+document.getElementById('btn-save-detail').addEventListener('click', async () => {
+  if (!currentId) return;
+  const descripcion   = document.getElementById('d-descripcion').value.trim();
+  const cantidad      = parseFloat(document.getElementById('d-cantidad').value) || 0;
+  const unidad        = document.getElementById('d-unidad').value;
+  const proveedorId   = document.getElementById('d-proveedor').value || null;
+  const fechaPedidoISO  = document.getElementById('d-fecha-pedido').value;
+  const fechaEntregaISO = document.getElementById('d-fecha-entrega').value || null;
+  const monto         = parseFloat(document.getElementById('d-monto').value) || null;
+  const notas         = document.getElementById('d-notas').value.trim();
+
+  if (!descripcion) { document.getElementById('d-descripcion').focus(); return; }
+
+  await updatePedido(currentId, { descripcion, cantidad, unidad, proveedorId, fechaPedidoISO, fechaEntregaISO, monto, notas });
+  showToast('Pedido guardado');
+  await renderDetalle();
+});
+
+// FAB → modal pedido
+document.getElementById('fab').addEventListener('click', async () => {
+  _modalMode = 'pedido';
+  document.getElementById('modal-title').textContent = 'Nuevo pedido';
+  document.getElementById('modal-pedido-fields').style.display = 'block';
+  document.getElementById('modal-prov-fields').style.display = 'none';
+  document.getElementById('btn-modal-create').textContent = 'Crear pedido';
+
+  document.getElementById('m-descripcion').value  = '';
+  document.getElementById('m-cantidad').value     = '';
+  document.getElementById('m-unidad').value       = 'piezas';
+  document.getElementById('m-fecha-pedido').value = todayISO();
+  document.getElementById('m-fecha-entrega').value = '';
+  document.getElementById('m-monto').value        = '';
+  document.getElementById('m-notas').value        = '';
+  await populateProveedorSelect('m-proveedor', null);
+
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-descripcion').focus(), 50);
+});
+
+// Nuevo proveedor desde vista proveedores
+document.getElementById('btn-nuevo-prov').addEventListener('click', () => {
+  _modalMode = 'proveedor';
+  document.getElementById('modal-title').textContent = 'Nuevo proveedor';
+  document.getElementById('modal-pedido-fields').style.display = 'none';
+  document.getElementById('modal-prov-fields').style.display = 'block';
+  document.getElementById('btn-modal-create').textContent = 'Crear proveedor';
+  document.getElementById('m-prov-nombre').value   = '';
+  document.getElementById('m-prov-contacto').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-prov-nombre').focus(), 50);
+});
+
+// Modal cancel
+document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// Modal overlay click outside
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget)
+    e.currentTarget.classList.remove('open');
+});
+
+// Modal create
+document.getElementById('btn-modal-create').addEventListener('click', async () => {
+  if (_modalMode === 'pedido') {
+    const descripcion   = document.getElementById('m-descripcion').value.trim();
+    const cantidad      = parseFloat(document.getElementById('m-cantidad').value) || 0;
+    const unidad        = document.getElementById('m-unidad').value;
+    const proveedorId   = document.getElementById('m-proveedor').value || null;
+    const fechaPedidoISO  = document.getElementById('m-fecha-pedido').value || todayISO();
+    const fechaEntregaISO = document.getElementById('m-fecha-entrega').value || null;
+    const monto         = parseFloat(document.getElementById('m-monto').value) || null;
+    const notas         = document.getElementById('m-notas').value.trim();
+
+    if (!descripcion) { document.getElementById('m-descripcion').focus(); return; }
+
+    await createPedido(descripcion, cantidad, unidad, proveedorId, fechaPedidoISO, fechaEntregaISO, monto, notas);
+    document.getElementById('modal-overlay').classList.remove('open');
+    showToast('Pedido creado');
+    await renderPedidos();
+  } else {
+    const nombre   = document.getElementById('m-prov-nombre').value.trim();
+    const contacto = document.getElementById('m-prov-contacto').value.trim();
+    if (!nombre) { document.getElementById('m-prov-nombre').focus(); return; }
+    await createProveedor(nombre, contacto);
+    document.getElementById('modal-overlay').classList.remove('open');
+    showToast('Proveedor creado');
+    await renderProveedores();
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-overlay');
+    if (modal.classList.contains('open')) {
+      modal.classList.remove('open');
+    } else if (view === 'detalle') {
+      view = 'pedidos';
+      currentId = null;
+      render();
+    } else if (view === 'proveedores') {
+      view = 'pedidos';
+      render();
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>

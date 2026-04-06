@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "sections": [
     {
       "id": "productividad",
@@ -18,6 +18,20 @@
           "desc": "Listas de verificación y tareas rápidas",
           "icon": "✅",
           "enabled": true
+        },
+        {
+          "id": "recordatorios",
+          "label": "Recordatorios",
+          "desc": "Recordatorios y alarmas con repetición",
+          "icon": "⏰",
+          "enabled": true
+        },
+        {
+          "id": "investigacion",
+          "label": "Investigacion",
+          "desc": "Cuaderno de investigación por proyectos",
+          "icon": "🔬",
+          "enabled": true
         }
       ]
     },
@@ -31,6 +45,13 @@
           "desc": "Registro offline de gastos e ingresos",
           "icon": "💸",
           "enabled": true
+        },
+        {
+          "id": "pedidos",
+          "label": "Pedidos",
+          "desc": "Seguimiento de pedidos a proveedores",
+          "icon": "📦",
+          "enabled": true
         }
       ]
     },
@@ -43,6 +64,67 @@
           "label": "Visitas",
           "desc": "Registro de visitas técnicas con evidencia",
           "icon": "📍",
+          "enabled": true
+        },
+        {
+          "id": "evidencias",
+          "label": "Evidencias",
+          "desc": "Recolector de evidencias fotográficas",
+          "icon": "📸",
+          "enabled": true
+        },
+        {
+          "id": "inspeccion",
+          "label": "Inspeccion",
+          "desc": "Checklist con resultados pass / fail / n/a",
+          "icon": "🔍",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "hogar",
+      "label": "Hogar",
+      "apps": [
+        {
+          "id": "inventario",
+          "label": "Inventario",
+          "desc": "Inventario del hogar por habitación",
+          "icon": "🏠",
+          "enabled": true
+        },
+        {
+          "id": "mantenimiento",
+          "label": "Mantenimiento",
+          "desc": "Registro de mantenimiento de equipos",
+          "icon": "🔧",
+          "enabled": true
+        },
+        {
+          "id": "herramientas",
+          "label": "Herramientas",
+          "desc": "Gestor de herramientas y su ubicación",
+          "icon": "🛠️",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "multimedia",
+      "label": "Multimedia y Naturaleza",
+      "apps": [
+        {
+          "id": "audios",
+          "label": "Audios",
+          "desc": "Notas de voz organizadas por contexto",
+          "icon": "🎙️",
+          "enabled": true
+        },
+        {
+          "id": "cultivos",
+          "label": "Cultivos",
+          "desc": "Bitácora de cultivos con seguimiento fotográfico",
+          "icon": "🌱",
           "enabled": true
         }
       ]

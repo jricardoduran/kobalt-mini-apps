@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Mantenimiento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0f0f0f;
+      --surface:     #1a1a1a;
+      --border:      #2a2a2a;
+      --text:        #e8e8e8;
+      --muted:       #666;
+      --accent:      #4f8ef7;
+      --danger:      #e05555;
+      --radius:      8px;
+      --preventivo:  #4caf50;
+      --correctivo:  #ef5350;
+      --inspeccion:  #ff9800;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      flex: 1;
+    }
+
+    #header-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 12px;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: border-color .15s;
+      display: none;
+    }
+    #header-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    #sync-status.ok    { color: #4caf7d; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-title {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+
+    /* ── EQUIPO CARDS ── */
+    #equipos-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .equipo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .equipo-card:hover { border-color: var(--accent); background: #1f1f1f; }
+    .equipo-card.alerta { border-color: var(--inspeccion); }
+    .equipo-card.vencida { border-color: var(--correctivo); }
+
+    .equipo-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .equipo-nombre {
+      font-weight: 600;
+      font-size: .95rem;
+      flex: 1;
+    }
+    .equipo-tipo-badge {
+      font-size: .7rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1e2d45;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .equipo-sub {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .equipo-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Alert badges */
+    .badge-alerta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    .badge-alerta.proxima {
+      background: rgba(255,152,0,.15);
+      color: var(--inspeccion);
+      border: 1px solid rgba(255,152,0,.3);
+    }
+    .badge-alerta.vencida {
+      background: rgba(239,83,80,.15);
+      color: var(--correctivo);
+      border: 1px solid rgba(239,83,80,.3);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .5; }
+    }
+
+    .proxima-fecha {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── HISTORIAL VIEW ── */
+    #historial-view { display: none; }
+    #historial-equipo-nombre {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    #historial-equipo-sub {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .historial-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .btn-add-registro {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 16px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-add-registro:hover { opacity: .85; }
+
+    #registros-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .registro-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color .15s;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .registro-item:hover { border-color: var(--accent); }
+
+    .registro-tipo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .registro-tipo-dot.preventivo  { background: var(--preventivo); }
+    .registro-tipo-dot.correctivo  { background: var(--correctivo); }
+    .registro-tipo-dot.inspeccion  { background: var(--inspeccion); }
+
+    .registro-body { flex: 1; min-width: 0; }
+    .registro-desc {
+      font-size: .88rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .registro-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tipo-badge {
+      font-size: .68rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .tipo-badge.preventivo { background: rgba(76,175,80,.18); color: var(--preventivo); }
+    .tipo-badge.correctivo { background: rgba(239,83,80,.18); color: var(--correctivo); }
+    .tipo-badge.inspeccion { background: rgba(255,152,0,.18); color: var(--inspeccion); }
+
+    .registro-fecha {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+    .registro-costo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--text);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── REGISTRO DETAIL VIEW ── */
+    #registro-view { display: none; }
+
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .detail-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    .btn-save {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-delete:hover { border-color: var(--danger); }
+
+    /* ── FORM FIELDS ── */
+    .detail-field { margin-bottom: 18px; }
+    .detail-field-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+    .field-input, .field-textarea, .field-select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+      resize: none;
+      appearance: none;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--accent); }
+    .field-textarea { min-height: 90px; line-height: 1.55; }
+    .field-select option { background: #1a1a1a; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--muted);
+    }
+    .empty-state p { font-size: .9rem; }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+    .modal-field { margin-bottom: 14px; }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<header>
+  <button id="header-back">← Volver</button>
+  <h1 id="header-title">Kobalt Mantenimiento</h1>
+  <span id="sync-status">—</span>
+  <button id="btn-sync">Sync</button>
+</header>
+
+<main>
+  <!-- VISTA: EQUIPOS -->
+  <div id="equipos-view">
+    <div id="equipos-list"></div>
+    <div id="equipos-empty" class="empty-state" style="display:none">
+      <p>Sin equipos registrados. Pulsa <strong>+</strong> para añadir el primero.</p>
+    </div>
+  </div>
+
+  <!-- VISTA: HISTORIAL -->
+  <div id="historial-view">
+    <div id="historial-equipo-nombre"></div>
+    <div id="historial-equipo-sub"></div>
+    <div class="historial-toolbar">
+      <button class="btn-add-registro" id="btn-nuevo-registro">+ Registro</button>
+    </div>
+    <div id="registros-list"></div>
+    <div id="registros-empty" class="empty-state" style="display:none">
+      <p>Sin registros. Pulsa <strong>+ Registro</strong> para el primero.</p>
+    </div>
+  </div>
+
+  <!-- VISTA: REGISTRO DETALLE -->
+  <div id="registro-view">
+    <div class="detail-toolbar">
+      <span class="detail-meta" id="registro-meta"></span>
+      <button class="btn-delete" id="btn-delete-registro">Eliminar</button>
+      <button class="btn-save" id="btn-save-registro">Guardar</button>
+    </div>
+
+    <div class="form-row">
+      <div class="detail-field">
+        <div class="detail-field-label">Tipo</div>
+        <select class="field-select" id="r-tipo">
+          <option value="preventivo">Preventivo</option>
+          <option value="correctivo">Correctivo</option>
+          <option value="inspeccion">Inspección</option>
+        </select>
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Fecha</div>
+        <input class="field-input" id="r-fecha" type="date" />
+      </div>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-field-label">Descripción</div>
+      <textarea class="field-textarea" id="r-descripcion" placeholder="Describe el trabajo realizado…"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="detail-field">
+        <div class="detail-field-label">Costo</div>
+        <input class="field-input" id="r-costo" type="number" min="0" step="0.01" placeholder="0.00" />
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Realizado por</div>
+        <input class="field-input" id="r-realizado-por" type="text" placeholder="Nombre o empresa…" />
+      </div>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-field-label">Próxima fecha de mantenimiento</div>
+      <input class="field-input" id="r-proxima-fecha" type="date" />
+    </div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nuevo equipo">+</button>
+
+<!-- MODAL: CREAR / EDITAR EQUIPO -->
+<div class="modal-overlay" id="modal-equipo" role="dialog" aria-modal="true" aria-label="Equipo">
+  <div class="modal-box">
+    <h2 id="modal-equipo-titulo">Nuevo equipo</h2>
+    <div class="modal-field">
+      <div class="detail-field-label">Nombre</div>
+      <input class="field-input" id="me-nombre" type="text" maxlength="120" placeholder="Ej: Compresor Honda, Camión ABC-123…" />
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Tipo</div>
+      <select class="field-select" id="me-tipo">
+        <option value="vehiculo">Vehículo</option>
+        <option value="maquinaria">Maquinaria</option>
+        <option value="electrodomestico">Electrodoméstico</option>
+        <option value="instalacion">Instalación</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="modal-field">
+        <div class="detail-field-label">Marca</div>
+        <input class="field-input" id="me-marca" type="text" placeholder="Honda, Bosch…" />
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Modelo</div>
+        <input class="field-input" id="me-modelo" type="text" placeholder="GX200, WM-12…" />
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Año</div>
+      <input class="field-input" id="me-anio" type="number" min="1900" max="2099" placeholder="2020" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-equipo-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-modal-equipo-save">Guardar equipo</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Mantenimiento';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbDelete(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando…');
+
+  try {
+    let remoteOmega = {};
+    try {
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexión');
+      return;
+    }
+
+    const localOmega = await getOmega();
+    const allKeys = new Set([...Object.keys(localOmega), ...Object.keys(remoteOmega)]);
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    if (toPush.length > 0) {
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    await saveOmega(localOmega);
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN: EQUIPO ─────────────────────────────────────────────
+async function createEquipo(nombre, tipo, marca, modelo, anio) {
+  const e = {
+    id: newId(), nombre, tipo, marca, modelo,
+    anio: anio || null, members: [], ts: now()
+  };
+  await saveEntity('c', e);
+  return e;
+}
+
+async function updateEquipo(id, cambios) {
+  const key = 'c:' + id;
+  const eq = await idbGet(key);
+  if (!eq) throw new Error('Equipo no encontrado: ' + id);
+  const updated = Object.assign({}, eq, cambios, { ts: now() });
+  await saveEntity('c', updated);
+  return updated;
+}
+
+// ── DOMAIN: REGISTRO ───────────────────────────────────────────
+async function createRegistro(equipoId, tipo, descripcion, fechaISO, costo, realizadoPor, proximaFechaISO) {
+  const r = {
+    id: newId(), equipoId, tipo, descripcion, fechaISO,
+    costo: costo || null, realizadoPor,
+    proximaFechaISO: proximaFechaISO || null, ts: now()
+  };
+  await saveEntity('a', r);
+  const eq = await idbGet('c:' + equipoId);
+  if (eq) {
+    eq.members = [...(eq.members || []), r.id];
+    eq.ts = now();
+    await saveEntity('c', eq);
+  }
+  return r;
+}
+
+async function updateRegistro(id, cambios) {
+  const key = 'a:' + id;
+  const reg = await idbGet(key);
+  if (!reg) throw new Error('Registro no encontrado: ' + id);
+  const updated = Object.assign({}, reg, cambios, { ts: now() });
+  await saveEntity('a', updated);
+  return updated;
+}
+
+async function deleteRegistro(id) {
+  const reg = await idbGet('a:' + id);
+  if (!reg) return;
+  await idbDelete('a:' + id);
+  const omega = await getOmega();
+  delete omega['a:' + id];
+  await saveOmega(omega);
+  // Remove from equipo members
+  const eq = await idbGet('c:' + reg.equipoId);
+  if (eq) {
+    eq.members = (eq.members || []).filter(m => m !== id);
+    eq.ts = now();
+    await saveEntity('c', eq);
+  }
+}
+
+async function getHistorial(equipoId) {
+  const all = await idbGetAll('a:');
+  return all.filter(r => r.equipoId === equipoId)
+             .sort((a, b) => b.fechaISO.localeCompare(a.fechaISO));
+}
+
+async function getEquiposConAlerta() {
+  const equipos = await idbGetAll('c:');
+  const registros = await idbGetAll('a:');
+  const hoy = new Date().toISOString().slice(0, 10);
+  const limite = new Date(); limite.setDate(limite.getDate() + 7);
+  const limiteISO = limite.toISOString().slice(0, 10);
+
+  return equipos.map(eq => {
+    const regs = registros.filter(r => r.equipoId === eq.id && r.proximaFechaISO);
+    const ultimaProxima = regs.sort((a, b) => b.fechaISO.localeCompare(a.fechaISO))[0]?.proximaFechaISO;
+    const alerta = ultimaProxima && ultimaProxima <= limiteISO;
+    const vencida = ultimaProxima && ultimaProxima < hoy;
+    return { ...eq, proximaFecha: ultimaProxima, alerta, vencida };
+  }).sort((a, b) => {
+    // Vencidos primero, luego alertas, luego por nombre
+    if (a.vencida && !b.vencida) return -1;
+    if (!a.vencida && b.vencida) return 1;
+    if (a.alerta && !b.alerta) return -1;
+    if (!a.alerta && b.alerta) return 1;
+    return (a.nombre || '').localeCompare(b.nombre || '');
+  });
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view               = 'equipos';   // 'equipos' | 'historial' | 'registro-detalle' | 'equipo-form'
+let currentEquipoId    = null;
+let currentRegistroId  = null;
+
+// ── HELPERS ────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function formatTs(ts) {
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function tipoLabel(tipo) {
+  return { preventivo: 'Preventivo', correctivo: 'Correctivo', inspeccion: 'Inspección' }[tipo] || tipo;
+}
+
+function tipoEquipoLabel(tipo) {
+  return {
+    vehiculo: 'Vehículo', maquinaria: 'Maquinaria',
+    electrodomestico: 'Electrodoméstico', instalacion: 'Instalación', otro: 'Otro'
+  }[tipo] || tipo;
+}
+
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  const equiposView   = document.getElementById('equipos-view');
+  const historialView = document.getElementById('historial-view');
+  const registroView  = document.getElementById('registro-view');
+  const fab           = document.getElementById('fab');
+  const headerBack    = document.getElementById('header-back');
+  const headerTitle   = document.getElementById('header-title');
+
+  // Hide all
+  equiposView.style.display   = 'none';
+  historialView.style.display = 'none';
+  registroView.style.display  = 'none';
+
+  if (view === 'equipos') {
+    equiposView.style.display = 'block';
+    fab.style.display = 'flex';
+    headerBack.style.display = 'none';
+    headerTitle.textContent = 'Kobalt Mantenimiento';
+    await renderEquipos();
+
+  } else if (view === 'historial') {
+    historialView.style.display = 'block';
+    fab.style.display = 'none';
+    headerBack.style.display = 'inline-block';
+    const eq = await idbGet('c:' + currentEquipoId);
+    headerTitle.textContent = eq ? eq.nombre : 'Historial';
+    await renderHistorial();
+
+  } else if (view === 'registro-detalle') {
+    registroView.style.display = 'block';
+    fab.style.display = 'none';
+    headerBack.style.display = 'inline-block';
+    headerTitle.textContent = currentRegistroId ? 'Editar registro' : 'Nuevo registro';
+    await renderRegistroForm();
+  }
+}
+
+async function renderEquipos() {
+  const equipos = await getEquiposConAlerta();
+  const container = document.getElementById('equipos-list');
+  const emptyEl   = document.getElementById('equipos-empty');
+
+  if (equipos.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = equipos.map(eq => {
+    let alertBadge = '';
+    if (eq.vencida) {
+      alertBadge = `<span class="badge-alerta vencida">🔴 Vencido</span>`;
+    } else if (eq.alerta) {
+      alertBadge = `<span class="badge-alerta proxima">⚠️ Próximo</span>`;
+    }
+    const proximaStr = eq.proximaFecha
+      ? `<span class="proxima-fecha">Próx: ${escHtml(eq.proximaFecha)}</span>` : '';
+    const marcaModelo = [eq.marca, eq.modelo].filter(Boolean).join(' ');
+    return `
+      <div class="equipo-card ${eq.vencida ? 'vencida' : eq.alerta ? 'alerta' : ''}" data-id="${escHtml(eq.id)}">
+        <div class="equipo-card-header">
+          <span class="equipo-nombre">${escHtml(eq.nombre)}</span>
+          <span class="equipo-tipo-badge">${escHtml(tipoEquipoLabel(eq.tipo))}</span>
+        </div>
+        <div class="equipo-sub">${escHtml(marcaModelo || '—')}${eq.anio ? ' · ' + eq.anio : ''}</div>
+        <div class="equipo-footer">
+          ${alertBadge}
+          ${proximaStr}
+        </div>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.equipo-card').forEach(card => {
+    card.addEventListener('click', () => {
+      currentEquipoId = card.dataset.id;
+      view = 'historial';
+      render();
+    });
+  });
+}
+
+async function renderHistorial() {
+  const eq = await idbGet('c:' + currentEquipoId);
+  if (!eq) { view = 'equipos'; render(); return; }
+
+  document.getElementById('historial-equipo-nombre').textContent = eq.nombre;
+  const marcaModelo = [eq.marca, eq.modelo].filter(Boolean).join(' ');
+  document.getElementById('historial-equipo-sub').textContent =
+    [tipoEquipoLabel(eq.tipo), marcaModelo, eq.anio].filter(Boolean).join(' · ');
+
+  const registros = await getHistorial(currentEquipoId);
+  const container = document.getElementById('registros-list');
+  const emptyEl   = document.getElementById('registros-empty');
+
+  if (registros.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = registros.map(r => {
+    const costoStr = r.costo != null ? `€${parseFloat(r.costo).toFixed(2)}` : '';
+    return `
+      <div class="registro-item" data-id="${escHtml(r.id)}">
+        <span class="registro-tipo-dot ${escHtml(r.tipo)}"></span>
+        <div class="registro-body">
+          <div class="registro-desc">${escHtml(r.descripcion || '(sin descripción)')}</div>
+          <div class="registro-meta">
+            <span class="tipo-badge ${escHtml(r.tipo)}">${escHtml(tipoLabel(r.tipo))}</span>
+            <span class="registro-fecha">${escHtml(r.fechaISO || '')}</span>
+            ${r.realizadoPor ? `<span class="registro-fecha">${escHtml(r.realizadoPor)}</span>` : ''}
+          </div>
+        </div>
+        ${costoStr ? `<span class="registro-costo">${escHtml(costoStr)}</span>` : ''}
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.registro-item').forEach(item => {
+    item.addEventListener('click', () => {
+      currentRegistroId = item.dataset.id;
+      view = 'registro-detalle';
+      render();
+    });
+  });
+}
+
+async function renderRegistroForm() {
+  if (currentRegistroId) {
+    const reg = await idbGet('a:' + currentRegistroId);
+    if (!reg) { view = 'historial'; render(); return; }
+    document.getElementById('r-tipo').value        = reg.tipo || 'preventivo';
+    document.getElementById('r-fecha').value       = reg.fechaISO || todayISO();
+    document.getElementById('r-descripcion').value = reg.descripcion || '';
+    document.getElementById('r-costo').value       = reg.costo != null ? reg.costo : '';
+    document.getElementById('r-realizado-por').value  = reg.realizadoPor || '';
+    document.getElementById('r-proxima-fecha').value  = reg.proximaFechaISO || '';
+    document.getElementById('registro-meta').textContent =
+      'id:' + reg.id + '  ·  ' + formatTs(reg.ts);
+    document.getElementById('btn-delete-registro').style.display = 'inline-block';
+  } else {
+    document.getElementById('r-tipo').value        = 'preventivo';
+    document.getElementById('r-fecha').value       = todayISO();
+    document.getElementById('r-descripcion').value = '';
+    document.getElementById('r-costo').value       = '';
+    document.getElementById('r-realizado-por').value  = '';
+    document.getElementById('r-proxima-fecha').value  = '';
+    document.getElementById('registro-meta').textContent = 'nuevo registro';
+    document.getElementById('btn-delete-registro').style.display = 'none';
+  }
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// Header back
+document.getElementById('header-back').addEventListener('click', () => {
+  if (view === 'historial') {
+    view = 'equipos';
+    currentEquipoId = null;
+  } else if (view === 'registro-detalle') {
+    view = 'historial';
+    currentRegistroId = null;
+  }
+  render();
+});
+
+// Sync button
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// FAB: crear equipo
+document.getElementById('fab').addEventListener('click', () => {
+  openModalEquipo(null);
+});
+
+// Nuevo registro
+document.getElementById('btn-nuevo-registro').addEventListener('click', () => {
+  currentRegistroId = null;
+  view = 'registro-detalle';
+  render();
+});
+
+// Save registro
+document.getElementById('btn-save-registro').addEventListener('click', async () => {
+  const tipo           = document.getElementById('r-tipo').value;
+  const fechaISO       = document.getElementById('r-fecha').value;
+  const descripcion    = document.getElementById('r-descripcion').value.trim();
+  const costoVal       = document.getElementById('r-costo').value;
+  const realizadoPor   = document.getElementById('r-realizado-por').value.trim();
+  const proximaFechaISO = document.getElementById('r-proxima-fecha').value || null;
+
+  if (!fechaISO) { document.getElementById('r-fecha').focus(); return; }
+
+  const costo = costoVal !== '' ? parseFloat(costoVal) : null;
+
+  if (currentRegistroId) {
+    await updateRegistro(currentRegistroId, { tipo, descripcion, fechaISO, costo, realizadoPor, proximaFechaISO });
+    showToast('Registro actualizado');
+  } else {
+    await createRegistro(currentEquipoId, tipo, descripcion, fechaISO, costo, realizadoPor, proximaFechaISO);
+    showToast('Registro creado');
+  }
+  view = 'historial';
+  currentRegistroId = null;
+  render();
+});
+
+// Delete registro
+document.getElementById('btn-delete-registro').addEventListener('click', async () => {
+  if (!currentRegistroId) return;
+  if (!confirm('¿Eliminar este registro?')) return;
+  await deleteRegistro(currentRegistroId);
+  view = 'historial';
+  currentRegistroId = null;
+  showToast('Registro eliminado');
+  render();
+});
+
+// ── MODAL EQUIPO ───────────────────────────────────────────────
+let _editingEquipoId = null;
+
+function openModalEquipo(equipoId) {
+  _editingEquipoId = equipoId;
+  const modal = document.getElementById('modal-equipo');
+  const titulo = document.getElementById('modal-equipo-titulo');
+
+  if (equipoId) {
+    titulo.textContent = 'Editar equipo';
+    idbGet('c:' + equipoId).then(eq => {
+      if (!eq) return;
+      document.getElementById('me-nombre').value = eq.nombre || '';
+      document.getElementById('me-tipo').value   = eq.tipo || 'vehiculo';
+      document.getElementById('me-marca').value  = eq.marca || '';
+      document.getElementById('me-modelo').value = eq.modelo || '';
+      document.getElementById('me-anio').value   = eq.anio || '';
+    });
+  } else {
+    titulo.textContent = 'Nuevo equipo';
+    document.getElementById('me-nombre').value = '';
+    document.getElementById('me-tipo').value   = 'vehiculo';
+    document.getElementById('me-marca').value  = '';
+    document.getElementById('me-modelo').value = '';
+    document.getElementById('me-anio').value   = '';
+  }
+
+  modal.classList.add('open');
+  setTimeout(() => document.getElementById('me-nombre').focus(), 50);
+}
+
+document.getElementById('btn-modal-equipo-cancel').addEventListener('click', () => {
+  document.getElementById('modal-equipo').classList.remove('open');
+});
+
+document.getElementById('modal-equipo').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+document.getElementById('btn-modal-equipo-save').addEventListener('click', async () => {
+  const nombre = document.getElementById('me-nombre').value.trim();
+  const tipo   = document.getElementById('me-tipo').value;
+  const marca  = document.getElementById('me-marca').value.trim();
+  const modelo = document.getElementById('me-modelo').value.trim();
+  const anioVal = document.getElementById('me-anio').value;
+  const anio   = anioVal ? parseInt(anioVal) : null;
+
+  if (!nombre) { document.getElementById('me-nombre').focus(); return; }
+
+  if (_editingEquipoId) {
+    await updateEquipo(_editingEquipoId, { nombre, tipo, marca, modelo, anio });
+    showToast('Equipo actualizado');
+  } else {
+    await createEquipo(nombre, tipo, marca, modelo, anio);
+    showToast('Equipo creado');
+  }
+
+  document.getElementById('modal-equipo').classList.remove('open');
+  await render();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-equipo');
+    if (modal.classList.contains('open')) {
+      modal.classList.remove('open');
+    } else if (view === 'registro-detalle') {
+      view = 'historial';
+      currentRegistroId = null;
+      render();
+    } else if (view === 'historial') {
+      view = 'equipos';
+      currentEquipoId = null;
+      render();
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>

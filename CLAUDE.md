@@ -229,6 +229,16 @@ Subagente (Claude Code via Ruflo):
 | Kobalt-Gastos | α | PHP-plain | data_Kobalt-Gastos | no | ✓ funcionando |
 | Kobalt-Checklist | α | PHP-plain | data_Kobalt-Checklist | no | ✓ funcionando |
 | Kobalt-Visitas | α | PHP-plain | data_Kobalt-Visitas | no | ✓ funcionando |
+| Kobalt-Audios | α | PHP-plain | data_Kobalt-Audios | no | ✓ funcionando |
+| Kobalt-Recordatorios | α | PHP-plain | data_Kobalt-Recordatorios | no | ✓ funcionando |
+| Kobalt-Inventario | α | PHP-plain | data_Kobalt-Inventario | no | ✓ funcionando |
+| Kobalt-Mantenimiento | α | PHP-plain | data_Kobalt-Mantenimiento | no | ✓ funcionando |
+| Kobalt-Inspeccion | α | PHP-plain | data_Kobalt-Inspeccion | no | ✓ funcionando |
+| Kobalt-Evidencias | α | PHP-plain | data_Kobalt-Evidencias | no | ✓ funcionando (fotos) |
+| Kobalt-Investigacion | α | PHP-plain | data_Kobalt-Investigacion | no | ✓ funcionando |
+| Kobalt-Cultivos | α | PHP-plain | data_Kobalt-Cultivos | no | ✓ funcionando (fotos) |
+| Kobalt-Herramientas | α | PHP-plain | data_Kobalt-Herramientas | no | ✓ funcionando |
+| Kobalt-Pedidos | α | PHP-plain | data_Kobalt-Pedidos | no | ✓ funcionando |
 
 ---
 
@@ -291,6 +301,18 @@ curl https://mi-servidor.com/data/manifest.json
 - Invariantes I1–I10 definidos
 - Error SAVE_URL/DATA_URL documentado como crítico
 - Error ensureDir/photos documentado como crítico
+
+### 2026-04-06 (sesión 3)
+- Segunda tanda: 10 mini apps creadas en paralelo con 10 subagentes simultáneos
+- Apps sin fotos (8): audios, recordatorios, inventario, mantenimiento, inspeccion, investigacion, herramientas, pedidos
+- Apps con fotos (2): evidencias, cultivos — blob:* excluidos del sync, upload multipart
+- data/apps.json actualizado a v2: 5 secciones (productividad, finanzas, campo, hogar, multimedia), 14 apps total
+- Claridad: label en apps.json sin acento para Inspeccion e Investigacion (IDB deriva data_Kobalt-${label})
+- audios: blobs de audio son locales en Fase α (solo metadata b: se sincroniza)
+- inspeccion: resultado por ítem es 4-estado ('pass'|'fail'|'na'|'pendiente'), no boolean (diferenciado de Checklist)
+- cultivos/B: cultivoId denormalizado en B para queries getFotosDeCultivo() sin join
+- save.php canónico adopta contrato action:manifest + action:put (lecturas via archivos estáticos)
+- Hub dinámico lee data/apps.json → motor _buildNav/_deriveApp → no tocar JS al añadir apps
 
 ### 2026-04-05 (sesión 2)
 - Hub portal /index.html creado (sin IDB, sin sync, solo navegación)

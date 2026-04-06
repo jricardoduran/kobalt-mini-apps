@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Audios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f0f0f;
+      --surface: #1a1a1a;
+      --border:  #2a2a2a;
+      --text:    #e8e8e8;
+      --muted:   #666;
+      --accent:  #4f8ef7;
+      --danger:  #e05555;
+      --rec:     #ef5350;
+      --radius:  8px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      transition: background .3s;
+    }
+
+    header.recording {
+      background: var(--rec);
+      animation: pulse-header 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-header {
+      0%, 100% { background: var(--rec); }
+      50%       { background: #c62828; }
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      flex: 1;
+    }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    #sync-status.ok    { color: #4caf7d; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── CHIP FILTERS ── */
+    #filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filter-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .filter-chip:hover { border-color: var(--accent); color: var(--text); }
+    .filter-chip.active {
+      background: #1e2d45;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── RECORDING CARDS ── */
+    #list-container { display: flex; flex-direction: column; gap: 10px; }
+
+    .rec-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .rec-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .rec-card .card-title {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ctx-chip {
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .72rem;
+      font-weight: 500;
+    }
+    .ctx-reunion  { background: #1e2d45; color: #4f8ef7; }
+    .ctx-campo    { background: #1a2e1a; color: #66bb6a; }
+    .ctx-personal { background: #2d1e3a; color: #ce93d8; }
+    .ctx-otro     { background: #2a2a1e; color: #ffd54f; }
+
+    .card-dur {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .card-ts {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .btn-play {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 5px 14px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-play:hover { opacity: .85; }
+
+    .btn-del-card {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-del-card:hover { border-color: var(--danger); }
+
+    /* ── EMPTY STATE ── */
+    #empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      display: none;
+    }
+    #empty-state p { font-size: .9rem; }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s, background .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+    #fab.recording-fab {
+      background: var(--rec);
+      box-shadow: 0 4px 18px rgba(239,83,80,.5);
+      animation: pulse-fab 1s ease-in-out infinite;
+    }
+    @keyframes pulse-fab {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.12); }
+    }
+
+    /* ── REC TIMER BAR ── */
+    #rec-bar {
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--rec);
+      border-radius: 24px;
+      padding: 8px 20px;
+      gap: 14px;
+      align-items: center;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #rec-bar.show { display: flex; }
+
+    #rec-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .9rem;
+      color: var(--rec);
+    }
+
+    #btn-stop {
+      background: var(--rec);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 5px 14px;
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    #btn-stop:hover { opacity: .85; }
+
+    /* ── DETAIL VIEW ── */
+    #detail-view { display: none; }
+
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .detail-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    .btn-save {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-delete:hover { border-color: var(--danger); }
+
+    .detail-field-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+    .detail-field { margin-bottom: 18px; }
+
+    .field-input, .field-textarea, .field-select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus { border-color: var(--accent); }
+    .field-textarea { min-height: 120px; line-height: 1.55; resize: none; }
+    .field-select option { background: #1a1a1a; }
+
+    #detail-player {
+      width: 100%;
+      margin-bottom: 18px;
+      filter: invert(0.9) hue-rotate(180deg);
+      border-radius: var(--radius);
+    }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+    }
+
+    #modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .modal-field { margin-bottom: 14px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .detail-toolbar { flex-wrap: wrap; }
+      .btn-save { width: 100%; text-align: center; order: -1; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="app-header">
+  <h1>Kobalt Audios</h1>
+  <span id="sync-status">—</span>
+  <button id="btn-sync">Sync</button>
+</header>
+
+<main>
+  <!-- LIST VIEW -->
+  <div id="list-view">
+    <div id="filter-bar">
+      <button class="filter-chip active" data-ctx="todos">Todos</button>
+      <button class="filter-chip" data-ctx="reunion">Reunión</button>
+      <button class="filter-chip" data-ctx="campo">Campo</button>
+      <button class="filter-chip" data-ctx="personal">Personal</button>
+      <button class="filter-chip" data-ctx="otro">Otro</button>
+    </div>
+    <div id="list-container"></div>
+    <div id="empty-state"><p>Sin grabaciones. Pulsa <strong>🎙️</strong> para grabar.</p></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="detail-view">
+    <div class="detail-toolbar">
+      <button class="btn-back" id="btn-back">← Volver</button>
+      <span class="detail-meta" id="detail-meta"></span>
+      <button class="btn-delete" id="btn-delete">Eliminar</button>
+      <button class="btn-save" id="btn-save-detail">Guardar</button>
+    </div>
+    <audio id="detail-player" controls></audio>
+    <div class="detail-field">
+      <div class="detail-field-label">Título</div>
+      <input class="field-input" id="detail-titulo" type="text" maxlength="120" placeholder="Título de la grabación…" />
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Contexto</div>
+      <select class="field-select" id="detail-contexto">
+        <option value="reunion">Reunión</option>
+        <option value="campo">Campo</option>
+        <option value="personal">Personal</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Notas</div>
+      <textarea class="field-textarea" id="detail-notas" placeholder="Notas adicionales…"></textarea>
+    </div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nueva grabación">🎙️</button>
+
+<!-- REC BAR -->
+<div id="rec-bar">
+  <span id="rec-timer">0:00</span>
+  <button id="btn-stop">⏹ Detener</button>
+</div>
+
+<!-- MODAL: guardar grabación -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Guardar grabación">
+  <div id="modal-box">
+    <h2>Guardar grabación</h2>
+    <div class="modal-field">
+      <div class="detail-field-label">Título</div>
+      <input class="field-input" id="m-titulo" type="text" maxlength="120" placeholder="Nombre de la grabación…" />
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Contexto</div>
+      <select class="field-select" id="m-contexto">
+        <option value="reunion">Reunión</option>
+        <option value="campo">Campo</option>
+        <option value="personal">Personal</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <div class="detail-field-label">Notas</div>
+      <textarea class="field-textarea" id="m-notas" placeholder="Notas opcionales…" style="min-height:80px"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-cancel">Descartar</button>
+      <button class="btn-save" id="btn-modal-save">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Audios';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME  = 'data_' + APP_NAME;  // 'data_Kobalt-Audios'
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbDelete(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── FORMAT DURATION ────────────────────────────────────────────
+function fmtDur(s) {
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function formatTs(ts) {
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function ctxLabel(ctx) {
+  const map = { reunion: 'Reunión', campo: 'Campo', personal: 'Personal', otro: 'Otro' };
+  return map[ctx] || ctx;
+}
+
+// ── RECORDING ENGINE ───────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks   = [];
+let recTimerInterval = null;
+let recStartTime  = 0;
+
+// Pending buffer for post-stop save
+let _pendingBuf  = null;
+let _pendingMime = null;
+let _pendingDur  = null;
+
+async function startRecording() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+                 : MediaRecorder.isTypeSupported('audio/mp4')  ? 'audio/mp4'
+                 : 'audio/ogg';
+  mediaRecorder = new MediaRecorder(stream, { mimeType });
+  audioChunks   = [];
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.start(1000);
+  recStartTime = Date.now();
+
+  // UI
+  document.getElementById('app-header').classList.add('recording');
+  document.getElementById('fab').classList.add('recording-fab');
+  document.getElementById('fab').textContent = '⏹';
+  document.getElementById('rec-bar').classList.add('show');
+
+  recTimerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
+    document.getElementById('rec-timer').textContent = fmtDur(elapsed);
+  }, 500);
+}
+
+function stopRecording() {
+  return new Promise(resolve => {
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+      const buf  = await blob.arrayBuffer();
+      const duracion = Math.round((Date.now() - recStartTime) / 1000);
+      resolve({ buf, mime: blob.type, duracion });
+      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    };
+    mediaRecorder.stop();
+  });
+}
+
+async function handleStopRecording() {
+  clearInterval(recTimerInterval);
+
+  // UI: stop recording state
+  document.getElementById('app-header').classList.remove('recording');
+  document.getElementById('fab').classList.remove('recording-fab');
+  document.getElementById('fab').textContent = '🎙️';
+  document.getElementById('rec-bar').classList.remove('show');
+  document.getElementById('rec-timer').textContent = '0:00';
+
+  const { buf, mime, duracion } = await stopRecording();
+  _pendingBuf  = buf;
+  _pendingMime = mime;
+  _pendingDur  = duracion;
+
+  // Open save modal
+  document.getElementById('m-titulo').value  = '';
+  document.getElementById('m-notas').value   = '';
+  document.getElementById('m-contexto').value = 'reunion';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-titulo').focus(), 50);
+}
+
+async function saveRecordingFromModal(titulo, contexto, notas) {
+  if (!_pendingBuf) return;
+  const buf     = _pendingBuf;
+  const mime    = _pendingMime;
+  const duracion = _pendingDur;
+  _pendingBuf = _pendingMime = _pendingDur = null;
+
+  const graId  = newId();
+  const blobId = newId();
+
+  // 1. Guardar blob en IDB (local only — NO sube al servidor)
+  await idbSet('blob:' + blobId, buf);
+
+  // 2. Guardar metadata B
+  const meta = { id: blobId, grabacionId: graId, mime, duracion, ts: now() };
+  await saveEntity('b', meta);
+
+  // 3. Guardar entidad A
+  const gra = { id: graId, titulo: titulo.trim(), duracion, contexto, notas: notas.trim(), ts: now() };
+  await saveEntity('a', gra);
+
+  return gra;
+}
+
+async function playRecording(blobId, audioEl) {
+  const buf = await idbGet('blob:' + blobId);
+  if (!buf) { showToast('Audio no disponible localmente'); return; }
+  const mimeKey = 'b:' + blobId;
+  const meta    = await idbGet(mimeKey);
+  const mime    = (meta && meta.mime) ? meta.mime : 'audio/webm';
+  const blob    = new Blob([buf], { type: mime });
+  const url     = URL.createObjectURL(blob);
+  audioEl.src   = url;
+  audioEl.play();
+}
+
+async function deleteRecording(grabacionId) {
+  // 1. Find B associated
+  const todos = await idbGetAll('b:');
+  const meta  = todos.find(m => m.grabacionId === grabacionId);
+  if (meta) {
+    await idbDelete('b:'    + meta.id);
+    await idbDelete('blob:' + meta.id);
+  }
+  // 2. Delete A
+  await idbDelete('a:' + grabacionId);
+  // 3. Update omega
+  const omega = await getOmega();
+  delete omega['a:' + grabacionId];
+  if (meta) delete omega['b:' + meta.id];
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando…');
+
+  try {
+    let remoteOmega = {};
+    try {
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexión');
+      return;
+    }
+
+    const localOmega = await getOmega();
+
+    // Solo a:* y b:* — blob:* excluidos del delta
+    const allKeys = new Set([
+      ...Object.keys(localOmega).filter(k => /^[ab]:/.test(k)),
+      ...Object.keys(remoteOmega).filter(k => /^[ab]:/.test(k))
+    ]);
+
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    // PUSH
+    if (toPush.length > 0) {
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    // PULL
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    await saveOmega(localOmega);
+
+    // I5: render solo si pulled > 0
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN ─────────────────────────────────────────────────────
+async function getAllGrabaciones() {
+  const all = await idbGetAll('a:');
+  return all.sort((a, b) => b.ts - a.ts);
+}
+
+async function updateGrabacion(id, cambios) {
+  const key = 'a:' + id;
+  const gra = await idbGet(key);
+  if (!gra) throw new Error('Grabación no encontrada: ' + id);
+  const updated = Object.assign({}, gra, cambios, { ts: now() });
+  await saveEntity('a', updated);
+  return updated;
+}
+
+// Find blob id for a grabacion
+async function getBlobIdForGrabacion(grabacionId) {
+  const todos = await idbGetAll('b:');
+  const meta  = todos.find(m => m.grabacionId === grabacionId);
+  return meta ? meta.id : null;
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view      = 'list';
+let currentId = null;
+let activeCtx = 'todos';
+let isRecording = false;
+
+// ── HELPERS ────────────────────────────────────────────────────
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  const listView   = document.getElementById('list-view');
+  const detailView = document.getElementById('detail-view');
+
+  if (view === 'list') {
+    listView.style.display   = 'block';
+    detailView.style.display = 'none';
+    document.getElementById('fab').style.display = 'flex';
+    await renderList();
+  } else if (view === 'detail') {
+    listView.style.display   = 'none';
+    detailView.style.display = 'block';
+    document.getElementById('fab').style.display = 'none';
+    await renderDetail();
+  }
+}
+
+async function renderList() {
+  const grabaciones = await getAllGrabaciones();
+  const filtered    = activeCtx === 'todos'
+    ? grabaciones
+    : grabaciones.filter(g => g.contexto === activeCtx);
+
+  const container = document.getElementById('list-container');
+  const emptyEl   = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = filtered.map(gra => `
+    <div class="rec-card" data-id="${escHtml(gra.id)}">
+      <div class="card-title">${escHtml(gra.titulo || '(sin título)')}</div>
+      <div class="card-footer">
+        <span class="ctx-chip ctx-${escHtml(gra.contexto)}">${escHtml(ctxLabel(gra.contexto))}</span>
+        <span class="card-dur">${fmtDur(gra.duracion || 0)}</span>
+        <span class="card-ts">${formatTs(gra.ts)}</span>
+      </div>
+      <div class="card-actions">
+        <button class="btn-play" data-id="${escHtml(gra.id)}">▶ Reproducir</button>
+        <button class="btn-del-card" data-id="${escHtml(gra.id)}">Eliminar</button>
+      </div>
+      <audio class="card-player" data-id="${escHtml(gra.id)}" controls style="display:none;width:100%;margin-top:10px;filter:invert(0.9) hue-rotate(180deg);border-radius:6px"></audio>
+    </div>
+  `).join('');
+
+  // Click on card title/footer → detail
+  container.querySelectorAll('.rec-card').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('.btn-play') || e.target.closest('.btn-del-card') || e.target.closest('audio')) return;
+      currentId = card.dataset.id;
+      view = 'detail';
+      render();
+    });
+  });
+
+  // Play buttons
+  container.querySelectorAll('.btn-play').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const graId   = btn.dataset.id;
+      const audioEl = btn.closest('.rec-card').querySelector('.card-player');
+      const blobId  = await getBlobIdForGrabacion(graId);
+      if (!blobId) { showToast('Audio no disponible'); return; }
+      audioEl.style.display = 'block';
+      await playRecording(blobId, audioEl);
+    });
+  });
+
+  // Delete buttons
+  container.querySelectorAll('.btn-del-card').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      if (!confirm('¿Eliminar esta grabación?')) return;
+      await deleteRecording(btn.dataset.id);
+      showToast('Grabación eliminada');
+      await renderList();
+    });
+  });
+}
+
+async function renderDetail() {
+  if (!currentId) { view = 'list'; render(); return; }
+  const gra = await idbGet('a:' + currentId);
+  if (!gra) { view = 'list'; render(); return; }
+
+  document.getElementById('detail-titulo').value   = gra.titulo   || '';
+  document.getElementById('detail-notas').value    = gra.notas    || '';
+  document.getElementById('detail-contexto').value = gra.contexto || 'otro';
+  document.getElementById('detail-meta').textContent =
+    'id:' + gra.id + '  ·  ' + formatTs(gra.ts) + '  ·  ' + fmtDur(gra.duracion || 0);
+
+  // Load audio into player
+  const playerEl = document.getElementById('detail-player');
+  playerEl.src   = '';
+  const blobId   = await getBlobIdForGrabacion(currentId);
+  if (blobId) {
+    await playRecording(blobId, playerEl);
+    playerEl.pause();
+  }
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// Filter chips
+document.getElementById('filter-bar').addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeCtx = chip.dataset.ctx;
+  renderList();
+});
+
+// Sync button
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// FAB — toggle recording
+document.getElementById('fab').addEventListener('click', async () => {
+  if (!isRecording) {
+    try {
+      await startRecording();
+      isRecording = true;
+    } catch (err) {
+      showToast('No se pudo acceder al micrófono');
+      console.error('[rec]', err);
+    }
+  } else {
+    isRecording = false;
+    await handleStopRecording();
+  }
+});
+
+// Stop button (rec bar)
+document.getElementById('btn-stop').addEventListener('click', async () => {
+  if (!isRecording) return;
+  isRecording = false;
+  await handleStopRecording();
+});
+
+// Modal: descartar (discard pending buffer)
+document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  _pendingBuf = _pendingMime = _pendingDur = null;
+  document.getElementById('modal-overlay').classList.remove('open');
+  showToast('Grabación descartada');
+});
+
+// Modal: click outside
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) {
+    _pendingBuf = _pendingMime = _pendingDur = null;
+    e.currentTarget.classList.remove('open');
+  }
+});
+
+// Modal: guardar
+document.getElementById('btn-modal-save').addEventListener('click', async () => {
+  const titulo   = document.getElementById('m-titulo').value.trim();
+  const contexto = document.getElementById('m-contexto').value;
+  const notas    = document.getElementById('m-notas').value;
+
+  if (!titulo) { document.getElementById('m-titulo').focus(); return; }
+
+  await saveRecordingFromModal(titulo, contexto, notas);
+  document.getElementById('modal-overlay').classList.remove('open');
+  showToast('Grabación guardada');
+  await renderList();
+});
+
+// Back
+document.getElementById('btn-back').addEventListener('click', () => {
+  // Stop detail player
+  const player = document.getElementById('detail-player');
+  player.pause();
+  player.src = '';
+  view = 'list';
+  currentId = null;
+  render();
+});
+
+// Save detail
+document.getElementById('btn-save-detail').addEventListener('click', async () => {
+  if (!currentId) return;
+  const titulo   = document.getElementById('detail-titulo').value.trim();
+  const contexto = document.getElementById('detail-contexto').value;
+  const notas    = document.getElementById('detail-notas').value.trim();
+  await updateGrabacion(currentId, { titulo, contexto, notas });
+  await renderDetail();
+  showToast('Grabación guardada');
+});
+
+// Delete detail
+document.getElementById('btn-delete').addEventListener('click', async () => {
+  if (!currentId) return;
+  if (!confirm('¿Eliminar esta grabación?')) return;
+  const player = document.getElementById('detail-player');
+  player.pause();
+  player.src = '';
+  await deleteRecording(currentId);
+  view = 'list';
+  currentId = null;
+  showToast('Grabación eliminada');
+  render();
+});
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-overlay');
+    if (modal.classList.contains('open')) {
+      _pendingBuf = _pendingMime = _pendingDur = null;
+      modal.classList.remove('open');
+    } else if (view === 'detail') {
+      const player = document.getElementById('detail-player');
+      player.pause();
+      player.src = '';
+      view = 'list';
+      currentId = null;
+      render();
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>

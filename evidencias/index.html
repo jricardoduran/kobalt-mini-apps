@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kobalt Evidencias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0f0f0f;
+    --surface: #1a1a1a;
+    --border:  #2a2a2a;
+    --text:    #e8e8e8;
+    --muted:   #666;
+    --accent:  #4f8ef7;
+    --danger:  #ef5350;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  #app { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+  }
+  header h1 { font-size: 18px; font-weight: 600; flex: 1; }
+  #sync-status {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+  #sync-status.syncing { color: var(--accent); }
+  #sync-status.error   { color: var(--danger); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-title { font-weight: 600; margin-bottom: 4px; }
+  .card-sub   { font-size: 12px; color: var(--muted); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost   { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-sm      { padding: 5px 12px; font-size: 13px; }
+
+  /* ── Toolbar ── */
+  .toolbar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+
+  /* ── Back button ── */
+  .back-btn {
+    background: none; border: none; color: var(--accent);
+    font-size: 14px; cursor: pointer; padding: 0; font-family: inherit;
+    display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin: 20px 0 8px;
+  }
+
+  /* ── Detail field ── */
+  .detail-field { margin-bottom: 14px; }
+  .detail-label {
+    font-size: 11px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px;
+  }
+  .detail-value { font-size: 15px; }
+
+  /* ── Case meta row ── */
+  .caso-meta { display: flex; align-items: center; justify-content: space-between; }
+  .caso-counter {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: #4f8ef711;
+    border: 1px solid #4f8ef733;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+
+  /* ── Evidencia card thumbnail grid (caso-detalle) ── */
+  .ev-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .ev-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .ev-card:hover { border-color: var(--accent); }
+  .ev-thumb-wrap {
+    aspect-ratio: 1;
+    width: 100%;
+    background: var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ev-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .ev-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 32px;
+  }
+  .ev-card-label {
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+  }
+
+  /* ── Photo grid (evidencia-detalle) ── */
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .photo-thumb {
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    width: 100%;
+    cursor: pointer;
+    display: block;
+  }
+  .photo-placeholder {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  /* ── Inline editable field ── */
+  .editable {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    padding: 6px 10px;
+    outline: none;
+    width: 100%;
+    transition: border-color .15s;
+  }
+  .editable:focus { border-color: var(--accent); }
+  textarea.editable { resize: vertical; min-height: 70px; }
+
+  /* ── Modal ── */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: #000a;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    width: 100%;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+
+  /* ── Form ── */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block; font-size: 12px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select option { background: var(--surface); }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── Empty ── */
+  .empty { color: var(--muted); font-size: 14px; padding: 20px 0; text-align: center; }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: #000d;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    cursor: zoom-out;
+  }
+  .lightbox img {
+    max-width: 95vw; max-height: 92vh;
+    border-radius: 6px; object-fit: contain;
+  }
+  .lightbox-close {
+    position: fixed; top: 16px; right: 20px;
+    background: #fff2; border: none; color: #fff;
+    font-size: 28px; cursor: pointer; border-radius: 50%;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+
+  /* ── FAB ── */
+  #fab {
+    position: fixed;
+    bottom: 24px; right: 20px;
+    width: 52px; height: 52px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 50%;
+    font-size: 1.6rem; line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(79,142,247,.45);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, box-shadow .15s;
+    z-index: 50;
+  }
+  #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+  #fab.hidden { display: none; }
+
+  /* ── Save bar (evidencia-detalle) ── */
+  .save-bar {
+    display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 id="header-title">Kobalt Evidencias</h1>
+    <span id="sync-status">—</span>
+  </header>
+  <div id="view-container"></div>
+</div>
+
+<button id="fab" title="Nuevo">+</button>
+
+<!-- Modal crear caso -->
+<div id="modal-caso" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Nuevo caso</h2>
+    <div class="field">
+      <label>Nombre del caso / expediente</label>
+      <input id="f-caso-nombre" type="text" placeholder="Ej: Caso 2024-001">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModals()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitCaso()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal crear evidencia -->
+<div id="modal-evidencia" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h2>Nueva evidencia</h2>
+    <div class="field">
+      <label>Título</label>
+      <input id="f-ev-titulo" type="text" placeholder="Descripción breve">
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <textarea id="f-ev-descripcion" placeholder="Detalles de la evidencia…"></textarea>
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input id="f-ev-fecha" type="date">
+    </div>
+    <div class="field">
+      <label>GeoTag (opcional)</label>
+      <input id="f-ev-geotag" type="text" placeholder="Ej: -34.6037,-58.3816 o Calle X, Ciudad">
+    </div>
+    <div class="field">
+      <label>Caso (opcional)</label>
+      <select id="f-ev-caso">
+        <option value="">Sin caso</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModals()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitEvidencia()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── Constantes ──────────────────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Evidencias';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function newId() { return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
+function now()   { return Math.floor(Date.now() / 1000); }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── IDB ─────────────────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx  = _db.transaction('kv', 'readonly');
+    const req = tx.objectStore('kv').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, value) {
+  return new Promise((resolve, reject) => {
+    const tx  = _db.transaction('kv', 'readwrite');
+    const req = tx.objectStore('kv').put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const tx    = _db.transaction('kv', 'readonly');
+    const store = tx.objectStore('kv');
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const req   = store.getAll(range);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+// ── Omega (manifest local) ───────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── saveEntity ───────────────────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── Operaciones de dominio ───────────────────────────────────────────────────
+async function createCaso(nombre) {
+  const e = { id: newId(), nombre, members: [], ts: now() };
+  await saveEntity('c', e);
+  return e;
+}
+
+async function createEvidencia(titulo, casoId, descripcion, fechaISO, geoTag) {
+  const e = {
+    id: newId(),
+    titulo,
+    casoId: casoId || null,
+    descripcion,
+    fechaISO,
+    geoTag: geoTag || null,
+    ts: now()
+  };
+  await saveEntity('a', e);
+  if (casoId) {
+    const caso = await idbGet('c:' + casoId);
+    if (caso) {
+      caso.members = [...(caso.members || []), e.id];
+      caso.ts = now();
+      await saveEntity('c', caso);
+    }
+  }
+  return e;
+}
+
+async function updateEvidencia(id, cambios) {
+  const ev = await idbGet('a:' + id);
+  if (!ev) return;
+  Object.assign(ev, cambios, { ts: now() });
+  await saveEntity('a', ev);
+  return ev;
+}
+
+async function addFoto(evidenciaId, file) {
+  const id  = newId();
+  const ext = (file.name || '').split('.').pop().toLowerCase() || 'jpg';
+
+  // 1. Guardar ArrayBuffer en IDB (local)
+  const buf = await file.arrayBuffer();
+  await idbSet('blob:' + id, buf);
+
+  // 2. Metadata B en IDB + omega
+  const meta = { id, evidenciaId, mime: file.type || 'image/jpeg', ext, ts: now() };
+  await saveEntity('b', meta);
+
+  // 3. Subir al servidor (multipart)
+  try {
+    const form = new FormData();
+    form.append('photo', file);
+    form.append('id', id);
+    form.append('ext', ext);
+    await fetch(SAVE_URL, { method: 'POST', body: form });
+  } catch (err) { console.warn('upload falló (offline?):', err); }
+
+  return meta;
+}
+
+async function getFotosDe(evidenciaId) {
+  const all = await idbGetAll('b:');
+  return all.filter(m => m.evidenciaId === evidenciaId).sort((a, b) => a.ts - b.ts);
+}
+
+async function getEvidenciasDeCaso(casoId) {
+  const all = await idbGetAll('a:');
+  return all.filter(e => e.casoId === casoId).sort((a, b) => b.ts - a.ts);
+}
+
+async function getEvidenciasSinCaso() {
+  const all = await idbGetAll('a:');
+  return all.filter(e => !e.casoId).sort((a, b) => b.ts - a.ts);
+}
+
+async function getCasos() {
+  return idbGetAll('c:');
+}
+
+// ── Sync ─────────────────────────────────────────────────────────────────────
+let _syncTimer = null;
+
+function setSyncStatus(msg, cls) {
+  const el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className   = cls || '';
+}
+
+async function syncNow() {
+  setSyncStatus('syncing…', 'syncing');
+  try {
+    const res = await fetch(DATA_URL + '/manifest.json?t=' + Date.now());
+    let omegaR = {};
+    if (res.ok) {
+      try { omegaR = await res.json(); } catch (_) { omegaR = {}; }
+    }
+
+    const omegaL = await getOmega();
+
+    // Solo a:*, b:*, c:* — NO blob:*
+    const allKeys = new Set([
+      ...Object.keys(omegaL).filter(k => /^[abc]:/.test(k)),
+      ...Object.keys(omegaR).filter(k => /^[abc]:/.test(k))
+    ]);
+
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = omegaL[key] || 0;
+      const tsR = omegaR[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    // PUSH
+    if (toPush.length) {
+      for (const key of toPush) {
+        const val = await idbGet(key);
+        if (!val) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: val })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(omegaL[k] || 0, omegaR[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    // PULL
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const r = await fetch(DATA_URL + '/' + key.replace(':', '/') + '.json?t=' + Date.now());
+        if (r.ok) {
+          const entity = await r.json();
+          await idbSet(key, entity);
+          omegaL[key] = omegaR[key];
+          pulled++;
+        }
+      } catch (_) { /* offline */ }
+    }
+
+    if (pulled > 0) {
+      await saveOmega(omegaL);
+      await render(); // I5: solo repintar si hubo pull
+    }
+
+    setSyncStatus('sync ' + new Date().toLocaleTimeString(), '');
+  } catch (e) {
+    console.warn('Sync error:', e);
+    setSyncStatus('offline', 'error');
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  _syncTimer = setInterval(syncNow, 30000);
+}
+
+// ── Estado de navegación ──────────────────────────────────────────────────────
+let view               = 'casos';
+let currentCasoId      = null;
+let currentEvidenciaId = null;
+
+// Guarda de dónde venimos al entrar a evidencia-detalle
+let _prevView          = 'casos';
+
+// ── Render ───────────────────────────────────────────────────────────────────
+async function render() {
+  const container = document.getElementById('view-container');
+  const header    = document.getElementById('header-title');
+  const fab       = document.getElementById('fab');
+
+  if (view === 'casos') {
+    header.textContent = 'Kobalt Evidencias';
+    fab.classList.remove('hidden');
+    fab.onclick = openModalCaso;
+    container.innerHTML = await renderCasos();
+  } else if (view === 'caso-detalle') {
+    const caso = await idbGet('c:' + currentCasoId);
+    header.textContent = caso ? esc(caso.nombre) : 'Caso';
+    fab.classList.remove('hidden');
+    fab.onclick = () => openModalEvidenciaConCaso(currentCasoId);
+    container.innerHTML = await renderCasoDetalle(currentCasoId);
+  } else if (view === 'evidencia-detalle') {
+    const ev = await idbGet('a:' + currentEvidenciaId);
+    header.textContent = ev ? esc(ev.titulo) : 'Evidencia';
+    fab.classList.add('hidden');
+    container.innerHTML = await renderEvidenciaDetalle(currentEvidenciaId);
+  }
+
+  attachEvents();
+}
+
+// ── Vista: casos ─────────────────────────────────────────────────────────────
+async function renderCasos() {
+  const casos   = await getCasos();
+  const sinCaso = await getEvidenciasSinCaso();
+
+  let html = `
+    <div class="toolbar">
+      <button class="btn btn-primary btn-sm" onclick="openModalCaso()">+ Caso</button>
+      <button class="btn btn-ghost btn-sm" onclick="openModalEvidencia()">+ Evidencia</button>
+    </div>
+  `;
+
+  if (casos.length === 0 && sinCaso.length === 0) {
+    html += `<p class="empty">No hay casos ni evidencias. Crea uno para empezar.</p>`;
+    return html;
+  }
+
+  if (casos.length) {
+    html += `<div class="section-label">Casos</div>`;
+    for (const c of casos.sort((a,b) => a.nombre.localeCompare(b.nombre))) {
+      const evs = await getEvidenciasDeCaso(c.id);
+      html += `
+        <div class="card" data-action="open-caso" data-id="${esc(c.id)}">
+          <div class="caso-meta">
+            <div class="card-title">${esc(c.nombre)}</div>
+            <span class="caso-counter">${evs.length} evidencia${evs.length !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (sinCaso.length) {
+    html += `<div class="section-label">Sin caso</div>`;
+    for (const ev of sinCaso) {
+      html += renderEvidenciaCard(ev);
+    }
+  }
+
+  return html;
+}
+
+// ── Vista: caso-detalle ───────────────────────────────────────────────────────
+async function renderCasoDetalle(casoId) {
+  const evs = await getEvidenciasDeCaso(casoId);
+
+  let html = `
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+    <div class="toolbar">
+      <button class="btn btn-ghost btn-sm" onclick="openModalEvidenciaConCaso('${esc(casoId)}')">+ Evidencia</button>
+    </div>
+  `;
+
+  if (evs.length === 0) {
+    html += `<p class="empty">No hay evidencias en este caso.</p>`;
+    return html;
+  }
+
+  html += `<div class="ev-grid">`;
+  for (const ev of evs) {
+    const fotos = await getFotosDe(ev.id);
+    let thumbHtml = '';
+    if (fotos.length > 0) {
+      const f   = fotos[0];
+      const buf = await idbGet('blob:' + f.id);
+      let src = '';
+      if (buf) {
+        const blob = new Blob([buf], { type: f.mime });
+        src = URL.createObjectURL(blob);
+      } else {
+        src = DATA_URL + '/photos/' + encodeURIComponent(f.id) + '.' + encodeURIComponent(f.ext);
+      }
+      thumbHtml = `<img src="${esc(src)}" alt="foto">`;
+    } else {
+      thumbHtml = `<div class="ev-thumb-placeholder">📁</div>`;
+    }
+    html += `
+      <div class="ev-card" data-action="open-evidencia" data-id="${esc(ev.id)}">
+        <div class="ev-thumb-wrap">${thumbHtml}</div>
+        <div class="ev-card-label">${esc(ev.titulo)}</div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ── Vista: evidencia-detalle ──────────────────────────────────────────────────
+async function renderEvidenciaDetalle(evId) {
+  const ev = await idbGet('a:' + evId);
+  if (!ev) return `<button class="back-btn" onclick="goBack()">← Volver</button><p class="empty">Evidencia no encontrada.</p>`;
+
+  const fotos = await getFotosDe(evId);
+
+  let fotoGrid = '';
+  for (const f of fotos) {
+    const buf = await idbGet('blob:' + f.id);
+    let src = '';
+    if (buf) {
+      const blob = new Blob([buf], { type: f.mime });
+      src = URL.createObjectURL(blob);
+    } else {
+      src = DATA_URL + '/photos/' + encodeURIComponent(f.id) + '.' + encodeURIComponent(f.ext);
+    }
+    fotoGrid += `<img class="photo-thumb" src="${esc(src)}" alt="foto" data-action="lightbox" data-src="${esc(src)}">`;
+  }
+
+  let html = `
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+
+    <div class="detail-field">
+      <div class="detail-label">Título</div>
+      <input class="editable" id="ev-titulo" type="text" value="${esc(ev.titulo)}" placeholder="Título">
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">Descripción</div>
+      <textarea class="editable" id="ev-descripcion" placeholder="Descripción…">${esc(ev.descripcion || '')}</textarea>
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">Fecha</div>
+      <input class="editable" id="ev-fecha" type="date" value="${esc(ev.fechaISO || '')}">
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">GeoTag</div>
+      <input class="editable" id="ev-geotag" type="text" value="${esc(ev.geoTag || '')}" placeholder="lat,lon o dirección">
+    </div>
+
+    <div class="detail-field">
+      <div class="detail-label">Fotos (${fotos.length})</div>
+      <div class="photo-grid">
+        ${fotoGrid}
+        <div class="photo-placeholder" data-action="add-foto" data-id="${esc(evId)}" title="Añadir foto">📷</div>
+      </div>
+    </div>
+    <input type="file" id="foto-input" accept="image/*" style="display:none" data-ev-id="${esc(evId)}">
+
+    <div class="save-bar">
+      <button class="btn btn-ghost btn-sm" onclick="goBack()">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEvidenciaEdits('${esc(evId)}')">Guardar cambios</button>
+    </div>
+  `;
+
+  return html;
+}
+
+async function saveEvidenciaEdits(evId) {
+  const titulo      = document.getElementById('ev-titulo').value.trim();
+  const descripcion = document.getElementById('ev-descripcion').value.trim();
+  const fechaISO    = document.getElementById('ev-fecha').value;
+  const geoTag      = document.getElementById('ev-geotag').value.trim();
+
+  if (!titulo) { document.getElementById('ev-titulo').focus(); return; }
+  await updateEvidencia(evId, { titulo, descripcion, fechaISO, geoTag: geoTag || null });
+  document.getElementById('header-title').textContent = esc(titulo);
+  syncNow();
+}
+
+// ── Card helper ───────────────────────────────────────────────────────────────
+function renderEvidenciaCard(ev) {
+  return `
+    <div class="card" data-action="open-evidencia" data-id="${esc(ev.id)}">
+      <div class="card-title">${esc(ev.titulo)}</div>
+      <div class="card-sub" style="font-family:'JetBrains Mono',monospace">${esc(ev.fechaISO || '')}</div>
+      ${ev.geoTag ? `<div class="card-sub" style="margin-top:2px">📍 ${esc(ev.geoTag)}</div>` : ''}
+    </div>
+  `;
+}
+
+// ── Event delegation ─────────────────────────────────────────────────────────
+function attachEvents() {
+  const container = document.getElementById('view-container');
+
+  container.onclick = async (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const action = el.dataset.action;
+
+    if (action === 'open-caso') {
+      currentCasoId = el.dataset.id;
+      view = 'caso-detalle';
+      await render();
+
+    } else if (action === 'open-evidencia') {
+      _prevView = view;
+      currentEvidenciaId = el.dataset.id;
+      view = 'evidencia-detalle';
+      await render();
+
+    } else if (action === 'add-foto') {
+      const input = document.getElementById('foto-input');
+      if (input) {
+        input.dataset.evId = el.dataset.id;
+        input.click();
+      }
+
+    } else if (action === 'lightbox') {
+      openLightbox(el.dataset.src);
+    }
+  };
+
+  // Input foto
+  const fotoInput = document.getElementById('foto-input');
+  if (fotoInput) {
+    fotoInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const evId = fotoInput.dataset.evId;
+      await addFoto(evId, file);
+      await render();
+      syncNow();
+      fotoInput.value = '';
+    };
+  }
+}
+
+// ── Lightbox ─────────────────────────────────────────────────────────────────
+function openLightbox(src) {
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  lb.innerHTML = `
+    <img src="${esc(src)}" alt="foto">
+    <button class="lightbox-close" title="Cerrar">&#x2715;</button>
+  `;
+  lb.onclick = (e) => {
+    if (e.target === lb || e.target.classList.contains('lightbox-close')) lb.remove();
+  };
+  document.body.appendChild(lb);
+}
+
+// ── Navegación ───────────────────────────────────────────────────────────────
+async function goBack() {
+  if (view === 'evidencia-detalle') {
+    view = _prevView;
+    if (_prevView === 'caso-detalle' && !currentCasoId) view = 'casos';
+  } else if (view === 'caso-detalle') {
+    view = 'casos';
+    currentCasoId = null;
+  } else {
+    view = 'casos';
+  }
+  await render();
+}
+
+// ── Modales ───────────────────────────────────────────────────────────────────
+function openModalCaso() {
+  document.getElementById('f-caso-nombre').value = '';
+  document.getElementById('modal-caso').style.display = 'flex';
+  setTimeout(() => document.getElementById('f-caso-nombre').focus(), 50);
+}
+
+async function openModalEvidencia(preselectedCasoId) {
+  await _populateCasoSelect(preselectedCasoId || '');
+  document.getElementById('f-ev-titulo').value      = '';
+  document.getElementById('f-ev-descripcion').value = '';
+  document.getElementById('f-ev-fecha').value       = todayStr();
+  document.getElementById('f-ev-geotag').value      = '';
+  document.getElementById('modal-evidencia').style.display = 'flex';
+  setTimeout(() => document.getElementById('f-ev-titulo').focus(), 50);
+}
+
+function openModalEvidenciaConCaso(casoId) {
+  openModalEvidencia(casoId);
+}
+
+async function _populateCasoSelect(selectedId) {
+  const sel   = document.getElementById('f-ev-caso');
+  const casos = await getCasos();
+  sel.innerHTML = `<option value="">Sin caso</option>`;
+  for (const c of casos.sort((a,b) => a.nombre.localeCompare(b.nombre))) {
+    sel.innerHTML += `<option value="${esc(c.id)}" ${c.id === selectedId ? 'selected' : ''}>${esc(c.nombre)}</option>`;
+  }
+}
+
+function closeModals() {
+  document.getElementById('modal-caso').style.display      = 'none';
+  document.getElementById('modal-evidencia').style.display = 'none';
+}
+
+async function submitCaso() {
+  const nombre = document.getElementById('f-caso-nombre').value.trim();
+  if (!nombre) { document.getElementById('f-caso-nombre').focus(); return; }
+  closeModals();
+  await createCaso(nombre);
+  await render();
+  syncNow();
+}
+
+async function submitEvidencia() {
+  const titulo      = document.getElementById('f-ev-titulo').value.trim();
+  const descripcion = document.getElementById('f-ev-descripcion').value.trim();
+  const fechaISO    = document.getElementById('f-ev-fecha').value || todayStr();
+  const geoTag      = document.getElementById('f-ev-geotag').value.trim();
+  const casoId      = document.getElementById('f-ev-caso').value || null;
+
+  if (!titulo) { document.getElementById('f-ev-titulo').focus(); return; }
+  closeModals();
+  const ev = await createEvidencia(titulo, casoId, descripcion, fechaISO, geoTag);
+
+  // Si creamos desde dentro de un caso, ir directo al detalle de evidencia
+  if (casoId) {
+    _prevView = 'caso-detalle';
+    currentCasoId = casoId;
+    currentEvidenciaId = ev.id;
+    view = 'evidencia-detalle';
+  }
+  await render();
+  syncNow();
+}
+
+// Cerrar modales al click fuera
+document.getElementById('modal-caso').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModals();
+});
+document.getElementById('modal-evidencia').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModals();
+});
+
+// Escape cierra modales
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModals();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+init();
+</script>
+</body>
+</html>

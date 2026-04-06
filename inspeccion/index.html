@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Inspección</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f0f;
+      --surface:   #1a1a1a;
+      --border:    #2a2a2a;
+      --text:      #e8e8e8;
+      --muted:     #666;
+      --accent:    #4f8ef7;
+      --danger:    #e05555;
+      --radius:    8px;
+      --pass:      #4caf50;
+      --fail:      #ef5350;
+      --na:        #666;
+      --pendiente: #ff9800;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    #sync-status.ok    { color: #4caf7d; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── CARDS ── */
+    .card-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .ins-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .ins-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .ins-card .card-title {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ins-card .card-sub {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Estado badge */
+    .badge {
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .badge-borrador   { background: #2a2a2a; color: var(--muted); }
+    .badge-en-progreso{ background: #1e3060; color: var(--accent); }
+    .badge-cerrada    { background: #1a2e1a; color: var(--pass); }
+
+    /* Mini contadores */
+    .mini-counters {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+    }
+    .mc { padding: 1px 6px; border-radius: 3px; font-weight: 500; }
+    .mc-pass      { background: rgba(76,175,80,.18); color: var(--pass); }
+    .mc-fail      { background: rgba(239,83,80,.18); color: var(--fail); }
+    .mc-na        { background: rgba(102,102,102,.18); color: #999; }
+    .mc-pendiente { background: rgba(255,152,0,.18); color: var(--pendiente); }
+
+    .card-ts {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── EMPTY STATE ── */
+    #empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      display: none;
+    }
+    #empty-state p { font-size: .9rem; }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+
+    /* ── DETAIL VIEW ── */
+    #detail-view  { display: none; }
+    #resumen-view { display: none; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+      white-space: nowrap;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Barra de progreso */
+    .progress-wrap {
+      margin-bottom: 16px;
+    }
+    .progress-label {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width .3s ease;
+    }
+
+    /* ── ITEM CARD ── */
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .item-card:hover { border-color: #3a3a3a; }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px 10px;
+      cursor: pointer;
+    }
+
+    .item-desc {
+      flex: 1;
+      font-size: .9rem;
+      line-height: 1.4;
+    }
+
+    .item-expand-icon {
+      font-size: .75rem;
+      color: var(--muted);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .item-card.expanded .item-expand-icon { transform: rotate(180deg); }
+
+    /* Botones de resultado */
+    .resultado-btns {
+      display: flex;
+      gap: 6px;
+      padding: 0 14px 10px;
+    }
+
+    .btn-resultado {
+      flex: 1;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      padding: 7px 4px;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      background: var(--border);
+      color: var(--muted);
+    }
+    .btn-resultado:hover { opacity: .85; }
+
+    .btn-resultado.pass  { background: rgba(76,175,80,.12); color: #6fbf73; }
+    .btn-resultado.fail  { background: rgba(239,83,80,.12); color: #f27573; }
+    .btn-resultado.na    { background: rgba(102,102,102,.12); color: #999; }
+
+    .btn-resultado.active-pass {
+      background: rgba(76,175,80,.25);
+      color: var(--pass);
+      border-color: var(--pass);
+    }
+    .btn-resultado.active-fail {
+      background: rgba(239,83,80,.25);
+      color: var(--fail);
+      border-color: var(--fail);
+    }
+    .btn-resultado.active-na {
+      background: rgba(102,102,102,.25);
+      color: #aaa;
+      border-color: #aaa;
+    }
+
+    /* Notas inline */
+    .item-notas-wrap {
+      display: none;
+      padding: 0 14px 12px;
+    }
+    .item-card.expanded .item-notas-wrap { display: block; }
+
+    .item-notas-ta {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .85rem;
+      padding: 8px 12px;
+      resize: none;
+      min-height: 72px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .item-notas-ta:focus { border-color: var(--accent); }
+    .item-notas-ta::placeholder { color: var(--muted); }
+
+    /* Añadir item */
+    .add-item-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .add-item-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9rem;
+      padding: 9px 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .add-item-input:focus { border-color: var(--accent); }
+    .add-item-input::placeholder { color: var(--muted); }
+
+    .btn-add-item {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 9px 16px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .btn-add-item:hover { opacity: .85; }
+
+    /* Botones de acción del detalle */
+    .detail-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cerrar {
+      background: transparent;
+      border: 1px solid var(--pass);
+      color: var(--pass);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-cerrar:hover { background: rgba(76,175,80,.12); }
+    .btn-cerrar:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .btn-resumen {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-resumen:hover { background: rgba(79,142,247,.12); }
+
+    /* ── RESUMEN VIEW ── */
+    .resumen-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    .resumen-table th,
+    .resumen-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+      font-size: .9rem;
+    }
+    .resumen-table th {
+      background: var(--surface);
+      font-weight: 600;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+    }
+    .resumen-table td { background: #161616; }
+    .resumen-table .val-pass      { color: var(--pass); font-weight: 600; }
+    .resumen-table .val-fail      { color: var(--fail); font-weight: 600; }
+    .resumen-table .val-na        { color: var(--muted); }
+    .resumen-table .val-pendiente { color: var(--pendiente); font-weight: 600; }
+
+    .section-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 8px;
+      margin-top: 20px;
+    }
+
+    .fail-item-row {
+      background: var(--surface);
+      border: 1px solid rgba(239,83,80,.25);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      font-size: .88rem;
+    }
+    .fail-item-row .fi-desc { margin-bottom: 4px; }
+    .fail-item-row .fi-nota {
+      font-size: .78rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+    }
+    #modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .modal-field { margin-bottom: 14px; }
+
+    .field-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9rem;
+      padding: 9px 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .85; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── HEADER DE DETALLE ── */
+    .detail-header-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .dhi-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dhi-label {
+      font-size: .68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .dhi-value {
+      font-size: .85rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @media (max-width: 480px) {
+      .toolbar { flex-wrap: wrap; }
+      .resultado-btns { gap: 4px; }
+      .btn-resultado { font-size: .72rem; padding: 6px 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1 id="header-title">Kobalt Inspección</h1>
+  <span id="sync-status">—</span>
+  <button id="btn-sync">Sync</button>
+</header>
+
+<main>
+  <!-- ── VIEW: INSPECCIONES (lista) ── -->
+  <div id="inspecciones-view">
+    <div class="card-list" id="ins-list"></div>
+    <div id="empty-state"><p>Sin inspecciones. Pulsa <strong>+</strong> para crear la primera.</p></div>
+  </div>
+
+  <!-- ── VIEW: DETALLE ── -->
+  <div id="detail-view">
+    <div class="toolbar">
+      <button class="btn-back" id="btn-back-detail">← Volver</button>
+      <button class="btn-resumen" id="btn-ver-resumen">Ver resumen</button>
+    </div>
+
+    <div class="detail-header-info" id="detail-header-info"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-label-text">Progreso</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="items-list"></div>
+
+    <div class="add-item-row">
+      <input class="add-item-input" id="add-item-input" type="text" placeholder="Descripción del nuevo ítem…" maxlength="200" />
+      <button class="btn-add-item" id="btn-add-item">+ Añadir</button>
+    </div>
+
+    <div class="detail-actions">
+      <button class="btn-cerrar" id="btn-cerrar-ins" disabled>Cerrar inspección</button>
+    </div>
+  </div>
+
+  <!-- ── VIEW: RESUMEN ── -->
+  <div id="resumen-view">
+    <div class="toolbar">
+      <button class="btn-back" id="btn-back-resumen">← Volver al detalle</button>
+    </div>
+
+    <div id="resumen-content"></div>
+  </div>
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nueva inspección">+</button>
+
+<!-- MODAL CREAR INSPECCIÓN -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="Nueva inspección">
+  <div id="modal-box">
+    <h2>Nueva inspección</h2>
+    <div class="modal-field">
+      <div class="field-label">Título</div>
+      <input class="field-input" id="m-titulo" type="text" maxlength="150" placeholder="Ej: Inspección vehículo 2026-04-06…" />
+    </div>
+    <div class="modal-field">
+      <div class="field-label">Área / Equipo</div>
+      <input class="field-input" id="m-area" type="text" maxlength="100" placeholder="Ej: Flota A, Almacén 2…" />
+    </div>
+    <div class="modal-field">
+      <div class="field-label">Fecha</div>
+      <input class="field-input" id="m-fecha" type="date" />
+    </div>
+    <div class="modal-field">
+      <div class="field-label">Inspector</div>
+      <input class="field-input" id="m-inspector" type="text" maxlength="100" placeholder="Nombre del inspector…" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-modal-create">Crear inspección</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Inspeccion';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando…');
+
+  try {
+    let remoteOmega = {};
+    try {
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexión');
+      return;
+    }
+
+    const localOmega = await getOmega();
+
+    const allKeys = new Set([...Object.keys(localOmega), ...Object.keys(remoteOmega)]);
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    if (toPush.length > 0) {
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    await saveOmega(localOmega);
+
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN ─────────────────────────────────────────────────────
+
+async function createInspeccion(titulo, area, fechaISO, inspector) {
+  const e = {
+    id: newId(),
+    titulo,
+    area,
+    fechaISO,
+    inspector,
+    estado: 'borrador',
+    members: [],
+    ts: now()
+  };
+  await saveEntity('c', e);
+  return e;
+}
+
+async function addItemToInspeccion(inspeccionId, descripcion, orden) {
+  const item = {
+    id: newId(),
+    inspeccionId,
+    descripcion,
+    resultado: 'pendiente',
+    notas: '',
+    orden,
+    ts: now()
+  };
+  await saveEntity('a', item);
+  const ins = await idbGet('c:' + inspeccionId);
+  if (ins) {
+    ins.members = [...(ins.members || []), item.id];
+    ins.estado = 'en-progreso';
+    ins.ts = now();
+    await saveEntity('c', ins);
+  }
+  return item;
+}
+
+async function setResultado(itemId, resultado) {
+  const item = await idbGet('a:' + itemId);
+  if (!item) return;
+  item.resultado = resultado;
+  item.ts = now();
+  await saveEntity('a', item);
+}
+
+async function setNotaItem(itemId, notas) {
+  const item = await idbGet('a:' + itemId);
+  if (!item) return;
+  item.notas = notas;
+  item.ts = now();
+  await saveEntity('a', item);
+}
+
+async function cerrarInspeccion(id) {
+  const ins = await idbGet('c:' + id);
+  if (!ins) return;
+  ins.estado = 'cerrada';
+  ins.ts = now();
+  await saveEntity('c', ins);
+}
+
+async function getItemsDe(inspeccionId) {
+  const all = await idbGetAll('a:');
+  return all
+    .filter(i => i.inspeccionId === inspeccionId)
+    .sort((a, b) => a.orden - b.orden);
+}
+
+function getResumen(items) {
+  const r = { pass: 0, fail: 0, na: 0, pendiente: 0 };
+  items.forEach(i => r[i.resultado] = (r[i.resultado] || 0) + 1);
+  return r;
+}
+
+async function getAllInspecciones() {
+  const all = await idbGetAll('c:');
+  return all.sort((a, b) => b.ts - a.ts);
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view = 'inspecciones';
+let currentInspeccionId = null;
+
+// ── HELPERS ────────────────────────────────────────────────────
+function formatTs(ts) {
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function todayISO() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function estadoBadgeHtml(estado) {
+  const cls = 'badge badge-' + estado;
+  const labels = { borrador: 'Borrador', 'en-progreso': 'En progreso', cerrada: 'Cerrada' };
+  return `<span class="${cls}">${labels[estado] || estado}</span>`;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  const views = {
+    inspecciones: document.getElementById('inspecciones-view'),
+    detalle:      document.getElementById('detail-view'),
+    resumen:      document.getElementById('resumen-view'),
+  };
+  Object.values(views).forEach(v => v.style.display = 'none');
+  const fab = document.getElementById('fab');
+
+  if (view === 'inspecciones') {
+    views.inspecciones.style.display = 'block';
+    fab.style.display = 'flex';
+    document.getElementById('header-title').textContent = 'Kobalt Inspección';
+    await renderInspecciones();
+  } else if (view === 'detalle') {
+    views.detalle.style.display = 'block';
+    fab.style.display = 'none';
+    await renderDetalle();
+  } else if (view === 'resumen') {
+    views.resumen.style.display = 'block';
+    fab.style.display = 'none';
+    await renderResumen();
+  }
+}
+
+async function renderInspecciones() {
+  const all = await getAllInspecciones();
+  const container = document.getElementById('ins-list');
+  const emptyEl   = document.getElementById('empty-state');
+
+  if (all.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const cardsHtml = await Promise.all(all.map(async ins => {
+    const items = await getItemsDe(ins.id);
+    const res = getResumen(items);
+    const countersHtml = items.length > 0 ? `
+      <div class="mini-counters">
+        <span class="mc mc-pass">${res.pass}P</span>
+        <span class="mc mc-fail">${res.fail}F</span>
+        <span class="mc mc-na">${res.na}N</span>
+        <span class="mc mc-pendiente">${res.pendiente}?</span>
+      </div>` : '';
+    return `
+      <div class="ins-card" data-id="${escHtml(ins.id)}">
+        <div class="card-title">${escHtml(ins.titulo || '(sin título)')}</div>
+        <div class="card-sub">${escHtml(ins.area || '')}${ins.area && ins.fechaISO ? ' · ' : ''}${escHtml(ins.fechaISO || '')}${ins.inspector ? ' · ' + escHtml(ins.inspector) : ''}</div>
+        <div class="card-footer">
+          ${estadoBadgeHtml(ins.estado)}
+          ${countersHtml}
+          <span class="card-ts">${formatTs(ins.ts)}</span>
+        </div>
+      </div>`;
+  }));
+
+  container.innerHTML = cardsHtml.join('');
+  container.querySelectorAll('.ins-card').forEach(card => {
+    card.addEventListener('click', () => {
+      currentInspeccionId = card.dataset.id;
+      view = 'detalle';
+      render();
+    });
+  });
+}
+
+async function renderDetalle() {
+  if (!currentInspeccionId) { view = 'inspecciones'; render(); return; }
+  const ins = await idbGet('c:' + currentInspeccionId);
+  if (!ins) { view = 'inspecciones'; render(); return; }
+
+  document.getElementById('header-title').textContent = ins.titulo || 'Detalle';
+
+  // Header info
+  document.getElementById('detail-header-info').innerHTML = `
+    <div class="dhi-item">
+      <span class="dhi-label">Área</span>
+      <span class="dhi-value">${escHtml(ins.area || '—')}</span>
+    </div>
+    <div class="dhi-item">
+      <span class="dhi-label">Fecha</span>
+      <span class="dhi-value">${escHtml(ins.fechaISO || '—')}</span>
+    </div>
+    <div class="dhi-item">
+      <span class="dhi-label">Inspector</span>
+      <span class="dhi-value">${escHtml(ins.inspector || '—')}</span>
+    </div>
+    <div class="dhi-item">
+      <span class="dhi-label">Estado</span>
+      <span class="dhi-value">${estadoBadgeHtml(ins.estado)}</span>
+    </div>`;
+
+  const items = await getItemsDe(currentInspeccionId);
+  const resumen = getResumen(items);
+
+  // Barra de progreso
+  const total = items.length;
+  const done  = total - resumen.pendiente;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label-text').textContent =
+    `Progreso (${done}/${total} ítems evaluados)`;
+
+  // Lista de ítems
+  const listEl = document.getElementById('items-list');
+  listEl.innerHTML = '';
+  for (const item of items) {
+    const card = buildItemCard(item, ins.estado === 'cerrada');
+    listEl.appendChild(card);
+  }
+
+  // Botón cerrar — solo si todos != pendiente y hay al menos un ítem
+  const btnCerrar = document.getElementById('btn-cerrar-ins');
+  const puedeCerrar = total > 0 && resumen.pendiente === 0 && ins.estado !== 'cerrada';
+  btnCerrar.disabled = !puedeCerrar;
+  btnCerrar.textContent = ins.estado === 'cerrada' ? 'Inspección cerrada' : 'Cerrar inspección';
+
+  // Input añadir ítem — desactivar si cerrada
+  const addInput = document.getElementById('add-item-input');
+  const btnAdd   = document.getElementById('btn-add-item');
+  addInput.disabled = ins.estado === 'cerrada';
+  btnAdd.disabled   = ins.estado === 'cerrada';
+}
+
+function buildItemCard(item, readonly) {
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.dataset.id = item.id;
+
+  const res = item.resultado || 'pendiente';
+
+  card.innerHTML = `
+    <div class="item-header">
+      <span class="item-desc">${escHtml(item.descripcion)}</span>
+      <span class="item-expand-icon">▼</span>
+    </div>
+    <div class="resultado-btns">
+      <button class="btn-resultado pass${res === 'pass' ? ' active-pass' : ''}" data-r="pass" ${readonly ? 'disabled' : ''}>✓ PASS</button>
+      <button class="btn-resultado fail${res === 'fail' ? ' active-fail' : ''}" data-r="fail" ${readonly ? 'disabled' : ''}>✗ FAIL</button>
+      <button class="btn-resultado na${res === 'na' ? ' active-na' : ''}" data-r="na" ${readonly ? 'disabled' : ''}>— N/A</button>
+    </div>
+    <div class="item-notas-wrap">
+      <textarea class="item-notas-ta" placeholder="Observaciones…" ${readonly ? 'disabled' : ''}>${escHtml(item.notas || '')}</textarea>
+    </div>`;
+
+  // Toggle expand
+  card.querySelector('.item-header').addEventListener('click', () => {
+    card.classList.toggle('expanded');
+  });
+
+  // Botones resultado
+  card.querySelectorAll('.btn-resultado').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const r = btn.dataset.r;
+      await setResultado(item.id, r);
+      // Actualizar UI sin re-render completo
+      card.querySelectorAll('.btn-resultado').forEach(b => {
+        b.className = `btn-resultado ${b.dataset.r}`;
+      });
+      btn.classList.add('active-' + r);
+      // Actualizar progreso y botón cerrar
+      await refreshProgress();
+    });
+  });
+
+  // Notas con debounce
+  let notaTimer = null;
+  const ta = card.querySelector('.item-notas-ta');
+  ta.addEventListener('input', () => {
+    clearTimeout(notaTimer);
+    notaTimer = setTimeout(async () => {
+      await setNotaItem(item.id, ta.value);
+    }, 600);
+  });
+
+  return card;
+}
+
+async function refreshProgress() {
+  if (!currentInspeccionId) return;
+  const ins = await idbGet('c:' + currentInspeccionId);
+  if (!ins) return;
+  const items = await getItemsDe(currentInspeccionId);
+  const resumen = getResumen(items);
+  const total = items.length;
+  const done  = total - resumen.pendiente;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label-text').textContent =
+    `Progreso (${done}/${total} ítems evaluados)`;
+
+  const btnCerrar = document.getElementById('btn-cerrar-ins');
+  const puedeCerrar = total > 0 && resumen.pendiente === 0 && ins.estado !== 'cerrada';
+  btnCerrar.disabled = !puedeCerrar;
+}
+
+async function renderResumen() {
+  if (!currentInspeccionId) { view = 'inspecciones'; render(); return; }
+  const ins = await idbGet('c:' + currentInspeccionId);
+  if (!ins) { view = 'inspecciones'; render(); return; }
+
+  document.getElementById('header-title').textContent = 'Resumen: ' + (ins.titulo || '');
+
+  const items = await getItemsDe(currentInspeccionId);
+  const r = getResumen(items);
+  const total = items.length;
+  const failItems = items.filter(i => i.resultado === 'fail');
+
+  document.getElementById('resumen-content').innerHTML = `
+    <table class="resumen-table">
+      <thead>
+        <tr>
+          <th>Total</th>
+          <th>PASS</th>
+          <th>FAIL</th>
+          <th>N/A</th>
+          <th>Pendiente</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>${total}</td>
+          <td class="val-pass">${r.pass}</td>
+          <td class="val-fail">${r.fail}</td>
+          <td class="val-na">${r.na}</td>
+          <td class="val-pendiente">${r.pendiente}</td>
+        </tr>
+      </tbody>
+    </table>
+    ${failItems.length > 0 ? `
+      <div class="section-label">Ítems FAIL — acción correctiva requerida</div>
+      ${failItems.map(i => `
+        <div class="fail-item-row">
+          <div class="fi-desc">${escHtml(i.descripcion)}</div>
+          ${i.notas ? `<div class="fi-nota">${escHtml(i.notas)}</div>` : ''}
+        </div>`).join('')}
+    ` : `<div class="section-label" style="margin-top:16px;color:var(--pass)">Sin ítems FAIL</div>`}`;
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// Sync
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// FAB
+document.getElementById('fab').addEventListener('click', () => {
+  document.getElementById('m-titulo').value   = '';
+  document.getElementById('m-area').value     = '';
+  document.getElementById('m-fecha').value    = todayISO();
+  document.getElementById('m-inspector').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-titulo').focus(), 50);
+});
+
+// Modal cancel
+document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// Modal overlay click outside
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// Modal create
+document.getElementById('btn-modal-create').addEventListener('click', async () => {
+  const titulo    = document.getElementById('m-titulo').value.trim();
+  const area      = document.getElementById('m-area').value.trim();
+  const fechaISO  = document.getElementById('m-fecha').value || todayISO();
+  const inspector = document.getElementById('m-inspector').value.trim();
+
+  if (!titulo) { document.getElementById('m-titulo').focus(); return; }
+
+  const ins = await createInspeccion(titulo, area, fechaISO, inspector);
+  document.getElementById('modal-overlay').classList.remove('open');
+  showToast('Inspección creada');
+  currentInspeccionId = ins.id;
+  view = 'detalle';
+  await render();
+});
+
+// Volver desde detalle
+document.getElementById('btn-back-detail').addEventListener('click', () => {
+  view = 'inspecciones';
+  currentInspeccionId = null;
+  render();
+});
+
+// Volver desde resumen
+document.getElementById('btn-back-resumen').addEventListener('click', () => {
+  view = 'detalle';
+  render();
+});
+
+// Ver resumen
+document.getElementById('btn-ver-resumen').addEventListener('click', () => {
+  view = 'resumen';
+  render();
+});
+
+// Cerrar inspección
+document.getElementById('btn-cerrar-ins').addEventListener('click', async () => {
+  if (!currentInspeccionId) return;
+  if (!confirm('¿Cerrar esta inspección? No podrá editarse después.')) return;
+  await cerrarInspeccion(currentInspeccionId);
+  showToast('Inspección cerrada');
+  await renderDetalle();
+});
+
+// Añadir ítem
+document.getElementById('btn-add-item').addEventListener('click', addItemFromInput);
+document.getElementById('add-item-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addItemFromInput();
+});
+
+async function addItemFromInput() {
+  if (!currentInspeccionId) return;
+  const input = document.getElementById('add-item-input');
+  const desc = input.value.trim();
+  if (!desc) { input.focus(); return; }
+
+  const items = await getItemsDe(currentInspeccionId);
+  const orden = items.length;
+  await addItemToInspeccion(currentInspeccionId, desc, orden);
+  input.value = '';
+  input.focus();
+  await renderDetalle();
+  showToast('Ítem añadido');
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-overlay');
+    if (modal.classList.contains('open')) {
+      modal.classList.remove('open');
+    } else if (view === 'detalle') {
+      view = 'inspecciones';
+      currentInspeccionId = null;
+      render();
+    } else if (view === 'resumen') {
+      view = 'detalle';
+      render();
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobalt Inventario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0f0f0f;
+      --surface:     #1a1a1a;
+      --border:      #2a2a2a;
+      --text:        #e8e8e8;
+      --muted:       #666;
+      --accent:      #4f8ef7;
+      --danger:      #e05555;
+      --radius:      8px;
+      --bueno:       #4caf50;
+      --deteriorado: #ff9800;
+      --roto:        #ef5350;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+
+    #header-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    #sync-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-left: auto;
+    }
+    #sync-status.ok    { color: #4caf7d; }
+    #sync-status.error { color: var(--danger); }
+    #sync-status.busy  { color: var(--accent); }
+
+    #btn-search-header {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-search-header:hover { border-color: var(--accent); color: var(--accent); }
+
+    #btn-sync {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    #btn-sync:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 16px 12px 100px;
+    }
+
+    /* ── SECTIONS / VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── UBICACIONES GRID ── */
+    #ub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .ub-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .ub-card:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .ub-card-name {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ub-card-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .ub-estado-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .estado-pill {
+      font-size: .68rem;
+      font-weight: 500;
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .estado-pill.bueno       { background: rgba(76,175,80,.15);  color: var(--bueno); }
+    .estado-pill.deteriorado { background: rgba(255,152,0,.15);  color: var(--deteriorado); }
+    .estado-pill.roto        { background: rgba(239,83,80,.15);  color: var(--roto); }
+
+    .ub-sin-ubicacion {
+      margin-top: 24px;
+    }
+    .ub-sin-ubicacion h2 {
+      font-size: .85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+    }
+
+    /* ── DETALLE UBICACION ── */
+    .view-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .view-toolbar h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 7px 16px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .85; }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--danger);
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-danger:hover { border-color: var(--danger); }
+
+    /* ── CHIP FILTROS ── */
+    #cat-filter {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .cat-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .cat-chip:hover { border-color: var(--accent); color: var(--text); }
+    .cat-chip.active { border-color: var(--accent); color: var(--accent); background: #1e2d45; }
+
+    /* ── ITEM LIST ── */
+    #items-list, #sin-ub-list, #search-results {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color .15s, background .15s;
+    }
+    .item-row:hover { border-color: var(--accent); background: #1f1f1f; }
+
+    .item-row-name {
+      font-weight: 500;
+      font-size: .92rem;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-row-qty {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .estado-badge {
+      font-size: .7rem;
+      font-weight: 600;
+      border-radius: 4px;
+      padding: 2px 8px;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .estado-badge.bueno       { background: rgba(76,175,80,.15);  color: var(--bueno); }
+    .estado-badge.deteriorado { background: rgba(255,152,0,.15);  color: var(--deteriorado); }
+    .estado-badge.roto        { background: rgba(239,83,80,.15);  color: var(--roto); }
+
+    .item-row-ub {
+      font-size: .75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── ITEM DETALLE (formulario) ── */
+    .detail-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    .detail-field { margin-bottom: 16px; }
+
+    .detail-field-label {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
+    .field-input, .field-textarea, .field-select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color .15s;
+      appearance: none;
+    }
+    .field-input:focus,
+    .field-textarea:focus,
+    .field-select:focus { border-color: var(--accent); }
+    .field-select option { background: var(--surface); }
+    .field-textarea { min-height: 100px; line-height: 1.55; resize: vertical; }
+
+    /* ── BUSCAR ── */
+    #search-input-global {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9rem;
+      padding: 9px 14px;
+      outline: none;
+      transition: border-color .15s;
+      margin-bottom: 14px;
+    }
+    #search-input-global:focus { border-color: var(--accent); }
+    #search-input-global::placeholder { color: var(--muted); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    /* ── FAB ── */
+    #fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(79,142,247,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+      z-index: 200;
+    }
+    #fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(79,142,247,.6); }
+
+    /* ── MODAL ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      padding: 16px;
+    }
+    #modal-overlay.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    #modal-box h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .modal-field { margin-bottom: 14px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    .btn-save {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-save:hover { opacity: .85; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1f2e46;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 8px 18px;
+      font-size: .82rem;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .view-toolbar { flex-wrap: wrap; }
+      .btn-primary  { order: -1; width: 100%; text-align: center; }
+      #ub-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Kobalt Inventario</h1>
+  <span id="header-stats">— ítems</span>
+  <span id="sync-status">—</span>
+  <button id="btn-search-header">Buscar</button>
+  <button id="btn-sync">Sync</button>
+</header>
+
+<main>
+
+  <!-- VIEW: UBICACIONES -->
+  <div id="view-ubicaciones" class="view active">
+    <div id="ub-grid"></div>
+    <div class="ub-sin-ubicacion" id="sin-ub-section" style="display:none">
+      <h2>Sin ubicacion</h2>
+      <div id="sin-ub-list"></div>
+    </div>
+    <div class="empty-state" id="ub-empty" style="display:none">
+      <p>Sin ubicaciones. Pulsa <strong>+</strong> para crear la primera.</p>
+    </div>
+  </div>
+
+  <!-- VIEW: DETALLE UBICACION -->
+  <div id="view-ub-detalle" class="view">
+    <div class="view-toolbar">
+      <button class="btn-back" id="btn-back-ub">← Volver</button>
+      <h2 id="ub-detalle-nombre">Ubicacion</h2>
+      <button class="btn-primary" id="btn-add-item-ub">+ Item</button>
+    </div>
+    <div id="cat-filter"></div>
+    <div id="items-list"></div>
+    <div class="empty-state" id="items-empty" style="display:none">
+      <p>Sin items en esta ubicacion.</p>
+    </div>
+  </div>
+
+  <!-- VIEW: ITEM DETALLE -->
+  <div id="view-item-detalle" class="view">
+    <div class="view-toolbar">
+      <button class="btn-back" id="btn-back-item">← Volver</button>
+      <span class="detail-meta" id="item-detail-meta"></span>
+      <button class="btn-danger" id="btn-delete-item">Eliminar</button>
+      <button class="btn-primary" id="btn-save-item">Guardar</button>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Nombre</div>
+      <input class="field-input" id="d-nombre" type="text" maxlength="120" placeholder="Nombre del item…" />
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Categoria</div>
+      <select class="field-select" id="d-categoria">
+        <option value="electrodomestico">Electrodomestico</option>
+        <option value="herramienta">Herramienta</option>
+        <option value="ropa">Ropa</option>
+        <option value="documento">Documento</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Ubicacion</div>
+      <select class="field-select" id="d-ubicacion">
+        <option value="">-- Sin ubicacion --</option>
+      </select>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Cantidad</div>
+      <input class="field-input" id="d-cantidad" type="number" min="1" value="1" />
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Estado</div>
+      <select class="field-select" id="d-estado">
+        <option value="bueno">Bueno</option>
+        <option value="deteriorado">Deteriorado</option>
+        <option value="roto">Roto</option>
+      </select>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Notas</div>
+      <textarea class="field-textarea" id="d-notas" placeholder="Notas opcionales…"></textarea>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Valor estimado ($)</div>
+      <input class="field-input" id="d-valor" type="number" min="0" step="0.01" placeholder="0.00" />
+    </div>
+  </div>
+
+  <!-- VIEW: BUSCAR -->
+  <div id="view-buscar" class="view">
+    <div class="view-toolbar">
+      <button class="btn-back" id="btn-back-buscar">← Volver</button>
+      <h2>Buscar</h2>
+    </div>
+    <input id="search-input-global" type="search" placeholder="Buscar items…" autocomplete="off" />
+    <div id="search-results"></div>
+    <div class="empty-state" id="search-empty" style="display:none">
+      <p>Sin resultados.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- FAB -->
+<button id="fab" title="Nueva ubicacion">+</button>
+
+<!-- MODAL CREAR UBICACION / ITEM -->
+<div id="modal-overlay" role="dialog" aria-modal="true">
+  <div id="modal-box">
+    <h2 id="modal-title">Nueva ubicacion</h2>
+
+    <!-- Campos ubicacion -->
+    <div id="modal-ub-fields">
+      <div class="modal-field">
+        <div class="detail-field-label">Nombre de la ubicacion</div>
+        <input class="field-input" id="m-ub-nombre" type="text" maxlength="80" placeholder="Ej: Cocina, Bodega…" />
+      </div>
+    </div>
+
+    <!-- Campos item -->
+    <div id="modal-item-fields" style="display:none">
+      <div class="modal-field">
+        <div class="detail-field-label">Nombre</div>
+        <input class="field-input" id="m-nombre" type="text" maxlength="120" placeholder="Nombre del item…" />
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Categoria</div>
+        <select class="field-select" id="m-categoria">
+          <option value="electrodomestico">Electrodomestico</option>
+          <option value="herramienta">Herramienta</option>
+          <option value="ropa">Ropa</option>
+          <option value="documento">Documento</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Ubicacion</div>
+        <select class="field-select" id="m-ubicacion">
+          <option value="">-- Sin ubicacion --</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Cantidad</div>
+        <input class="field-input" id="m-cantidad" type="number" min="1" value="1" />
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Estado</div>
+        <select class="field-select" id="m-estado">
+          <option value="bueno">Bueno</option>
+          <option value="deteriorado">Deteriorado</option>
+          <option value="roto">Roto</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Notas</div>
+        <textarea class="field-textarea" id="m-notas" placeholder="Notas opcionales…" style="min-height:70px"></textarea>
+      </div>
+      <div class="modal-field">
+        <div class="detail-field-label">Valor estimado ($)</div>
+        <input class="field-input" id="m-valor" type="number" min="0" step="0.01" placeholder="0.00" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-modal-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-modal-confirm">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── CONSTANTS ──────────────────────────────────────────────────
+const APP_NAME = 'Kobalt-Inventario';
+const SAVE_URL = './save.php';
+const DATA_URL = './data';
+const IDB_NAME = 'data_' + APP_NAME;
+const IDB_STORE = 'kv';
+
+// ── IDB ────────────────────────────────────────────────────────
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGet(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbSet(key, val) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(val, key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbDelete(key) {
+  return new Promise((resolve, reject) => {
+    const tx = _db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function idbGetAll(prefix) {
+  return new Promise((resolve, reject) => {
+    const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    const tx = _db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).openCursor(range);
+    const results = [];
+    req.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) { results.push(cursor.value); cursor.continue(); }
+      else resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+// ── ID / TS ────────────────────────────────────────────────────
+function newId() {
+  return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
+// ── OMEGA ──────────────────────────────────────────────────────
+async function getOmega() {
+  return (await idbGet('m:omega')) || {};
+}
+async function saveOmega(omega) {
+  await idbSet('m:omega', omega);
+}
+
+// ── SAVE ENTITY ────────────────────────────────────────────────
+async function saveEntity(prefix, entity) {
+  const key = prefix + ':' + entity.id;
+  await idbSet(key, entity);
+  const omega = await getOmega();
+  omega[key] = entity.ts;
+  await saveOmega(omega);
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+let _syncing = false;
+
+async function syncNow() {
+  if (_syncing) return;
+  _syncing = true;
+  setSyncStatus('busy', 'sincronizando...');
+
+  try {
+    let remoteOmega = {};
+    try {
+      const res = await fetch(DATA_URL + '/manifest.json', { cache: 'no-store' });
+      if (res.ok) remoteOmega = await res.json();
+    } catch (_) {
+      setSyncStatus('error', 'sin conexion');
+      return;
+    }
+
+    const localOmega = await getOmega();
+
+    const allKeys = new Set([...Object.keys(localOmega), ...Object.keys(remoteOmega)]);
+    const toPush = [];
+    const toPull = [];
+
+    for (const key of allKeys) {
+      const tsL = localOmega[key] || 0;
+      const tsR = remoteOmega[key] || 0;
+      if (tsL > tsR) toPush.push(key);
+      else if (tsR > tsL) toPull.push(key);
+    }
+
+    if (toPush.length > 0) {
+      for (const key of toPush) {
+        const payload = await idbGet(key);
+        if (payload === undefined) continue;
+        const [prefix, id] = key.split(':');
+        await fetch(SAVE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'put', path: `${prefix}/${id}.json`, data: payload })
+        });
+      }
+      const merged = {};
+      for (const k of allKeys) merged[k] = Math.max(localOmega[k] || 0, remoteOmega[k] || 0);
+      await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manifest', data: merged })
+      });
+      await saveOmega(merged);
+    }
+
+    let pulled = 0;
+    for (const key of toPull) {
+      try {
+        const [prefix, id] = key.split(':');
+        const res = await fetch(`${DATA_URL}/${prefix}/${id}.json`, { cache: 'no-store' });
+        if (res.ok) {
+          const payload = await res.json();
+          await idbSet(key, payload);
+          localOmega[key] = remoteOmega[key];
+          pulled++;
+        }
+      } catch (_) { /* skip */ }
+    }
+
+    await saveOmega(localOmega);
+
+    if (pulled > 0) await render();
+
+    const ts = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('ok', 'sync ' + ts);
+  } catch (err) {
+    setSyncStatus('error', 'error sync');
+    console.error('[sync]', err);
+  } finally {
+    _syncing = false;
+  }
+}
+
+function startSyncLoop() {
+  syncNow();
+  setInterval(syncNow, 30000);
+}
+
+// ── DOMAIN ─────────────────────────────────────────────────────
+
+async function createUbicacion(nombre) {
+  const e = { id: newId(), nombre, members: [], ts: now() };
+  await saveEntity('c', e);
+  return e;
+}
+
+async function createItem(nombre, categoria, ubicacionId, cantidad, estado, notas, valorEstimado) {
+  const item = {
+    id: newId(),
+    nombre,
+    categoria,
+    ubicacionId: ubicacionId || null,
+    cantidad,
+    estado,
+    notas,
+    valorEstimado: valorEstimado || null,
+    ts: now()
+  };
+  await saveEntity('a', item);
+  if (ubicacionId) {
+    const ub = await idbGet('c:' + ubicacionId);
+    if (ub) {
+      ub.members = [...(ub.members || []), item.id];
+      ub.ts = now();
+      await saveEntity('c', ub);
+    }
+  }
+  return item;
+}
+
+async function updateItem(id, cambios) {
+  const item = await idbGet('a:' + id);
+  if (!item) return;
+  const oldUbId = item.ubicacionId;
+  const newUbId = 'ubicacionId' in cambios ? cambios.ubicacionId : oldUbId;
+
+  if (oldUbId !== newUbId) {
+    await moverItem(id, newUbId);
+    const refreshed = await idbGet('a:' + id);
+    const updated = Object.assign({}, refreshed, cambios, { ubicacionId: newUbId, ts: now() });
+    await saveEntity('a', updated);
+  } else {
+    const updated = Object.assign({}, item, cambios, { ts: now() });
+    await saveEntity('a', updated);
+  }
+}
+
+async function moverItem(itemId, nuevaUbicacionId) {
+  const item = await idbGet('a:' + itemId);
+  if (!item) return;
+  if (item.ubicacionId) {
+    const old = await idbGet('c:' + item.ubicacionId);
+    if (old) {
+      old.members = old.members.filter(id => id !== itemId);
+      old.ts = now();
+      await saveEntity('c', old);
+    }
+  }
+  if (nuevaUbicacionId) {
+    const nw = await idbGet('c:' + nuevaUbicacionId);
+    if (nw) {
+      nw.members = [...(nw.members || []), itemId];
+      nw.ts = now();
+      await saveEntity('c', nw);
+    }
+  }
+  item.ubicacionId = nuevaUbicacionId || null;
+  item.ts = now();
+  await saveEntity('a', item);
+}
+
+async function deleteItem(id) {
+  const item = await idbGet('a:' + id);
+  if (!item) return;
+  if (item.ubicacionId) {
+    const ub = await idbGet('c:' + item.ubicacionId);
+    if (ub) {
+      ub.members = ub.members.filter(m => m !== id);
+      ub.ts = now();
+      await saveEntity('c', ub);
+    }
+  }
+  await idbDelete('a:' + id);
+  const omega = await getOmega();
+  delete omega['a:' + id];
+  await saveOmega(omega);
+}
+
+async function deleteUbicacion(id) {
+  const ub = await idbGet('c:' + id);
+  if (!ub) return;
+  // Desasociar todos sus items
+  for (const mid of (ub.members || [])) {
+    const item = await idbGet('a:' + mid);
+    if (item) {
+      item.ubicacionId = null;
+      item.ts = now();
+      await saveEntity('a', item);
+    }
+  }
+  await idbDelete('c:' + id);
+  const omega = await getOmega();
+  delete omega['c:' + id];
+  await saveOmega(omega);
+}
+
+async function getItemsDe(ubicacionId) {
+  const all = await idbGetAll('a:');
+  return all.filter(i => i.ubicacionId === ubicacionId);
+}
+
+async function getItemsSinUbicacion() {
+  const all = await idbGetAll('a:');
+  return all.filter(i => !i.ubicacionId);
+}
+
+async function getAllItems() {
+  return idbGetAll('a:');
+}
+
+async function getAllUbicaciones() {
+  return idbGetAll('c:');
+}
+
+async function buscar(query) {
+  const q = query.toLowerCase();
+  const all = await idbGetAll('a:');
+  return all.filter(i =>
+    i.nombre.toLowerCase().includes(q) ||
+    i.categoria.includes(q) ||
+    (i.notas || '').toLowerCase().includes(q)
+  );
+}
+
+// ── STATS ──────────────────────────────────────────────────────
+async function updateHeaderStats() {
+  const items = await getAllItems();
+  const total = items.length;
+  const valor = items.reduce((s, i) => s + (i.valorEstimado || 0), 0);
+  const el = document.getElementById('header-stats');
+  el.textContent = total + ' items' + (valor > 0 ? ' · $' + valor.toLocaleString('es') : '');
+}
+
+// ── UI STATE ───────────────────────────────────────────────────
+let view              = 'ubicaciones';
+let currentUbicacionId = null;
+let currentItemId      = null;
+let activeCatFilter    = null;
+let _modalMode         = 'ubicacion'; // 'ubicacion' | 'item'
+
+// ── HELPERS ────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function formatTs(ts) {
+  const d = new Date(ts * 1000);
+  const pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+    + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function setSyncStatus(cls, text) {
+  const el = document.getElementById('sync-status');
+  el.className = cls;
+  el.textContent = text;
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function estadoBadge(estado) {
+  return `<span class="estado-badge ${escHtml(estado)}">${escHtml(estado)}</span>`;
+}
+
+function estadoPill(estado, count) {
+  if (!count) return '';
+  return `<span class="estado-pill ${escHtml(estado)}">${count} ${escHtml(estado)}</span>`;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+async function render() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const fab = document.getElementById('fab');
+
+  if (view === 'ubicaciones') {
+    document.getElementById('view-ubicaciones').classList.add('active');
+    fab.style.display = 'flex';
+    fab.title = 'Nueva ubicacion';
+    await renderUbicaciones();
+  } else if (view === 'ub-detalle') {
+    document.getElementById('view-ub-detalle').classList.add('active');
+    fab.style.display = 'none';
+    await renderUbDetalle();
+  } else if (view === 'item-detalle') {
+    document.getElementById('view-item-detalle').classList.add('active');
+    fab.style.display = 'none';
+    await renderItemDetalle();
+  } else if (view === 'buscar') {
+    document.getElementById('view-buscar').classList.add('active');
+    fab.style.display = 'none';
+    document.getElementById('search-input-global').value = '';
+    document.getElementById('search-results').innerHTML = '';
+    document.getElementById('search-empty').style.display = 'none';
+    setTimeout(() => document.getElementById('search-input-global').focus(), 50);
+  }
+
+  await updateHeaderStats();
+}
+
+async function renderUbicaciones() {
+  const ubs   = await getAllUbicaciones();
+  const grid  = document.getElementById('ub-grid');
+  const empty = document.getElementById('ub-empty');
+  const sinUbSec = document.getElementById('sin-ub-section');
+  const sinUbList = document.getElementById('sin-ub-list');
+
+  if (ubs.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    grid.innerHTML = '';
+    for (const ub of ubs) {
+      const items = await getItemsDe(ub.id);
+      const bueno       = items.filter(i => i.estado === 'bueno').length;
+      const deteriorado = items.filter(i => i.estado === 'deteriorado').length;
+      const roto        = items.filter(i => i.estado === 'roto').length;
+      const card = document.createElement('div');
+      card.className = 'ub-card';
+      card.dataset.id = ub.id;
+      card.innerHTML = `
+        <div class="ub-card-name">${escHtml(ub.nombre)}</div>
+        <div class="ub-card-count">${items.length} item${items.length !== 1 ? 's' : ''}</div>
+        <div class="ub-estado-bar">
+          ${estadoPill('bueno', bueno)}
+          ${estadoPill('deteriorado', deteriorado)}
+          ${estadoPill('roto', roto)}
+        </div>`;
+      card.addEventListener('click', () => {
+        currentUbicacionId = ub.id;
+        activeCatFilter = null;
+        view = 'ub-detalle';
+        render();
+      });
+      grid.appendChild(card);
+    }
+  }
+
+  // Sin ubicacion
+  const sinUb = await getItemsSinUbicacion();
+  if (sinUb.length > 0) {
+    sinUbSec.style.display = 'block';
+    sinUbList.innerHTML = sinUb.map(item => `
+      <div class="item-row" data-id="${escHtml(item.id)}">
+        <span class="item-row-name">${escHtml(item.nombre)}</span>
+        <span class="item-row-qty">x${item.cantidad}</span>
+        ${estadoBadge(item.estado)}
+      </div>`).join('');
+    sinUbList.querySelectorAll('.item-row').forEach(row => {
+      row.addEventListener('click', () => {
+        currentItemId = row.dataset.id;
+        view = 'item-detalle';
+        render();
+      });
+    });
+  } else {
+    sinUbSec.style.display = 'none';
+  }
+}
+
+async function renderUbDetalle() {
+  if (!currentUbicacionId) { view = 'ubicaciones'; render(); return; }
+  const ub = await idbGet('c:' + currentUbicacionId);
+  if (!ub) { view = 'ubicaciones'; render(); return; }
+
+  document.getElementById('ub-detalle-nombre').textContent = ub.nombre;
+
+  let items = await getItemsDe(currentUbicacionId);
+  items.sort((a, b) => b.ts - a.ts);
+
+  // Cat filter chips
+  const cats = ['electrodomestico', 'herramienta', 'ropa', 'documento', 'otro'];
+  const usedCats = [...new Set(items.map(i => i.categoria))];
+  const filterDiv = document.getElementById('cat-filter');
+  filterDiv.innerHTML = '';
+  if (usedCats.length > 1) {
+    const allChip = document.createElement('span');
+    allChip.className = 'cat-chip' + (activeCatFilter === null ? ' active' : '');
+    allChip.textContent = 'Todos';
+    allChip.addEventListener('click', () => { activeCatFilter = null; renderUbDetalle(); });
+    filterDiv.appendChild(allChip);
+    for (const cat of cats) {
+      if (!usedCats.includes(cat)) continue;
+      const chip = document.createElement('span');
+      chip.className = 'cat-chip' + (activeCatFilter === cat ? ' active' : '');
+      chip.textContent = cat;
+      chip.addEventListener('click', () => { activeCatFilter = cat; renderUbDetalle(); });
+      filterDiv.appendChild(chip);
+    }
+  }
+
+  if (activeCatFilter) items = items.filter(i => i.categoria === activeCatFilter);
+
+  const list  = document.getElementById('items-list');
+  const empty = document.getElementById('items-empty');
+
+  if (items.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    list.innerHTML = items.map(item => `
+      <div class="item-row" data-id="${escHtml(item.id)}">
+        <span class="item-row-name">${escHtml(item.nombre)}</span>
+        <span class="item-row-qty">x${item.cantidad}</span>
+        ${estadoBadge(item.estado)}
+      </div>`).join('');
+    list.querySelectorAll('.item-row').forEach(row => {
+      row.addEventListener('click', () => {
+        currentItemId = row.dataset.id;
+        view = 'item-detalle';
+        render();
+      });
+    });
+  }
+}
+
+async function renderItemDetalle() {
+  if (!currentItemId) { view = 'ubicaciones'; render(); return; }
+  const item = await idbGet('a:' + currentItemId);
+  if (!item) { view = 'ubicaciones'; render(); return; }
+
+  document.getElementById('item-detail-meta').textContent =
+    'id:' + item.id + '  ·  ' + formatTs(item.ts);
+
+  document.getElementById('d-nombre').value    = item.nombre || '';
+  document.getElementById('d-categoria').value = item.categoria || 'otro';
+  document.getElementById('d-cantidad').value  = item.cantidad || 1;
+  document.getElementById('d-estado').value    = item.estado || 'bueno';
+  document.getElementById('d-notas').value     = item.notas || '';
+  document.getElementById('d-valor').value     = item.valorEstimado || '';
+
+  // Populate ubicacion select
+  await populateUbicacionSelect('d-ubicacion', item.ubicacionId);
+}
+
+async function populateUbicacionSelect(selectId, selectedId) {
+  const sel = document.getElementById(selectId);
+  const ubs = await getAllUbicaciones();
+  sel.innerHTML = '<option value="">-- Sin ubicacion --</option>';
+  for (const ub of ubs) {
+    const opt = document.createElement('option');
+    opt.value = ub.id;
+    opt.textContent = ub.nombre;
+    if (ub.id === selectedId) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+// ── SEARCH ─────────────────────────────────────────────────────
+async function renderSearch(query) {
+  const results  = document.getElementById('search-results');
+  const empty    = document.getElementById('search-empty');
+
+  if (!query.trim()) {
+    results.innerHTML = '';
+    empty.style.display = 'none';
+    return;
+  }
+
+  const items = await buscar(query);
+  const ubs   = await getAllUbicaciones();
+  const ubMap = {};
+  ubs.forEach(u => { ubMap[u.id] = u.nombre; });
+
+  if (items.length === 0) {
+    results.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  results.innerHTML = items.map(item => {
+    const ubNombre = item.ubicacionId ? (ubMap[item.ubicacionId] || 'Desconocida') : 'Sin ubicacion';
+    return `
+      <div class="item-row" data-id="${escHtml(item.id)}">
+        <span class="item-row-name">${escHtml(item.nombre)}</span>
+        <span class="item-row-qty">x${item.cantidad}</span>
+        ${estadoBadge(item.estado)}
+        <span class="item-row-ub">${escHtml(ubNombre)}</span>
+      </div>`;
+  }).join('');
+
+  results.querySelectorAll('.item-row').forEach(row => {
+    row.addEventListener('click', () => {
+      currentItemId = row.dataset.id;
+      view = 'item-detalle';
+      render();
+    });
+  });
+}
+
+// ── MODAL ──────────────────────────────────────────────────────
+function openModalUbicacion() {
+  _modalMode = 'ubicacion';
+  document.getElementById('modal-title').textContent = 'Nueva ubicacion';
+  document.getElementById('modal-ub-fields').style.display = 'block';
+  document.getElementById('modal-item-fields').style.display = 'none';
+  document.getElementById('m-ub-nombre').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-ub-nombre').focus(), 50);
+}
+
+async function openModalItem(preselectedUbId) {
+  _modalMode = 'item';
+  document.getElementById('modal-title').textContent = 'Nuevo item';
+  document.getElementById('modal-ub-fields').style.display = 'none';
+  document.getElementById('modal-item-fields').style.display = 'block';
+  document.getElementById('m-nombre').value   = '';
+  document.getElementById('m-categoria').value = 'otro';
+  document.getElementById('m-cantidad').value  = 1;
+  document.getElementById('m-estado').value    = 'bueno';
+  document.getElementById('m-notas').value     = '';
+  document.getElementById('m-valor').value     = '';
+  await populateUbicacionSelect('m-ubicacion', preselectedUbId || null);
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-nombre').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ── EVENTS ─────────────────────────────────────────────────────
+
+// FAB
+document.getElementById('fab').addEventListener('click', () => {
+  if (view === 'ubicaciones') openModalUbicacion();
+});
+
+// Search header button
+document.getElementById('btn-search-header').addEventListener('click', () => {
+  view = 'buscar';
+  render();
+});
+
+// Sync
+document.getElementById('btn-sync').addEventListener('click', syncNow);
+
+// Modal cancel
+document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+
+// Modal overlay click outside
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Modal confirm
+document.getElementById('btn-modal-confirm').addEventListener('click', async () => {
+  if (_modalMode === 'ubicacion') {
+    const nombre = document.getElementById('m-ub-nombre').value.trim();
+    if (!nombre) { document.getElementById('m-ub-nombre').focus(); return; }
+    await createUbicacion(nombre);
+    closeModal();
+    showToast('Ubicacion creada');
+    await render();
+  } else {
+    const nombre = document.getElementById('m-nombre').value.trim();
+    if (!nombre) { document.getElementById('m-nombre').focus(); return; }
+    const categoria    = document.getElementById('m-categoria').value;
+    const ubicacionId  = document.getElementById('m-ubicacion').value || null;
+    const cantidad     = parseInt(document.getElementById('m-cantidad').value) || 1;
+    const estado       = document.getElementById('m-estado').value;
+    const notas        = document.getElementById('m-notas').value.trim();
+    const valorRaw     = parseFloat(document.getElementById('m-valor').value);
+    const valorEstimado = isNaN(valorRaw) ? null : valorRaw;
+
+    await createItem(nombre, categoria, ubicacionId, cantidad, estado, notas, valorEstimado);
+    closeModal();
+    showToast('Item creado');
+    await render();
+  }
+});
+
+// Back buttons
+document.getElementById('btn-back-ub').addEventListener('click', () => {
+  view = 'ubicaciones';
+  currentUbicacionId = null;
+  render();
+});
+
+document.getElementById('btn-back-item').addEventListener('click', () => {
+  // Volver a donde vinimos
+  if (currentUbicacionId) {
+    view = 'ub-detalle';
+  } else {
+    view = 'ubicaciones';
+  }
+  currentItemId = null;
+  render();
+});
+
+document.getElementById('btn-back-buscar').addEventListener('click', () => {
+  view = 'ubicaciones';
+  render();
+});
+
+// Add item to ubicacion
+document.getElementById('btn-add-item-ub').addEventListener('click', async () => {
+  await openModalItem(currentUbicacionId);
+});
+
+// Save item detail
+document.getElementById('btn-save-item').addEventListener('click', async () => {
+  if (!currentItemId) return;
+  const nombre       = document.getElementById('d-nombre').value.trim();
+  const categoria    = document.getElementById('d-categoria').value;
+  const ubicacionId  = document.getElementById('d-ubicacion').value || null;
+  const cantidad     = parseInt(document.getElementById('d-cantidad').value) || 1;
+  const estado       = document.getElementById('d-estado').value;
+  const notas        = document.getElementById('d-notas').value.trim();
+  const valorRaw     = parseFloat(document.getElementById('d-valor').value);
+  const valorEstimado = isNaN(valorRaw) ? null : valorRaw;
+
+  if (!nombre) { document.getElementById('d-nombre').focus(); return; }
+
+  await updateItem(currentItemId, { nombre, categoria, ubicacionId, cantidad, estado, notas, valorEstimado });
+  await renderItemDetalle();
+  showToast('Item guardado');
+  await updateHeaderStats();
+});
+
+// Delete item
+document.getElementById('btn-delete-item').addEventListener('click', async () => {
+  if (!currentItemId) return;
+  if (!confirm('Eliminar este item?')) return;
+  const item = await idbGet('a:' + currentItemId);
+  const ubId = item ? item.ubicacionId : null;
+  await deleteItem(currentItemId);
+  currentItemId = null;
+  if (ubId) {
+    currentUbicacionId = ubId;
+    view = 'ub-detalle';
+  } else {
+    view = 'ubicaciones';
+  }
+  showToast('Item eliminado');
+  render();
+});
+
+// Search input global
+document.getElementById('search-input-global').addEventListener('input', e => {
+  renderSearch(e.target.value);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('modal-overlay');
+    if (modal.classList.contains('open')) {
+      closeModal();
+    } else if (view !== 'ubicaciones') {
+      if (view === 'item-detalle') {
+        document.getElementById('btn-back-item').click();
+      } else if (view === 'ub-detalle') {
+        document.getElementById('btn-back-ub').click();
+      } else if (view === 'buscar') {
+        document.getElementById('btn-back-buscar').click();
+      }
+    }
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────
+async function init() {
+  await openDB();
+  await render();
+  startSyncLoop();
+}
+
+init();
+</script>
+</body>
+</html>
