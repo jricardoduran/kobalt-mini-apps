@@ -1,0 +1,850 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qipu 2.0.0 · Evidencia de pruebas avanzadas</title><style>body{margin:0;background:#f4f6f8;color:#182d3a;font:16px/1.6 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:24px}header,section{background:#fff;border:1px solid #d6e0e5;border-radius:12px;padding:24px;margin:16px 0}header{border-top:5px solid #087b70}h1,h2{line-height:1.2}.eyebrow{font-size:12px;letter-spacing:.15em;font-weight:700;color:#087b70}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.tile{border:1px solid #d6e0e5;border-radius:8px;padding:12px}.metric{font-size:32px;color:#087b70;font-weight:800}.bar{display:flex;height:32px;border-radius:5px;overflow:hidden;margin:6px 0 16px;color:white;font-weight:600}.bar span{display:grid;place-items:center;background:#526779}.bar span:last-child{background:#087b70}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px solid #d6e0e5;padding:10px;text-align:left;vertical-align:top}th{background:#edf3f8}.scroll{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#edf3f8;padding:12px;font:13px/1.5 monospace}details{margin:12px 0}summary{cursor:pointer;font-weight:700}footer{font-size:13px;color:#526779}</style></head><body><main><header><div class="eyebrow">Kobalt Research / Qipu / evidencia reproducible</div><h1>Pruebas avanzadas de coherencia</h1><p>Qipu 2.0.0 · PAO 1.1.0 · 24 de noviembre de 2026 · Versión de la suite 0.1.0</p><div class="grid"><div class="tile"><div class="metric">334/334</div>Comprobaciones nuevas</div><div class="tile"><div class="metric">14</div>Ejecuciones independientes</div><div class="tile"><div class="metric">56/56</div>Regresión original</div><div class="tile"><div class="metric">390/390</div>Total identificado</div></div><p>PHP 8.4.24 y Node.js 22.16.0; servidor HTTP real con varios procesos. Datos sintéticos. El tercer nodo requirió una variante mínima de configuración, sin cambiar PAO.</p></header><section><h2>01 · Ventas concurrentes</h2><p>Stock inicial 20; solicitudes A=9, B=8, C=7. Tres aprobaciones simultáneas; la autoridad serializa los efectos. Dos reconocimientos y un rechazo en cada ronda.</p><div class="grid"><div class="tile">A + B · 2 rondas<div class="bar"><span style="width:85%">17</span><span style="width:15%">3</span></div></div><div class="tile">A + C · 1 ronda<div class="bar"><span style="width:80%">16</span><span style="width:20%">4</span></div></div><div class="tile">B + C · 3 rondas<div class="bar"><span style="width:75%">15</span><span style="width:25%">5</span></div></div></div><p>Gris: unidades reconocidas. Verde: saldo. 138/138 comprobaciones. Todas las combinaciones de ganadores observadas. El rechazo se registra explícitamente; HTTP 409 por sí solo no es una respuesta M3E1.</p></section><section><h2>02 · Constitución por primera aparición</h2><p>Nueve afirmaciones compartidas: tres nombran Cliente/CL-1/Nombre; tres amplían parámetros/entidades; dos compiten por la clase del parámetro Nivel; una agrega Ciudad. Ocho reconocidas, una rechazada por tipo incompatible. Cada ronda deriva una tabla Cliente, cuatro identidades y cinco parámetros sin duplicaciones.</p><p>Se observaron ambos tipos ganadores y los tres posibles nombres finales. La identidad nueva de la afirmación rechazada no emerge. Cero y false se distinguen de una celda ausente; los hechos privados quedan fuera de Q. 162/162 comprobaciones.</p></section><section><h2>03 · Recuperación y rollover</h2><pre>20 ── A vende 5 ── 15 (C constituida, RA aún ausente)
+   ── recuperar RA=1, B vende 6 ── 9
+   ── 127 rechazos de A ── 9 (C intacta)
+   ── A[128] vende 2, interrupción C→R ── 7
+   ── recuperar RA[128] = 0x80 ── 7</pre><p>32/32 comprobaciones sobre la versión original. Tres ventas canónicas únicas, 127 rechazos, 130 respuestas entre A y B. Rollover M3E1 confirmado. Interrupción simulada en proceso PHP separado, no corte de energía.</p></section><section><h2>04 · Resultados de cada ejecución</h2><div class="scroll"><table><thead><tr><th>Experimento</th><th>Ronda</th><th>Comprobaciones</th><th>PIDs PHP</th><th>Resultado</th></tr></thead><tbody><tr><td>Límite original</td><td>1</td><td>2</td><td>3</td><td>Tercer nodo no admitido por versión original.</td></tr><tr><td>Ventas concurrentes</td><td>1</td><td>23</td><td>4</td><td>Aceptadas A + B; rechazada C; stock final 3</td></tr><tr><td>Ventas concurrentes</td><td>2</td><td>23</td><td>5</td><td>Aceptadas A + B; rechazada C; stock final 3</td></tr><tr><td>Ventas concurrentes</td><td>3</td><td>23</td><td>5</td><td>Aceptadas B + C; rechazada A; stock final 5</td></tr><tr><td>Ventas concurrentes</td><td>4</td><td>23</td><td>3</td><td>Aceptadas B + C; rechazada A; stock final 5</td></tr><tr><td>Ventas concurrentes</td><td>5</td><td>23</td><td>5</td><td>Aceptadas A + C; rechazada B; stock final 4</td></tr><tr><td>Ventas concurrentes</td><td>6</td><td>23</td><td>5</td><td>Aceptadas B + C; rechazada A; stock final 5</td></tr><tr><td>Constitución concurrente</td><td>1</td><td>27</td><td>5</td><td>Nombre final Carolina; clase de Nivel de A; rechazo B; entidades CL-1, CL-2, CL-3, SOLO-A</td></tr><tr><td>Constitución concurrente</td><td>2</td><td>27</td><td>5</td><td>Nombre final Carolina; clase de Nivel de A; rechazo B; entidades CL-1, CL-2, CL-3, SOLO-A</td></tr><tr><td>Constitución concurrente</td><td>3</td><td>27</td><td>5</td><td>Nombre final Carolina; clase de Nivel de B; rechazo A; entidades CL-1, CL-3, CL-2, SOLO-B</td></tr><tr><td>Constitución concurrente</td><td>4</td><td>27</td><td>4</td><td>Nombre final Ana; clase de Nivel de B; rechazo A; entidades CL-1, CL-3, CL-2, SOLO-B</td></tr><tr><td>Constitución concurrente</td><td>5</td><td>27</td><td>3</td><td>Nombre final Beatriz; clase de Nivel de B; rechazo A; entidades CL-1, CL-3, CL-2, SOLO-B</td></tr><tr><td>Constitución concurrente</td><td>6</td><td>27</td><td>3</td><td>Nombre final Ana; clase de Nivel de B; rechazo A; entidades CL-1, CL-3, CL-2, SOLO-B</td></tr><tr><td>Recuperación y rollover</td><td>1</td><td>32</td><td>5</td><td>Stock 7; 127 rechazos; RA 129 bytes; byte en 128 = 128</td></tr></tbody></table></div></section><section><h2>05 · Reproducibilidad y alcance</h2><pre>python3 run.py /ruta/2026-11-24_1312_Qipu_2.0.0_PAO_1.1.0.zip</pre><p>La suite comprueba el SHA-256 del ZIP original, prepara una variante aislada de tres nodos para dos escenarios y ejecuta cada ronda con datos vacíos. El límite original de dos nodos se verifica explícitamente. No se prueba IndexedDB real, recuperación eléctrica, autenticación, todos los interleavings ni rendimiento de producción. Los resultados específicos pueden variar según el orden canónico. Se comparan invariantes, no ganadores predeterminados.</p><details><summary>Registro completo de las pruebas avanzadas</summary><pre>SHA-256 ZIP original: a63cc7f47bfa9d0e1906e1a641b8b51ad0909748362ddc996883ba995d9d6dbb
+Variante de prueba: exclusivamente habilitación de C en PHP y JS; PAO intacto.
+
+=== limit / ronda 1 / qipu_2.0.0 ===
+PASS Versión 2.0.0 original no admite tercer nodo
+PASS Intento de tercer nodo no cambia C
+TOTAL 2/2
+PHP PIDs que aceptaron conexiones: 3201,3203,3205
+
+=== one / ronda 1 / variant ===
+PASS Tres localidades generan solicitudes offline con derivados prudentes independientes
+PASS Sin publicación remota durante constitución local
+PASS Nueve publicaciones simultáneas: tres constituciones y seis reintentos
+PASS Tres aprobaciones concurrentes: exactamente dos válidas y una inviable
+PASS Conservación del stock; dos ventas, ninguna sobreventa
+PASS Aprobación inviable no se convierte automáticamente en rechazo
+PASS Autoridad registra rechazo explícito
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Adquisición incremental equivale a replay completo
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Reintentos y decisiones opuestas no modifican resoluciones
+PASS No se repite ningún descuento ante reintentos
+RESULT {&quot;accepted&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;rejected&quot;:&quot;C&quot;,&quot;stock&quot;:3,&quot;sold&quot;:17,&quot;canonicalRecords&quot;:3,&quot;bytes&quot;:618}
+TOTAL 23/23
+PHP PIDs que aceptaron conexiones: 3217,3218,3220,3221
+
+=== one / ronda 2 / variant ===
+PASS Tres localidades generan solicitudes offline con derivados prudentes independientes
+PASS Sin publicación remota durante constitución local
+PASS Nueve publicaciones simultáneas: tres constituciones y seis reintentos
+PASS Tres aprobaciones concurrentes: exactamente dos válidas y una inviable
+PASS Conservación del stock; dos ventas, ninguna sobreventa
+PASS Aprobación inviable no se convierte automáticamente en rechazo
+PASS Autoridad registra rechazo explícito
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Adquisición incremental equivale a replay completo
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Reintentos y decisiones opuestas no modifican resoluciones
+PASS No se repite ningún descuento ante reintentos
+RESULT {&quot;accepted&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;rejected&quot;:&quot;C&quot;,&quot;stock&quot;:3,&quot;sold&quot;:17,&quot;canonicalRecords&quot;:3,&quot;bytes&quot;:618}
+TOTAL 23/23
+PHP PIDs que aceptaron conexiones: 3233,3234,3235,3236,3237
+
+=== one / ronda 3 / variant ===
+PASS Tres localidades generan solicitudes offline con derivados prudentes independientes
+PASS Sin publicación remota durante constitución local
+PASS Nueve publicaciones simultáneas: tres constituciones y seis reintentos
+PASS Tres aprobaciones concurrentes: exactamente dos válidas y una inviable
+PASS Conservación del stock; dos ventas, ninguna sobreventa
+PASS Aprobación inviable no se convierte automáticamente en rechazo
+PASS Autoridad registra rechazo explícito
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Adquisición incremental equivale a replay completo
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Reintentos y decisiones opuestas no modifican resoluciones
+PASS No se repite ningún descuento ante reintentos
+RESULT {&quot;accepted&quot;:[&quot;B&quot;,&quot;C&quot;],&quot;rejected&quot;:&quot;A&quot;,&quot;stock&quot;:5,&quot;sold&quot;:15,&quot;canonicalRecords&quot;:3,&quot;bytes&quot;:618}
+TOTAL 23/23
+PHP PIDs que aceptaron conexiones: 3249,3250,3251,3252,3253
+
+=== one / ronda 4 / variant ===
+PASS Tres localidades generan solicitudes offline con derivados prudentes independientes
+PASS Sin publicación remota durante constitución local
+PASS Nueve publicaciones simultáneas: tres constituciones y seis reintentos
+PASS Tres aprobaciones concurrentes: exactamente dos válidas y una inviable
+PASS Conservación del stock; dos ventas, ninguna sobreventa
+PASS Aprobación inviable no se convierte automáticamente en rechazo
+PASS Autoridad registra rechazo explícito
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Adquisición incremental equivale a replay completo
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Reintentos y decisiones opuestas no modifican resoluciones
+PASS No se repite ningún descuento ante reintentos
+RESULT {&quot;accepted&quot;:[&quot;B&quot;,&quot;C&quot;],&quot;rejected&quot;:&quot;A&quot;,&quot;stock&quot;:5,&quot;sold&quot;:15,&quot;canonicalRecords&quot;:3,&quot;bytes&quot;:618}
+TOTAL 23/23
+PHP PIDs que aceptaron conexiones: 3265,3268,3269
+
+=== one / ronda 5 / variant ===
+PASS Tres localidades generan solicitudes offline con derivados prudentes independientes
+PASS Sin publicación remota durante constitución local
+PASS Nueve publicaciones simultáneas: tres constituciones y seis reintentos
+PASS Tres aprobaciones concurrentes: exactamente dos válidas y una inviable
+PASS Conservación del stock; dos ventas, ninguna sobreventa
+PASS Aprobación inviable no se convierte automáticamente en rechazo
+PASS Autoridad registra rechazo explícito
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Adquisición incremental equivale a replay completo
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Reintentos y decisiones opuestas no modifican resoluciones
+PASS No se repite ningún descuento ante reintentos
+RESULT {&quot;accepted&quot;:[&quot;A&quot;,&quot;C&quot;],&quot;rejected&quot;:&quot;B&quot;,&quot;stock&quot;:4,&quot;sold&quot;:16,&quot;canonicalRecords&quot;:3,&quot;bytes&quot;:618}
+TOTAL 23/23
+PHP PIDs que aceptaron conexiones: 3281,3282,3283,3284,3285
+
+=== one / ronda 6 / variant ===
+PASS Tres localidades generan solicitudes offline con derivados prudentes independientes
+PASS Sin publicación remota durante constitución local
+PASS Nueve publicaciones simultáneas: tres constituciones y seis reintentos
+PASS Tres aprobaciones concurrentes: exactamente dos válidas y una inviable
+PASS Conservación del stock; dos ventas, ninguna sobreventa
+PASS Aprobación inviable no se convierte automáticamente en rechazo
+PASS Autoridad registra rechazo explícito
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Adquisición incremental equivale a replay completo
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Reintentos y decisiones opuestas no modifican resoluciones
+PASS No se repite ningún descuento ante reintentos
+RESULT {&quot;accepted&quot;:[&quot;B&quot;,&quot;C&quot;],&quot;rejected&quot;:&quot;A&quot;,&quot;stock&quot;:5,&quot;sold&quot;:15,&quot;canonicalRecords&quot;:3,&quot;bytes&quot;:618}
+TOTAL 23/23
+PHP PIDs que aceptaron conexiones: 3297,3298,3299,3300,3301
+
+=== two / ronda 1 / variant ===
+PASS Hechos privados constituyen estructuras locales pero no Q
+PASS Nueve solicitudes publicadas concurrentemente por rondas
+PASS Autoridad rechaza salto posicional
+PASS Seis afirmaciones compatibles reconocidas concurrentemente
+PASS Primera aparición única de tabla, identidad y parámetro compartidos
+PASS Última afirmación canónica determina valor, no orden de llegada local
+PASS Clases incompatibles del parámetro Nivel: exactamente una reconocida
+PASS Incompatibilidad no escribe respuesta prematura
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS No emerge entidad parcial de afirmación rechazada
+PASS Clase del vector permanece estable
+PASS Celdas dispersas distinguen ausencia, cero y false
+PASS Ningún hecho estrictamente local contamina C
+PASS Replay incremental y completo idénticos después de constituciones en conflicto
+PASS Posiciones anteriores preservadas tras ampliar estructuras
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+RESULT {&quot;nombre&quot;:&quot;Carolina&quot;,&quot;winnerKind&quot;:&quot;A&quot;,&quot;rejectedKind&quot;:&quot;B&quot;,&quot;entities&quot;:[&quot;CL-1&quot;,&quot;CL-2&quot;,&quot;CL-3&quot;,&quot;SOLO-A&quot;],&quot;vectors&quot;:[[&quot;Nombre&quot;,0],[&quot;Activo&quot;,3],[&quot;Edad&quot;,1],[&quot;Nivel&quot;,1],[&quot;Ciudad&quot;,0]],&quot;canonicalRecords&quot;:9}
+TOTAL 27/27
+PHP PIDs que aceptaron conexiones: 3313,3314,3315,3316,3317
+
+=== two / ronda 2 / variant ===
+PASS Hechos privados constituyen estructuras locales pero no Q
+PASS Nueve solicitudes publicadas concurrentemente por rondas
+PASS Autoridad rechaza salto posicional
+PASS Seis afirmaciones compatibles reconocidas concurrentemente
+PASS Primera aparición única de tabla, identidad y parámetro compartidos
+PASS Última afirmación canónica determina valor, no orden de llegada local
+PASS Clases incompatibles del parámetro Nivel: exactamente una reconocida
+PASS Incompatibilidad no escribe respuesta prematura
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS No emerge entidad parcial de afirmación rechazada
+PASS Clase del vector permanece estable
+PASS Celdas dispersas distinguen ausencia, cero y false
+PASS Ningún hecho estrictamente local contamina C
+PASS Replay incremental y completo idénticos después de constituciones en conflicto
+PASS Posiciones anteriores preservadas tras ampliar estructuras
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+RESULT {&quot;nombre&quot;:&quot;Carolina&quot;,&quot;winnerKind&quot;:&quot;A&quot;,&quot;rejectedKind&quot;:&quot;B&quot;,&quot;entities&quot;:[&quot;CL-1&quot;,&quot;CL-2&quot;,&quot;CL-3&quot;,&quot;SOLO-A&quot;],&quot;vectors&quot;:[[&quot;Nombre&quot;,0],[&quot;Activo&quot;,3],[&quot;Edad&quot;,1],[&quot;Nivel&quot;,1],[&quot;Ciudad&quot;,0]],&quot;canonicalRecords&quot;:9}
+TOTAL 27/27
+PHP PIDs que aceptaron conexiones: 3329,3330,3331,3332,3333
+
+=== two / ronda 3 / variant ===
+PASS Hechos privados constituyen estructuras locales pero no Q
+PASS Nueve solicitudes publicadas concurrentemente por rondas
+PASS Autoridad rechaza salto posicional
+PASS Seis afirmaciones compatibles reconocidas concurrentemente
+PASS Primera aparición única de tabla, identidad y parámetro compartidos
+PASS Última afirmación canónica determina valor, no orden de llegada local
+PASS Clases incompatibles del parámetro Nivel: exactamente una reconocida
+PASS Incompatibilidad no escribe respuesta prematura
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS No emerge entidad parcial de afirmación rechazada
+PASS Clase del vector permanece estable
+PASS Celdas dispersas distinguen ausencia, cero y false
+PASS Ningún hecho estrictamente local contamina C
+PASS Replay incremental y completo idénticos después de constituciones en conflicto
+PASS Posiciones anteriores preservadas tras ampliar estructuras
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+RESULT {&quot;nombre&quot;:&quot;Carolina&quot;,&quot;winnerKind&quot;:&quot;B&quot;,&quot;rejectedKind&quot;:&quot;A&quot;,&quot;entities&quot;:[&quot;CL-1&quot;,&quot;CL-3&quot;,&quot;CL-2&quot;,&quot;SOLO-B&quot;],&quot;vectors&quot;:[[&quot;Nombre&quot;,0],[&quot;Edad&quot;,1],[&quot;Activo&quot;,3],[&quot;Nivel&quot;,0],[&quot;Ciudad&quot;,0]],&quot;canonicalRecords&quot;:9}
+TOTAL 27/27
+PHP PIDs que aceptaron conexiones: 3345,3346,3347,3348,3349
+
+=== two / ronda 4 / variant ===
+PASS Hechos privados constituyen estructuras locales pero no Q
+PASS Nueve solicitudes publicadas concurrentemente por rondas
+PASS Autoridad rechaza salto posicional
+PASS Seis afirmaciones compatibles reconocidas concurrentemente
+PASS Primera aparición única de tabla, identidad y parámetro compartidos
+PASS Última afirmación canónica determina valor, no orden de llegada local
+PASS Clases incompatibles del parámetro Nivel: exactamente una reconocida
+PASS Incompatibilidad no escribe respuesta prematura
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS No emerge entidad parcial de afirmación rechazada
+PASS Clase del vector permanece estable
+PASS Celdas dispersas distinguen ausencia, cero y false
+PASS Ningún hecho estrictamente local contamina C
+PASS Replay incremental y completo idénticos después de constituciones en conflicto
+PASS Posiciones anteriores preservadas tras ampliar estructuras
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+RESULT {&quot;nombre&quot;:&quot;Ana&quot;,&quot;winnerKind&quot;:&quot;B&quot;,&quot;rejectedKind&quot;:&quot;A&quot;,&quot;entities&quot;:[&quot;CL-1&quot;,&quot;CL-3&quot;,&quot;CL-2&quot;,&quot;SOLO-B&quot;],&quot;vectors&quot;:[[&quot;Nombre&quot;,0],[&quot;Edad&quot;,1],[&quot;Activo&quot;,3],[&quot;Nivel&quot;,0],[&quot;Ciudad&quot;,0]],&quot;canonicalRecords&quot;:9}
+TOTAL 27/27
+PHP PIDs que aceptaron conexiones: 3361,3362,3363,3365
+
+=== two / ronda 5 / variant ===
+PASS Hechos privados constituyen estructuras locales pero no Q
+PASS Nueve solicitudes publicadas concurrentemente por rondas
+PASS Autoridad rechaza salto posicional
+PASS Seis afirmaciones compatibles reconocidas concurrentemente
+PASS Primera aparición única de tabla, identidad y parámetro compartidos
+PASS Última afirmación canónica determina valor, no orden de llegada local
+PASS Clases incompatibles del parámetro Nivel: exactamente una reconocida
+PASS Incompatibilidad no escribe respuesta prematura
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS No emerge entidad parcial de afirmación rechazada
+PASS Clase del vector permanece estable
+PASS Celdas dispersas distinguen ausencia, cero y false
+PASS Ningún hecho estrictamente local contamina C
+PASS Replay incremental y completo idénticos después de constituciones en conflicto
+PASS Posiciones anteriores preservadas tras ampliar estructuras
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+RESULT {&quot;nombre&quot;:&quot;Beatriz&quot;,&quot;winnerKind&quot;:&quot;B&quot;,&quot;rejectedKind&quot;:&quot;A&quot;,&quot;entities&quot;:[&quot;CL-1&quot;,&quot;CL-3&quot;,&quot;CL-2&quot;,&quot;SOLO-B&quot;],&quot;vectors&quot;:[[&quot;Nombre&quot;,0],[&quot;Activo&quot;,3],[&quot;Edad&quot;,1],[&quot;Ciudad&quot;,0],[&quot;Nivel&quot;,0]],&quot;canonicalRecords&quot;:9}
+TOTAL 27/27
+PHP PIDs que aceptaron conexiones: 3377,3378,3380
+
+=== two / ronda 6 / variant ===
+PASS Hechos privados constituyen estructuras locales pero no Q
+PASS Nueve solicitudes publicadas concurrentemente por rondas
+PASS Autoridad rechaza salto posicional
+PASS Seis afirmaciones compatibles reconocidas concurrentemente
+PASS Primera aparición única de tabla, identidad y parámetro compartidos
+PASS Última afirmación canónica determina valor, no orden de llegada local
+PASS Clases incompatibles del parámetro Nivel: exactamente una reconocida
+PASS Incompatibilidad no escribe respuesta prematura
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS No emerge entidad parcial de afirmación rechazada
+PASS Clase del vector permanece estable
+PASS Celdas dispersas distinguen ausencia, cero y false
+PASS Ningún hecho estrictamente local contamina C
+PASS Replay incremental y completo idénticos después de constituciones en conflicto
+PASS Posiciones anteriores preservadas tras ampliar estructuras
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Todas las solicitudes de C resueltas
+PASS Convergencia operativa de C sin doble aplicación
+PASS Q de C es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+RESULT {&quot;nombre&quot;:&quot;Ana&quot;,&quot;winnerKind&quot;:&quot;B&quot;,&quot;rejectedKind&quot;:&quot;A&quot;,&quot;entities&quot;:[&quot;CL-1&quot;,&quot;CL-3&quot;,&quot;CL-2&quot;,&quot;SOLO-B&quot;],&quot;vectors&quot;:[[&quot;Nombre&quot;,0],[&quot;Activo&quot;,3],[&quot;Edad&quot;,1],[&quot;Ciudad&quot;,0],[&quot;Nivel&quot;,0]],&quot;canonicalRecords&quot;:9}
+TOTAL 27/27
+PHP PIDs que aceptaron conexiones: 3393,3394,3397
+
+=== three / ronda 1 / qipu_2.0.0 ===
+PASS Proceso PHP separado termina justo después de constituir C y antes de R
+PASS C durable y respuesta ausente tras interrupción
+PASS Adquirir C antes de R no duplica descuento
+PASS Recuperación y decisiones simultáneas: reintentos y oposición resueltos
+PASS Dos respuestas definitivas sin duplicación
+PASS R antes de C mantiene efecto provisional
+PASS Prefijo canónico original permanece byte por byte
+PASS Compromiso remoto del prefijo coincide con SHA-256 local
+PASS Dos ventas reales y solamente dos: 20−5−6=9
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS 127 rechazos consecutivos: marca posicional completa hasta 127
+PASS 127 rechazos no cambian la trayectoria canónica
+PASS Segunda interrupción al pasar de marca 127 a 0
+PASS Recuperación concurrente al rollover de M3E1
+PASS Rollover en posición 128: residuo cero, decisión uno
+PASS Prefijo preservado durante segunda recuperación
+PASS PHP y replay JS coinciden exactamente
+PASS Todas las solicitudes de A resueltas
+PASS Convergencia operativa de A sin doble aplicación
+PASS Q de A es proyección exacta del historial local
+PASS Todas las solicitudes de B resueltas
+PASS Convergencia operativa de B sin doble aplicación
+PASS Q de B es proyección exacta del historial local
+PASS Biyectividad entre orígenes canónicos y aceptaciones
+PASS Stock final 7; tres ventas, 127 rechazos, tres orígenes únicos
+RESULT {&quot;stock&quot;:7,&quot;canonicalRecords&quot;:4,&quot;responseA&quot;:129,&quot;responseB&quot;:1,&quot;rejections&quot;:127,&quot;rollover&quot;:128}
+TOTAL 32/32
+PHP PIDs que aceptaron conexiones: 3409,3410,3411,3412,3413
+
+=== RESUMEN ===
+[
+  {
+    &quot;scenario&quot;: &quot;limit&quot;,
+    &quot;round&quot;: 1,
+    &quot;variant&quot;: &quot;qipu_2.0.0&quot;,
+    &quot;checks&quot;: 2,
+    &quot;workers&quot;: 3,
+    &quot;result&quot;: {}
+  },
+  {
+    &quot;scenario&quot;: &quot;one&quot;,
+    &quot;round&quot;: 1,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 23,
+    &quot;workers&quot;: 4,
+    &quot;result&quot;: {
+      &quot;accepted&quot;: [
+        &quot;A&quot;,
+        &quot;B&quot;
+      ],
+      &quot;rejected&quot;: &quot;C&quot;,
+      &quot;stock&quot;: 3,
+      &quot;sold&quot;: 17,
+      &quot;canonicalRecords&quot;: 3,
+      &quot;bytes&quot;: 618
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;one&quot;,
+    &quot;round&quot;: 2,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 23,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;accepted&quot;: [
+        &quot;A&quot;,
+        &quot;B&quot;
+      ],
+      &quot;rejected&quot;: &quot;C&quot;,
+      &quot;stock&quot;: 3,
+      &quot;sold&quot;: 17,
+      &quot;canonicalRecords&quot;: 3,
+      &quot;bytes&quot;: 618
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;one&quot;,
+    &quot;round&quot;: 3,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 23,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;accepted&quot;: [
+        &quot;B&quot;,
+        &quot;C&quot;
+      ],
+      &quot;rejected&quot;: &quot;A&quot;,
+      &quot;stock&quot;: 5,
+      &quot;sold&quot;: 15,
+      &quot;canonicalRecords&quot;: 3,
+      &quot;bytes&quot;: 618
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;one&quot;,
+    &quot;round&quot;: 4,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 23,
+    &quot;workers&quot;: 3,
+    &quot;result&quot;: {
+      &quot;accepted&quot;: [
+        &quot;B&quot;,
+        &quot;C&quot;
+      ],
+      &quot;rejected&quot;: &quot;A&quot;,
+      &quot;stock&quot;: 5,
+      &quot;sold&quot;: 15,
+      &quot;canonicalRecords&quot;: 3,
+      &quot;bytes&quot;: 618
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;one&quot;,
+    &quot;round&quot;: 5,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 23,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;accepted&quot;: [
+        &quot;A&quot;,
+        &quot;C&quot;
+      ],
+      &quot;rejected&quot;: &quot;B&quot;,
+      &quot;stock&quot;: 4,
+      &quot;sold&quot;: 16,
+      &quot;canonicalRecords&quot;: 3,
+      &quot;bytes&quot;: 618
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;one&quot;,
+    &quot;round&quot;: 6,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 23,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;accepted&quot;: [
+        &quot;B&quot;,
+        &quot;C&quot;
+      ],
+      &quot;rejected&quot;: &quot;A&quot;,
+      &quot;stock&quot;: 5,
+      &quot;sold&quot;: 15,
+      &quot;canonicalRecords&quot;: 3,
+      &quot;bytes&quot;: 618
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;two&quot;,
+    &quot;round&quot;: 1,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 27,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;nombre&quot;: &quot;Carolina&quot;,
+      &quot;winnerKind&quot;: &quot;A&quot;,
+      &quot;rejectedKind&quot;: &quot;B&quot;,
+      &quot;entities&quot;: [
+        &quot;CL-1&quot;,
+        &quot;CL-2&quot;,
+        &quot;CL-3&quot;,
+        &quot;SOLO-A&quot;
+      ],
+      &quot;vectors&quot;: [
+        [
+          &quot;Nombre&quot;,
+          0
+        ],
+        [
+          &quot;Activo&quot;,
+          3
+        ],
+        [
+          &quot;Edad&quot;,
+          1
+        ],
+        [
+          &quot;Nivel&quot;,
+          1
+        ],
+        [
+          &quot;Ciudad&quot;,
+          0
+        ]
+      ],
+      &quot;canonicalRecords&quot;: 9
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;two&quot;,
+    &quot;round&quot;: 2,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 27,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;nombre&quot;: &quot;Carolina&quot;,
+      &quot;winnerKind&quot;: &quot;A&quot;,
+      &quot;rejectedKind&quot;: &quot;B&quot;,
+      &quot;entities&quot;: [
+        &quot;CL-1&quot;,
+        &quot;CL-2&quot;,
+        &quot;CL-3&quot;,
+        &quot;SOLO-A&quot;
+      ],
+      &quot;vectors&quot;: [
+        [
+          &quot;Nombre&quot;,
+          0
+        ],
+        [
+          &quot;Activo&quot;,
+          3
+        ],
+        [
+          &quot;Edad&quot;,
+          1
+        ],
+        [
+          &quot;Nivel&quot;,
+          1
+        ],
+        [
+          &quot;Ciudad&quot;,
+          0
+        ]
+      ],
+      &quot;canonicalRecords&quot;: 9
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;two&quot;,
+    &quot;round&quot;: 3,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 27,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;nombre&quot;: &quot;Carolina&quot;,
+      &quot;winnerKind&quot;: &quot;B&quot;,
+      &quot;rejectedKind&quot;: &quot;A&quot;,
+      &quot;entities&quot;: [
+        &quot;CL-1&quot;,
+        &quot;CL-3&quot;,
+        &quot;CL-2&quot;,
+        &quot;SOLO-B&quot;
+      ],
+      &quot;vectors&quot;: [
+        [
+          &quot;Nombre&quot;,
+          0
+        ],
+        [
+          &quot;Edad&quot;,
+          1
+        ],
+        [
+          &quot;Activo&quot;,
+          3
+        ],
+        [
+          &quot;Nivel&quot;,
+          0
+        ],
+        [
+          &quot;Ciudad&quot;,
+          0
+        ]
+      ],
+      &quot;canonicalRecords&quot;: 9
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;two&quot;,
+    &quot;round&quot;: 4,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 27,
+    &quot;workers&quot;: 4,
+    &quot;result&quot;: {
+      &quot;nombre&quot;: &quot;Ana&quot;,
+      &quot;winnerKind&quot;: &quot;B&quot;,
+      &quot;rejectedKind&quot;: &quot;A&quot;,
+      &quot;entities&quot;: [
+        &quot;CL-1&quot;,
+        &quot;CL-3&quot;,
+        &quot;CL-2&quot;,
+        &quot;SOLO-B&quot;
+      ],
+      &quot;vectors&quot;: [
+        [
+          &quot;Nombre&quot;,
+          0
+        ],
+        [
+          &quot;Edad&quot;,
+          1
+        ],
+        [
+          &quot;Activo&quot;,
+          3
+        ],
+        [
+          &quot;Nivel&quot;,
+          0
+        ],
+        [
+          &quot;Ciudad&quot;,
+          0
+        ]
+      ],
+      &quot;canonicalRecords&quot;: 9
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;two&quot;,
+    &quot;round&quot;: 5,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 27,
+    &quot;workers&quot;: 3,
+    &quot;result&quot;: {
+      &quot;nombre&quot;: &quot;Beatriz&quot;,
+      &quot;winnerKind&quot;: &quot;B&quot;,
+      &quot;rejectedKind&quot;: &quot;A&quot;,
+      &quot;entities&quot;: [
+        &quot;CL-1&quot;,
+        &quot;CL-3&quot;,
+        &quot;CL-2&quot;,
+        &quot;SOLO-B&quot;
+      ],
+      &quot;vectors&quot;: [
+        [
+          &quot;Nombre&quot;,
+          0
+        ],
+        [
+          &quot;Activo&quot;,
+          3
+        ],
+        [
+          &quot;Edad&quot;,
+          1
+        ],
+        [
+          &quot;Ciudad&quot;,
+          0
+        ],
+        [
+          &quot;Nivel&quot;,
+          0
+        ]
+      ],
+      &quot;canonicalRecords&quot;: 9
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;two&quot;,
+    &quot;round&quot;: 6,
+    &quot;variant&quot;: &quot;variant&quot;,
+    &quot;checks&quot;: 27,
+    &quot;workers&quot;: 3,
+    &quot;result&quot;: {
+      &quot;nombre&quot;: &quot;Ana&quot;,
+      &quot;winnerKind&quot;: &quot;B&quot;,
+      &quot;rejectedKind&quot;: &quot;A&quot;,
+      &quot;entities&quot;: [
+        &quot;CL-1&quot;,
+        &quot;CL-3&quot;,
+        &quot;CL-2&quot;,
+        &quot;SOLO-B&quot;
+      ],
+      &quot;vectors&quot;: [
+        [
+          &quot;Nombre&quot;,
+          0
+        ],
+        [
+          &quot;Activo&quot;,
+          3
+        ],
+        [
+          &quot;Edad&quot;,
+          1
+        ],
+        [
+          &quot;Ciudad&quot;,
+          0
+        ],
+        [
+          &quot;Nivel&quot;,
+          0
+        ]
+      ],
+      &quot;canonicalRecords&quot;: 9
+    }
+  },
+  {
+    &quot;scenario&quot;: &quot;three&quot;,
+    &quot;round&quot;: 1,
+    &quot;variant&quot;: &quot;qipu_2.0.0&quot;,
+    &quot;checks&quot;: 32,
+    &quot;workers&quot;: 5,
+    &quot;result&quot;: {
+      &quot;stock&quot;: 7,
+      &quot;canonicalRecords&quot;: 4,
+      &quot;responseA&quot;: 129,
+      &quot;responseB&quot;: 1,
+      &quot;rejections&quot;: 127,
+      &quot;rollover&quot;: 128
+    }
+  }
+]
+TOTAL ADVANCED 334
+</pre></details><details><summary>Regresión Qipu</summary><pre>PASS Génesis PHP leído y K2P/K5B decodificado en JS
+PASS Nota no pertenece a Q y posición L distinta de Q
+PASS Derivados provisionales independientes
+PASS Constitución local no escribe en PHP
+PASS Reintento de solicitud idéntica no duplica
+PASS Conflicto y hueco no modifican Q
+PASS Resolución sin saltos
+PASS Respuesta antes de C conserva provisional
+PASS C antes de R elimina doble descuento
+PASS Rechazo retira efecto provisional sin borrar historia
+PASS Replay incremental = completo
+PASS Constitución de entidad y vectores por posiciones
+PASS Prefijo canónico inmutable
+PASS Constatación de corte sin descargar prefijo
+PASS M3E1: respuesta 1 en posición 1
+PASS Convergencia de A y B a igual corte
+PASS Decisión idempotente
+PASS Decisión histórica no cambia C
+PASS Solicitud inviable: no hay efecto ni respuesta prematura
+PASS Génesis sin CREATE: tres afirmaciones nombradas T13
+PASS 11 afirmaciones T13 interoperables byte a byte PHP/JS, ámbitos y cuatro clases de valor (stock en génesis)
+PASS Primera aparición constituye tipo y entidades; repetición no duplica
+PASS Orden de parámetros, valor booleano false y posiciones compartidas
+PASS Celdas dispersas; ausencia no se confunde con valor
+PASS Parámetro nuevo sin rellenar entidades; repetición actualiza mismo slot
+PASS Afirmación repetida conserva acontecimiento y origen, sin mutar corte anterior
+PASS Replay completo e incremental idénticos tras CPA
+PASS Derivados PHP y JS idénticos, incluyendo celdas dispersas
+PASS Tipo incompatible no constituye entidad parcial, C ni R
+PASS Venta referencial jamás crea SKU
+PASS Identidades especiales y espacios separados seguros en índice
+PASS Nulo explícito diferenciado de ausencia
+PASS Quitar valor no elimina identidad
+PASS K2P preserva BOM como carácter, no lo descarta
+PASS CPA estrictamente local: estructuras privadas sin solicitud
+PASS Recorrido local incremental equivalente a completo
+PASS T102 local no puede publicarse por API Q
+37/37 comprobaciones HTTP + JS correctas
+PASS C durable antes de R; caída simulada
+PASS Recuperación autónoma de respuesta por procedencia
+PASS Sin duplicación canónica; R completado
+PASS Reintento posterior idempotente
+4/4 recuperación
+</pre></details><details><summary>Regresión PAO</summary><pre>PASS 64 independent writer processes completed
+PASS 512 bytes; all 64 records unique, no interleaving
+PASS position replay without duplicate
+PASS conflict rejected
+PASS gap rejected
+PASS simulated interruption at 0/32 bytes recovered
+PASS simulated interruption at 1/32 bytes recovered
+PASS simulated interruption at 15/32 bytes recovered
+PASS simulated interruption at 32/32 bytes recovered
+PASS corruption fail-closed, no truncation
+PASS malformed intent rejected
+PASS byte range read
+PASS empty EOF read
+PASS path traversal rejected
+PASS historical prefix unchanged
+</pre></details></section><footer>Documento autónomo. Evidencia experimental, no certificación formal. Código base intacto.</footer></main></body></html>

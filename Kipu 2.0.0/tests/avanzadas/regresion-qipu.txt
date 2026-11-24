@@ -1,0 +1,43 @@
+PASS Génesis PHP leído y K2P/K5B decodificado en JS
+PASS Nota no pertenece a Q y posición L distinta de Q
+PASS Derivados provisionales independientes
+PASS Constitución local no escribe en PHP
+PASS Reintento de solicitud idéntica no duplica
+PASS Conflicto y hueco no modifican Q
+PASS Resolución sin saltos
+PASS Respuesta antes de C conserva provisional
+PASS C antes de R elimina doble descuento
+PASS Rechazo retira efecto provisional sin borrar historia
+PASS Replay incremental = completo
+PASS Constitución de entidad y vectores por posiciones
+PASS Prefijo canónico inmutable
+PASS Constatación de corte sin descargar prefijo
+PASS M3E1: respuesta 1 en posición 1
+PASS Convergencia de A y B a igual corte
+PASS Decisión idempotente
+PASS Decisión histórica no cambia C
+PASS Solicitud inviable: no hay efecto ni respuesta prematura
+PASS Génesis sin CREATE: tres afirmaciones nombradas T13
+PASS 11 afirmaciones T13 interoperables byte a byte PHP/JS, ámbitos y cuatro clases de valor (stock en génesis)
+PASS Primera aparición constituye tipo y entidades; repetición no duplica
+PASS Orden de parámetros, valor booleano false y posiciones compartidas
+PASS Celdas dispersas; ausencia no se confunde con valor
+PASS Parámetro nuevo sin rellenar entidades; repetición actualiza mismo slot
+PASS Afirmación repetida conserva acontecimiento y origen, sin mutar corte anterior
+PASS Replay completo e incremental idénticos tras CPA
+PASS Derivados PHP y JS idénticos, incluyendo celdas dispersas
+PASS Tipo incompatible no constituye entidad parcial, C ni R
+PASS Venta referencial jamás crea SKU
+PASS Identidades especiales y espacios separados seguros en índice
+PASS Nulo explícito diferenciado de ausencia
+PASS Quitar valor no elimina identidad
+PASS K2P preserva BOM como carácter, no lo descarta
+PASS CPA estrictamente local: estructuras privadas sin solicitud
+PASS Recorrido local incremental equivalente a completo
+PASS T102 local no puede publicarse por API Q
+37/37 comprobaciones HTTP + JS correctas
+PASS C durable antes de R; caída simulada
+PASS Recuperación autónoma de respuesta por procedencia
+PASS Sin duplicación canónica; R completado
+PASS Reintento posterior idempotente
+4/4 recuperación
