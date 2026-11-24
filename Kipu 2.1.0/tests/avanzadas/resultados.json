@@ -1,0 +1,358 @@
+[
+  {
+    "scenario": "one",
+    "round": 1,
+    "checks": 23,
+    "workers": 5,
+    "result": {
+      "accepted": [
+        "A",
+        "B"
+      ],
+      "rejected": "C",
+      "stock": 3,
+      "sold": 17,
+      "canonicalRecords": 3,
+      "bytes": 618
+    }
+  },
+  {
+    "scenario": "one",
+    "round": 2,
+    "checks": 23,
+    "workers": 5,
+    "result": {
+      "accepted": [
+        "A",
+        "C"
+      ],
+      "rejected": "B",
+      "stock": 4,
+      "sold": 16,
+      "canonicalRecords": 3,
+      "bytes": 618
+    }
+  },
+  {
+    "scenario": "one",
+    "round": 3,
+    "checks": 23,
+    "workers": 5,
+    "result": {
+      "accepted": [
+        "A",
+        "B"
+      ],
+      "rejected": "C",
+      "stock": 3,
+      "sold": 17,
+      "canonicalRecords": 3,
+      "bytes": 618
+    }
+  },
+  {
+    "scenario": "one",
+    "round": 4,
+    "checks": 23,
+    "workers": 5,
+    "result": {
+      "accepted": [
+        "B",
+        "C"
+      ],
+      "rejected": "A",
+      "stock": 5,
+      "sold": 15,
+      "canonicalRecords": 3,
+      "bytes": 618
+    }
+  },
+  {
+    "scenario": "one",
+    "round": 5,
+    "checks": 23,
+    "workers": 5,
+    "result": {
+      "accepted": [
+        "B",
+        "C"
+      ],
+      "rejected": "A",
+      "stock": 5,
+      "sold": 15,
+      "canonicalRecords": 3,
+      "bytes": 618
+    }
+  },
+  {
+    "scenario": "one",
+    "round": 6,
+    "checks": 23,
+    "workers": 5,
+    "result": {
+      "accepted": [
+        "B",
+        "C"
+      ],
+      "rejected": "A",
+      "stock": 5,
+      "sold": 15,
+      "canonicalRecords": 3,
+      "bytes": 618
+    }
+  },
+  {
+    "scenario": "two",
+    "round": 1,
+    "checks": 27,
+    "workers": 5,
+    "result": {
+      "nombre": "Carolina",
+      "winnerKind": "A",
+      "rejectedKind": "B",
+      "entities": [
+        "CL-1",
+        "CL-2",
+        "CL-3",
+        "SOLO-A"
+      ],
+      "vectors": [
+        [
+          "Nombre",
+          0
+        ],
+        [
+          "Activo",
+          3
+        ],
+        [
+          "Edad",
+          1
+        ],
+        [
+          "Nivel",
+          1
+        ],
+        [
+          "Ciudad",
+          0
+        ]
+      ],
+      "canonicalRecords": 9
+    }
+  },
+  {
+    "scenario": "two",
+    "round": 2,
+    "checks": 27,
+    "workers": 4,
+    "result": {
+      "nombre": "Carolina",
+      "winnerKind": "A",
+      "rejectedKind": "B",
+      "entities": [
+        "CL-1",
+        "CL-2",
+        "CL-3",
+        "SOLO-A"
+      ],
+      "vectors": [
+        [
+          "Nombre",
+          0
+        ],
+        [
+          "Activo",
+          3
+        ],
+        [
+          "Edad",
+          1
+        ],
+        [
+          "Nivel",
+          1
+        ],
+        [
+          "Ciudad",
+          0
+        ]
+      ],
+      "canonicalRecords": 9
+    }
+  },
+  {
+    "scenario": "two",
+    "round": 3,
+    "checks": 27,
+    "workers": 4,
+    "result": {
+      "nombre": "Ana",
+      "winnerKind": "B",
+      "rejectedKind": "A",
+      "entities": [
+        "CL-1",
+        "CL-2",
+        "CL-3",
+        "SOLO-B"
+      ],
+      "vectors": [
+        [
+          "Nombre",
+          0
+        ],
+        [
+          "Edad",
+          1
+        ],
+        [
+          "Activo",
+          3
+        ],
+        [
+          "Nivel",
+          0
+        ],
+        [
+          "Ciudad",
+          0
+        ]
+      ],
+      "canonicalRecords": 9
+    }
+  },
+  {
+    "scenario": "two",
+    "round": 4,
+    "checks": 27,
+    "workers": 5,
+    "result": {
+      "nombre": "Ana",
+      "winnerKind": "B",
+      "rejectedKind": "A",
+      "entities": [
+        "CL-1",
+        "CL-3",
+        "CL-2",
+        "SOLO-B"
+      ],
+      "vectors": [
+        [
+          "Nombre",
+          0
+        ],
+        [
+          "Edad",
+          1
+        ],
+        [
+          "Activo",
+          3
+        ],
+        [
+          "Nivel",
+          0
+        ],
+        [
+          "Ciudad",
+          0
+        ]
+      ],
+      "canonicalRecords": 9
+    }
+  },
+  {
+    "scenario": "two",
+    "round": 5,
+    "checks": 27,
+    "workers": 5,
+    "result": {
+      "nombre": "Beatriz",
+      "winnerKind": "B",
+      "rejectedKind": "A",
+      "entities": [
+        "CL-1",
+        "CL-3",
+        "CL-2",
+        "SOLO-B"
+      ],
+      "vectors": [
+        [
+          "Nombre",
+          0
+        ],
+        [
+          "Activo",
+          3
+        ],
+        [
+          "Edad",
+          1
+        ],
+        [
+          "Ciudad",
+          0
+        ],
+        [
+          "Nivel",
+          0
+        ]
+      ],
+      "canonicalRecords": 9
+    }
+  },
+  {
+    "scenario": "two",
+    "round": 6,
+    "checks": 27,
+    "workers": 3,
+    "result": {
+      "nombre": "Beatriz",
+      "winnerKind": "B",
+      "rejectedKind": "A",
+      "entities": [
+        "CL-1",
+        "CL-3",
+        "CL-2",
+        "SOLO-B"
+      ],
+      "vectors": [
+        [
+          "Nombre",
+          0
+        ],
+        [
+          "Activo",
+          3
+        ],
+        [
+          "Edad",
+          1
+        ],
+        [
+          "Ciudad",
+          0
+        ],
+        [
+          "Nivel",
+          0
+        ]
+      ],
+      "canonicalRecords": 9
+    }
+  },
+  {
+    "scenario": "three",
+    "round": 1,
+    "checks": 32,
+    "workers": 5,
+    "result": {
+      "stock": 7,
+      "canonicalRecords": 4,
+      "responseA": 129,
+      "responseB": 1,
+      "rejections": 127,
+      "rollover": 128
+    }
+  }
+]

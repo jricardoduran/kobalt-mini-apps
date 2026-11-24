@@ -1,0 +1,11 @@
+PASS N inicialmente vacío; ningún nodo preconstituido
+PASS Interrupción antes de N: archivos vacíos sin nodo visible
+PASS Archivos huérfanos no son accesibles desde API
+PASS Reintento completa primera constitución
+PASS Registro repetido idempotente
+PASS Segunda localidad deriva posición 1
+PASS Prefijo N inmutable
+PASS Nodo dinámico puede publicar y adquirir resolución
+PASS Identidad insegura rechazada
+PASS Archivo huérfano no vacío no se adopta
+10/10 pruebas registro dinámico PHP

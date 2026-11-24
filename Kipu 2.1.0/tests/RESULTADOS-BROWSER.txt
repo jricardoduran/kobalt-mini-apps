@@ -1,0 +1,4 @@
+PASS Registro vacío en servidor HTTP
+PASS 6 registros HTTP concurrentes: 3 identidades y 3 reintentos
+BLOQUEADO: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:46925/
+2/2 pruebas HTTP de registro; IndexedDB y UI NO ejecutadas (salida 77).
