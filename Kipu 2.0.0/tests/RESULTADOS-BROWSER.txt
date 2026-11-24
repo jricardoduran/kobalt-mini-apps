@@ -1,0 +1,2 @@
+README autónomo: renderizado en Chromium vía contenido estático; laboratorio comprobado (primera aparición, repetición, parámetro nuevo, incompatibilidad sin efectos), sin errores JS.
+Aplicación HTTP / IndexedDB: intento de Chromium a localhost bloqueado con net::ERR_BLOCKED_BY_ADMINISTRATOR. No verificada en navegador.

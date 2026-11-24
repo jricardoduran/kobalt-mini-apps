@@ -1,0 +1,15 @@
+PASS 64 independent writer processes completed
+PASS 512 bytes; all 64 records unique, no interleaving
+PASS position replay without duplicate
+PASS conflict rejected
+PASS gap rejected
+PASS simulated interruption at 0/32 bytes recovered
+PASS simulated interruption at 1/32 bytes recovered
+PASS simulated interruption at 15/32 bytes recovered
+PASS simulated interruption at 32/32 bytes recovered
+PASS corruption fail-closed, no truncation
+PASS malformed intent rejected
+PASS byte range read
+PASS empty EOF read
+PASS path traversal rejected
+PASS historical prefix unchanged

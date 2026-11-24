@@ -1,0 +1,5 @@
+PASS C durable antes de R; caída simulada
+PASS Recuperación autónoma de respuesta por procedencia
+PASS Sin duplicación canónica; R completado
+PASS Reintento posterior idempotente
+4/4 recuperación
