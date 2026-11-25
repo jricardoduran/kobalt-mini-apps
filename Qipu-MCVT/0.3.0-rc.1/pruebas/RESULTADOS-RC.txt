@@ -1,0 +1,13 @@
+Qipu MCVT 0.3.0-rc.1
+Ejecutado sobre los archivos exactos de esta entrega en aislado JavaScript con shims de plataforma (SHA256 contrastado con abc y fixture original). No es Node nativo, Web Crypto nativo, IndexedDB real ni PHP.
+PASS consulta posicional
+PASS JSON nominal derivado
+PASS campo no declarado rechazado
+PASS declaración sin nacimiento vectorial
+PASS extensión conservativa
+PASS nominal y posicional producen bytes idénticos
+PASS contrato inválido no modifica estado
+PASS replay exacto ATM/T120
+PASS fixture original K5B/T120: 22 registros
+TOTAL 9/9
+Pendientes: ejecución física pruebas/browser.html y pruebas/php.php, ejecución en Node nativo, equivalencia JS/PHP, crash-recovery y rendimiento.
