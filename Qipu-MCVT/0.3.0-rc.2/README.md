@@ -1,0 +1,32 @@
+# Qipu MCVT 0.3.0-rc.2 — economía de residuos y cooperación
+Candidato experimental. Base RC.1 y Kernel 10.2.5. No cambia K5B, T120, T101, M3E1 ni contratos. PHP original Kernel.php intacto. JS: se modifica únicamente la adquisición de conocimiento del adaptador de persistencia; el intérprete, recibo, cola, CAS y confirmación transaccional siguen siendo los mismos. La versión se denomina RC porque las pruebas físicas deben verificarse.
+
+## Cinco residuos y su justificación
+
+1. Metageometría: los efectos de MCVT contienen la información nueva. Filtrar las claves estructurales, y para schema emitir únicamente las declaraciones añadidas; no repetir mapas inversos. Un cambio de una celda o una venta no cambia la API. Una nueva identidad o vector sí. metaDelta devuelve coordenadas/definiciones, no hechos nuevos. El consumidor aplica cambios en orden y solo sobre un corte reconocido. Si ya recibe el sufijo T120, deriva sus propios cambios; no enviar ambos por defecto.
+2. Conocimiento: adquisición de claves estrictamente solicitadas, en una transacción de lectura coherente. Consultas de metadatos se resuelven por lotes sin cargar celdas/historial. Para consultas y planes pequeños se suspende el evaluador en una dependencia desconocida, adquiere esa clave, reevalúa; distingue ausencia conocida de falta de adquisición. Límite 32 claves y fallback al Map completo; puede repetir CPU O(k²), no se afirma óptimo universal. En cargas grandes conviene medir espejo frente al camino disperso. El origen se consulta por separado. La revisión se comprueba en la misma transacción que confirma log/delta/origen/meta. No trasladar delta a otro corte.
+3. Constitutivo: el motor original MCVT materializa solo sus efectos. Un SUB sobre stock existente: una celda. No duplicar realidad ni schema. Acción compuesta puede modificar varias celdas e historial.
+4. Coordinación: reconocimiento exacto fuera de cola de escritura; CAS continúa aunque se desactive cola. En Q/R/C se respeta la coordinación de autoridad original. No se promete evitar el lock global PHP; no se sustituye QipuDemo::decide por CanonicalLog sobre C. El adaptador ATM independiente corrigió init para crear la trayectoria PAO inexistente.
+5. Sincronización: cursor (offset,sha256) por continuidad y reconocimiento; se envían exclusivamente bytes posteriores al prefijo validado, con hash de destino. La autoridad verifica prefijos y lee un corte C/R coherente bajo locked; el nodo valida destino y aplica en memoria cambios dispersos de todo el sufijo antes de consolidar. Un cliente sin novedades recibe cero bytes de historia. Esta versión calcula SHA256 del prefijo completo y usa hex en RPC; ahorro de red de historia, no de hashing físico ni del overhead hex. En el futuro: compromiso encadenado/checkpoints y binario, con identidad de trayectoria autenticada.
+
+## Cooperación
+L local: T102 hechos privados, T101 solicitudes. Índice de origen cuenta T101, no T102. La API local traduce coordenadas a nombres; dos nodos con orden distinto pueden referir la misma identidad. Q_j es recepción append-only de solicitudes; R_j conserva decisiones M3E1; C constituye exclusivamente las admitidas bajo autoridad. C→R y recuperación original. La réplica C no es L ni es coproducto de hechos privados. Coproducto conserva procedencia, no otorga autoridad. El overlay original reconoce incorporada, rechazada, provisional o conflicto; no descontar dos veces. 
+Cooperation.php es adaptador confiable de laboratorio; no expone HTTP ni autentica. RPC CLI ejecuta un proceso PHP por operación para probar persistencia real. No escribir directamente en C.
+Residue.Node y Replica son el modelo local en RAM; DurableNode materializa L, la réplica C y R en IndexedDB por localidad. Q_j vive en la autoridad. La ruta IndexedDB selectiva reutiliza el outbox RC.1 para trayectorias independientes. Falta integrar identidad/autorización, verificar fallos abruptos y OPFS. No se afirma equivalencia física con OPFS.
+
+## Verificación reproducible
+- node pruebas/model.cjs
+- node pruebas/residues.cjs (1000 productos, comparación de claves y planes).
+- php pruebas/php.php (autoridad ATM independiente, PAO/cola, multiproceso).
+- node pruebas/cooperation.cjs (3 nodos locales en RAM, cada uno con L, geometría distinta y C/R; servidor canónico PHP real vía procesos CLI, conflicto de stock, reenvío, interrupción C→R, verificación de sufijo y convergencia).
+- pruebas/browser.html (IndexedDB físico y Web Locks). Servir por HTTP localhost o HTTPS. 
+- pruebas/RESULTADOS-RC.txt separa resultados realmente ejecutados de suites disponibles.
+
+
+## Persistencia cooperativa (extensión física RC.2)
+DurableNode conserva tres streams L, C réplica y R como segmentos append-only en una base IndexedDB independiente por nodo. Los bytes de T101 se consolidan antes de enviar; el índice deriva de la cantidad de solicitudes de L. C y R se validan por prefijo/destino, por origen y decisión, y se anexan conjuntamente en una transacción local; el plan disperso se aplica en RAM solamente después de confirmar esa transacción. Las extensiones de L o C/R verifican revisión y frontera dentro de la transacción; una conexión obsoleta falla con LOCAL_CUT_CONFLICT y no sobrescribe. La reapertura reconstruye desde los segmentos, no de un estado opaco. La prueba utiliza PHP real por HTTP loopback y tres bases IndexedDB reales de Chrome. No es endpoint de producción ni prueba entre tres máquinas físicas.
+- node pruebas/browser-run.cjs (PHP, Chrome/Chromium y Node 22+, sin npm). Corre browser.html y cooperation-browser.html en navegador real; las pruebas se sirven exclusivamente por loopback.
+- Costo pendiente: leer L completo para derivar el índice y reconstruir metageometría privada, así como hashear C/R completos al preparar cursores. Se optimiza la transferencia, la escritura dispersa y el conocimiento de consultas/planes del adaptador ATM independiente; no se promete O(residuo) global. La trayectoria privada y C nunca se fusionan.
+
+## Resultado final de verificación
+63/63 comprobaciones PASS, ejecución nativa Node 24.22.3 / PHP 8.5.4 / Chrome real; commit probado 6b9cea63fbbfc8ed58486ca8f861878b81746046. GitHub Actions 45726600963, job 139597925578. Véase [resultados](pruebas/RESULTADOS-RC.txt) y [fundamentos](documentacion/RESIDUOS_Y_COOPERACION.md). Las referencias anteriores a pruebas físicas pendientes quedan sustituidas por este resultado. Se conserva la denominación RC por los límites de producción.

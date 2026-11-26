@@ -1,0 +1,34 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Qipu: 3 localidades IndexedDB y PHP</title><pre id="out">Iniciando...</pre>
+<script src="../local/kernel.js"></script><script src="../local/atm.js"></script><script src="../local/residue.js"></script><script src="../local/durable-node.js"></script>
+<script>
+(async()=>{const out=document.getElementById('out'),say=s=>out.textContent+='\n'+s,check=(x,m)=>{if(!x)throw Error(m);say('PASS '+m)},R=Residue;
+out.textContent='Chrome real / IndexedDB / autoridad PHP';
+const rpc=async(...x)=>(await fetch('cooperation-http.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)})).json();
+const call=async(...x)=>{const r=await rpc(...x);if(!r.ok)throw Error(JSON.stringify(r));return r.data};
+const db='qipu-coop-'+crypto.randomUUID(),open=id=>DurableNode.open(db+'-'+id,id,'Comercio-C');
+let [a,b,c]=await Promise.all(['NodoA','NodoB','NodoC'].map(open));const decl=['DEF',['Producto'],[['Producto','Nombre','text',['SET'],true],['Producto','Stock','natural',['SET','ADD','SUB'],false]],[]];
+for(const n of [a,b,c]){await call('register',n.id);await n.fact(decl);}
+for(const [n,ids] of [[a,['SKU-A','SKU-B']],[b,['SKU-B','SKU-A']],[c,['SKU-C','SKU-A']]])for(const id of ids){await n.fact(['SET','Producto',id,'Nombre',id]);await n.fact(['SET','Producto',id,'Stock',10]);}
+check(Qipu.MCVT.get((await a.local()).privateState,'entity',0,0)==='SKU-A'&&Qipu.MCVT.get((await b.local()).privateState,'entity',0,1)==='SKU-A','L independientes y coordenadas divergentes');
+async function submit(n,q){const r=await n.request(q);await call('submit',n.id,r.index,R.hex(r.raw));return r}
+async function admit(n,q){const r=await submit(n,q);await call('decide',n.id,r.index,1);return r}
+await admit(a,decl);await admit(a,['SET',0,0,0,'SKU-A']);await admit(a,['SET',0,0,1,10]);
+for(const n of [a,b,c])await n.sync(await call('sync',n.id,await n.cursors()));
+const ra=await a.request(['SUB',0,0,1,7]),rb=await b.request(['SUB',0,1,1,6]),rc=await c.request(['SUB',0,1,1,2]);
+await a.close();a=await open('NodoA');check(R.hex((await a.pending())[0].raw)===R.hex(ra.raw),'solicitud exacta sobrevive reapertura IndexedDB');
+await Promise.all([[a,ra],[b,rb],[c,rc]].map(([n,r])=>call('submit',n.id,r.index,R.hex(r.raw))));
+await call('decide',a.id,ra.index,1);
+const rejection=await rpc('decide',b.id,rb.index,1);check(!rejection.ok,'autoridad reevalúa stock y rechaza B');await call('decide',b.id,rb.index,0);
+const interruption=await rpc('decide',c.id,rc.index,1,true);check(!interruption.ok,'interrupción C→R');await call('pending');
+for(const n of [a,b,c]){const d=await n.sync(await call('sync',n.id,await n.cursors()));check(d.bytesC>0&&d.bytesC<d.totalC&&d.metadata.length===0,'sufijo sin cambio de API '+n.id);check(await n.canonical([0,0,1])===1,'stock canónico '+n.id);}
+check((await b.overlay()).status.at(-1)==='rechazada','R de B persistido');
+check((await c.overlay()).status.at(-1)==='incorporada','R de C recuperado');
+const finalBytes=R.hex(c.replica.bytes);await c.close();c=await open('NodoC');check(R.hex(c.replica.bytes)===finalBytes&&(await c.overlay()).status.at(-1)==='incorporada','C, R y L sobreviven reapertura');
+check(R.hex(a.replica.bytes)===R.hex(b.replica.bytes)&&R.hex(b.replica.bytes)===R.hex(c.replica.bytes),'convergencia C byte a byte');
+const old=await open('NodoA');await a.fact(['SET',0,0,1,11]);let conflict=false;try{await old.fact(['SET',0,0,1,12])}catch(e){conflict=e.code==='LOCAL_CUT_CONFLICT'}check(conflict,'CAS local evita sobrescribir L obsoleta');await old.refresh();await old.fact(['SET',0,0,1,12]);await old.close();
+const empty=await c.sync(await call('sync',c.id,await c.cursors()));check(empty.bytesC===0&&empty.bytesR===0,'sin novedades no se anexan bytes');
+const bad=await call('sync',c.id,await c.cursors());bad.R.to.sha256='0'.repeat(64);let rejected=false;try{await c.sync(bad)}catch{rejected=true}check(rejected&&R.hex(c.replica.bytes)===finalBytes,'sufijo inválido no consolida');
+await Promise.all([a.close(),b.close(),c.close()]);
+say('TOTAL COOPERACION BROWSER OK');
+})().catch(e=>document.getElementById('out').textContent+='\nFAIL '+e.stack);
+</script></html>
