@@ -1,0 +1,47 @@
+Commit probado: ae1bb8ad80b71150d12eeb7bf15b51aa8966aba2
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45747259892
+PASS A→A binario interior reconstruye su propia geometría
+PASS bytes iniciales interiores exactos AA
+PASS transformación interior conserva prefijo exterior AA
+PASS rechazo no anexa en ninguna trayectoria AA
+PASS replay de trayectorias interiores AA
+PASS contenido lista no se interpreta como trayectoria AA
+PASS sufijo interior corrupto revierte lote completo AA
+PASS perfil interior no se confunde AA
+PASS prefijo original intacto AA
+PASS A→B binario interior reconstruye su propia geometría
+PASS bytes iniciales interiores exactos AB
+PASS transformación interior conserva prefijo exterior AB
+PASS rechazo no anexa en ninguna trayectoria AB
+PASS replay de trayectorias interiores AB
+PASS contenido lista no se interpreta como trayectoria AB
+PASS sufijo interior corrupto revierte lote completo AB
+PASS perfil interior no se confunde AB
+PASS prefijo original intacto AB
+PASS B→A binario interior reconstruye su propia geometría
+PASS bytes iniciales interiores exactos BA
+PASS transformación interior conserva prefijo exterior BA
+PASS rechazo no anexa en ninguna trayectoria BA
+PASS replay de trayectorias interiores BA
+PASS contenido lista no se interpreta como trayectoria BA
+PASS sufijo interior corrupto revierte lote completo BA
+PASS perfil interior no se confunde BA
+PASS prefijo original intacto BA
+PASS B→B binario interior reconstruye su propia geometría
+PASS bytes iniciales interiores exactos BB
+PASS transformación interior conserva prefijo exterior BB
+PASS rechazo no anexa en ninguna trayectoria BB
+PASS replay de trayectorias interiores BB
+PASS contenido lista no se interpreta como trayectoria BB
+PASS sufijo interior corrupto revierte lote completo BB
+PASS perfil interior no se confunde BB
+PASS prefijo original intacto BB
+PASS BATCH ordinario conserva semántica B
+PASS BATCH no puede forjar frontera ni efectos parciales
+PASS cola conserva orden de submit concurrentes
+PASS dos fronteras anidadas y cambio de perfil
+PASS corte interior independiente de coordenada exterior
+PASS 103 coordenadas y 207 claves, sin límite de 32 ni reinicio
+PASS cancelación explícita sin fallback
+PASS replay recursivo conserva última manifestación
+TOTAL RC4 44
