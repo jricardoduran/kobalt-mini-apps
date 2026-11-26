@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><title>Pruebas físicas ATM</title><pre id="out">Ejecutando...</pre><script src="../local/kernel.js"></script><script src="../local/atm.js"></script><script src="../local/atm-coordinate.js"></script><script>
+(async()=>{const out=document.getElementById('out'),say=s=>out.textContent+='\n'+s,ok=(x,m)=>{if(!x)throw Error(m);say('PASS '+m)};out.textContent='IndexedDB / Web Locks reales';
+const db='atm-rc1-test-'+crypto.randomUUID(),a=await ATM.Local.open(db,'C'),b=await ATM.Local.open(db,'C');try{
+await a.init();await a.submit(['DEF',['Producto'],[['Producto','Nombre','text',['SET'],true],['Producto','Stock','natural',['SET','ADD','SUB'],false]],[]],['Test',0]);await a.submit(['SET','Producto','SKU','Nombre','Producto'],['Test',1]);await a.submit(['SET',0,0,'Stock',20],['Test',2]);
+const both=await Promise.all([a.submit(['SUB',0,0,1,1],['Test',3]),b.submit(['SUB',0,0,1,1],['Test',3])]);ok(both.filter(x=>x.replayed).length===1,'mismo origen concurrente');
+const rr=await Promise.allSettled(Array.from({length:30},(_,i)=>(i%2?a:b).submit(['SUB',0,0,1,1],['Carga',i])));ok(rr.filter(x=>x.status==='fulfilled').length===19,'19 admisiones y 11 rechazos');ok((await a.read([0,0,1])).data===0,'stock no negativo');
+a.close();const c=await ATM.Local.open(db,'C');try{ok((await c.retry(['Test',3])).replayed,'reenvío tras reapertura');const state=await Qipu.Canonical.replay(await c.export());ok(Qipu.MCVT.project(state.state,0,0).parameters.Stock===0,'replay coherente');
+if(navigator.locks){let release,ready;const started=new Promise(r=>ready=r),held=new Promise(r=>release=r);const lock=navigator.locks.request('qipu:'+db+':C',()=>{ready();return held});await started;try{ok((await c.retry(['Test',3],{timeout:5})).replayed,'recibo fuera de cola');let timeout=false;try{await c.submit(['ADD',0,0,1,1],['Timeout',0],{timeout:20})}catch(e){timeout=e.code==='LOCK_TIMEOUT'}ok(timeout,'timeout sin escritura');ok((await c.read([0,0,1])).data===0,'estado intacto durante timeout')}finally{release();await lock}await c.retry(['Timeout',0]);ok((await c.read([0,0,1])).data===1,'reenvío de bytes tras timeout')}
+}finally{c.close()}
+const k=await ATMC.Local.open(db,'C','C:test');try{const before=(await k.read([0,1,0])).data;
+const one=await k.submit({context:'C:test',op:'ADD',coordinates:[0,1,0],value:3},['Coordinate',0]);ok((await k.read([0,1,0])).data===before+3,'ATM-C escritura posicional física');
+ok((await k.submit(['C:test',['ADD',['Producto','Stock','SKU'],3]],['Coordinate',0])).replayed,'traducción nominal y posicional mismo origen');
+let bad=false;try{await k.submit(['incorrecto',['SET',[0,1,0],99]],['Coordinate',1])}catch{bad=true}ok(bad&&(await k.read([0,1,0])).data===before+3,'contexto ajeno no modifica IndexedDB');ok((await k.json(0,0)).data.parameters.Stock===before+3,'traductor salida JSON físico');
+}finally{k.close()}const reopen=await ATMC.Local.open(db,'C','C:test');try{ok((await reopen.retry(['Coordinate',0])).replayed,'ATM-C reenvío físico tras reapertura')}finally{reopen.close()}
+say('FIN');
+}catch(e){say('FAIL '+e.stack)}finally{try{a.close()}catch{}b.close();}})().catch(e=>document.getElementById('out').textContent+='FAIL '+e.stack);
+</script>

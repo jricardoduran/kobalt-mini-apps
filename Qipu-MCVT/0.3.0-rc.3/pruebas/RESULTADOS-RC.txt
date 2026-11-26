@@ -1,0 +1,81 @@
+Qipu MCVT 0.3.0-rc.2 — 63/63 comprobaciones nativas
+Commit probado: 6b9cea63fbbfc8ed58486ca8f861878b81746046
+GitHub Actions: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45726600963
+Job 139597925578: COMPLETED / SUCCESS
+9 ATM, 6 residuos, 4 PHP multiproceso, 18 cooperación RAM/PHP, 9 IndexedDB/Web Locks, 17 tres IndexedDB/PHP HTTP.
+
+v24.22.3
+PHP 8.5.4 (cli) (built: Oct 19 2026 14:35:18) (NTS)
+PASS consulta posicional
+PASS JSON nominal derivado
+PASS campo no declarado rechazado
+PASS declaración sin nacimiento vectorial
+PASS extensión conservativa
+PASS nominal y posicional producen bytes idénticos
+PASS contrato inválido no modifica estado
+PASS replay exacto ATM/T120
+PASS fixture original K5B/T120: 22 registros
+TOTAL 9/9
+PASS adquisición parcial equivale a consulta completa
+PASS plan disperso exacto
+PASS cambio stock: 0 cambios de API, 1 efecto
+PASS metacontrato incremental: 1 declaración
+PASS nacimiento vectorial conserva coordenadas
+PASS coordenada anterior estable
+{"stateKeys":5013,"readKeys":7,"planKeys":6,"stockWrites":1,"metadataStock":0,"metadataBirth":2}
+PASS reenvío exacto
+PASS 9 admisiones concurrentes
+PASS stock y reconstrucción
+PASS metaestructura estable
+TOTAL 4/4
+PASS coordenadas locales distintas
+PASS traducción local preserva identidad
+PASS autoridad rechaza plan con stock insuficiente
+PASS interrupción inyectada entre C y R
+PASS solo sufijo canónico para NodoA
+PASS ventas no alteran API NodoA
+PASS estado canónico de NodoA
+PASS solo sufijo canónico para NodoB
+PASS ventas no alteran API NodoB
+PASS estado canónico de NodoB
+PASS solo sufijo canónico para NodoC
+PASS ventas no alteran API NodoC
+PASS estado canónico de NodoC
+PASS R conserva rechazo de B
+PASS C/R recuperan reconocimiento de C
+PASS tres replicas C byte a byte
+PASS prefijo incompatible no cambia estado
+PASS sin novedad: cero bytes de historia
+TOTAL cooperación OK
+IndexedDB / Web Locks reales
+PASS mismo origen concurrente
+PASS 19 admisiones y 11 rechazos
+PASS stock no negativo
+PASS reenvío tras reapertura
+PASS replay coherente
+PASS recibo fuera de cola
+PASS timeout sin escritura
+PASS estado intacto durante timeout
+PASS reenvío de bytes tras timeout
+FIN
+Chrome real / IndexedDB / autoridad PHP
+PASS L independientes y coordenadas divergentes
+PASS solicitud exacta sobrevive reapertura IndexedDB
+PASS autoridad reevalúa stock y rechaza B
+PASS interrupción C→R
+PASS sufijo sin cambio de API NodoA
+PASS stock canónico NodoA
+PASS sufijo sin cambio de API NodoB
+PASS stock canónico NodoB
+PASS sufijo sin cambio de API NodoC
+PASS stock canónico NodoC
+PASS R de B persistido
+PASS R de C recuperado
+PASS C, R y L sobreviven reapertura
+PASS convergencia C byte a byte
+PASS CAS local evita sobrescribir L obsoleta
+PASS sin novedades no se anexan bytes
+PASS sufijo inválido no consolida
+TOTAL COOPERACION BROWSER OK
+
+Límites: tres localidades lógicas en un runner Linux; PHP por loopback; no tres máquinas, WAN, OPFS, autenticación, permisos ni pérdida de energía. Se inyectó una interrupción C→R. Los conteos de claves no son mediciones de latencia.

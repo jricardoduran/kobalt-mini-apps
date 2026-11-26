@@ -1,0 +1,111 @@
+ATM-C RC.3 · 25 nov 2026 (UTC-5)
+Commit probado: 7bbde676bcb2b86a99278f1711183dc047c6bb75
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45741192759
+104 PASS (76 regresión + 20 equivalencia y utilización + 5 IndexedDB + 3 cooperación canónica).
+
+PASS consulta posicional
+PASS JSON nominal derivado
+PASS campo no declarado rechazado
+PASS declaración sin nacimiento vectorial
+PASS extensión conservativa
+PASS nominal y posicional producen bytes idénticos
+PASS contrato inválido no modifica estado
+PASS replay exacto ATM/T120
+PASS fixture original K5B/T120: 22 registros
+PASS adquisición parcial equivale a consulta completa
+PASS plan disperso exacto
+PASS cambio stock: 0 cambios de API, 1 efecto
+PASS metacontrato incremental: 1 declaración
+PASS nacimiento vectorial conserva coordenadas
+PASS coordenada anterior estable
+PASS reenvío exacto
+PASS 9 admisiones concurrentes
+PASS stock y reconstrucción
+PASS metaestructura estable
+PASS coordenadas locales distintas
+PASS traducción local preserva identidad
+PASS autoridad rechaza plan con stock insuficiente
+PASS interrupción inyectada entre C y R
+PASS solo sufijo canónico para NodoA
+PASS ventas no alteran API NodoA
+PASS estado canónico de NodoA
+PASS solo sufijo canónico para NodoB
+PASS ventas no alteran API NodoB
+PASS estado canónico de NodoB
+PASS solo sufijo canónico para NodoC
+PASS ventas no alteran API NodoC
+PASS estado canónico de NodoC
+PASS R conserva rechazo de B
+PASS C/R recuperan reconocimiento de C
+PASS tres replicas C byte a byte
+PASS prefijo incompatible no cambia estado
+PASS sin novedad: cero bytes de historia
+PASS mismo origen concurrente
+PASS 19 admisiones y 11 rechazos
+PASS stock no negativo
+PASS reenvío tras reapertura
+PASS replay coherente
+PASS recibo fuera de cola
+PASS timeout sin escritura
+PASS estado intacto durante timeout
+PASS reenvío de bytes tras timeout
+PASS ATM-C escritura posicional física
+PASS traducción nominal y posicional mismo origen
+PASS contexto ajeno no modifica IndexedDB
+PASS traductor salida JSON físico
+PASS ATM-C reenvío físico tras reapertura
+PASS L independientes y coordenadas divergentes
+PASS consulta canónica vectorial ATM-C
+PASS contexto privado rechazado en solicitud canónica
+PASS misma coordenada canónica no se interpreta como SKU-B privado
+PASS solicitud exacta sobrevive reapertura IndexedDB
+PASS autoridad reevalúa stock y rechaza B
+PASS interrupción C→R
+PASS sufijo sin cambio de API NodoA
+PASS stock canónico NodoA
+PASS sufijo sin cambio de API NodoB
+PASS stock canónico NodoB
+PASS sufijo sin cambio de API NodoC
+PASS stock canónico NodoC
+PASS R de B persistido
+PASS R de C recuperado
+PASS C, R y L sobreviven reapertura
+PASS convergencia C byte a byte
+PASS CAS local evita sobrescribir L obsoleta
+PASS sin novedades no se anexan bytes
+PASS sufijo inválido no consolida
+PASS raíz vacía antes de declarar
+PASS declaración no constituye posiciones
+PASS SET constitutivo crea producto parcial
+PASS false no es ausencia
+PASS vector existente con celda ausente
+PASS ACT admite dos productos
+PASS ACT inválida revierte todos los efectos
+PASS precio suministrado 1 admitido: límite contractual actual
+PASS API mutable: declarar y constituir Peso
+PASS rechazo de dominio y parámetro no declarado
+PASS equivalencia estado y metaestructura JS/PHP por corte
+PASS trayectoria JS/PHP idéntica byte a byte
+PASS reconstrucción de toda la experiencia
+PASS geometría vacía sin duplicación
+PASS admisión y rechazo esperados en 25 solicitudes
+PASS contrato no equivale a geometría constituida
+PASS ID independiente y orden de primera aparición
+PASS solo nombre irreducible para vector nuevo
+PASS orden vectorial real, no de declaración
+PASS false y ausencia
+PASS SET ADD SUB ACT con eje vectorial
+PASS acción multi-fila rechazada sin efectos
+PASS rechazos de saldo, posición, contrato, contexto, forma y dominio no anexan
+PASS cero no es ausencia
+PASS vector y proyección transversal
+PASS JSON derivado no pierde false
+PASS traducciones nominal y posicional convergen
+PASS bytes exactos de traducciones equivalentes
+PASS parámetro tardío y vector disperso
+PASS no confundir posición contractual con constituida
+PASS JS PHP equivalentes por corte en geometría, contrato, intención y estado
+PASS trayectoria T120 idéntica JS PHP
+PASS reconstrucción conserva traducción y geometría
+
+Scope: laboratorio, runner único; no WAN ni autorización. El HTML de utilización se entrega pero su UI no fue probada en esta ejecución. JS/PHP equivalencia en escenario y formatos válidos evaluados, no prueba exhaustiva. Kernel y formatos históricos intactos.
