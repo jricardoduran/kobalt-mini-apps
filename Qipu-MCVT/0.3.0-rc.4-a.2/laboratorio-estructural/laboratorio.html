@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Qipu A · Trayectorias dentro del recorrido</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf4f4;color:#18363d;font:16px/1.6 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:clamp(10px,3vw,28px)}header,section{background:white;border:1px solid #cadada;border-radius:14px;margin-bottom:16px;padding:clamp(16px,3vw,28px)}header{background:#16343e;color:white;border-top:6px solid #52c7b0}h1{font-size:clamp(28px,5vw,48px);line-height:1.1;margin:16px 0}h2{line-height:1.25;font-size:24px}h3{font-size:18px}p{margin:8px 0 15px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.tile{border:1px solid #cadada;border-radius:10px;padding:14px;min-width:0}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.note{border-left:4px solid #078578;padding:12px;background:#e6f5f1}small,.muted{color:#587278}header small{color:#a5dfd7}button,select,input,textarea{font:inherit;border:1px solid #a9c0c1;border-radius:7px;padding:9px;max-width:100%}button{cursor:pointer;background:#087e74;color:white}button.alt{background:white;color:#17343e}button:disabled{opacity:.55;cursor:default}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#edf4f4;border-radius:7px;padding:12px;font:13px/1.5 monospace;max-height:380px;overflow:auto}textarea{width:100%;min-height:85px;font:14px monospace}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px;border-bottom:1px solid #d3e1e1;text-align:left;vertical-align:top}a{color:#087e74}header a{color:#b4efe0}.status{font-weight:650;overflow-wrap:anywhere}nav{display:flex;gap:10px;flex-wrap:wrap}summary{cursor:pointer}code{overflow-wrap:anywhere}svg{max-width:100%;height:auto}label{min-width:0}input[type=range]{flex:1;min-width:120px}
+</style><main>
+<header><small>QIPU · MCVT 0.3.0-rc.4-a.2 / Laboratorio estructural</small><h1>Una intención.<br>Un recorrido.<br>Una historia constituida.</h1><p>El camino estructural como opción predeterminada. La causalidad automática es un mecanismo adicional, no una obligación de las trayectorias interiores.</p><nav><a href="#naturaleza">Naturaleza</a><a href="#recorrido">Recorrido</a><a href="#preguntas">Preguntas</a><a href="#laboratorio">Laboratorio</a><a href="#comparacion">Comparación</a><a href="#evidencia">Pruebas</a></nav></header>
+<section id="naturaleza"><h2>01 · ¿Qué es aquello que queremos representar?</h2><div class="grid"><div class="tile"><h3>Manifestación</h3><p>Un contenido terminal. Precio, teléfono, nota, archivo o lista. No es navegable solo por parecer una lista o binario.</p></div><div class="tile"><h3>Geometría interior</h3><p>Una tabla o vector dentro de la misma trayectoria. Identidades, variantes, fotos, colaboradores. No necesita otra historia autónoma.</p></div><div class="tile"><h3>Trayectoria interior</h3><p>Una secuencia de acontecimientos con preguntas históricas propias. Conversación, venta, entrega, tarea, revisión.</p></div></div><p class="note">Toda manifestación tiene procedencia histórica. Una trayectoria hija permite delimitar un fenómeno, reconstruirlo por sus acontecimientos y exportar su prefijo. No significa una nueva autoridad.</p><h3>¿Cuándo elegir trayectoria?</h3><p>Cuando importa el orden de los acontecimientos del componente, sus cortes, su evolución como unidad o su exportación propia. Si solo necesitamos un conjunto de parámetros, una geometría interior suele bastar. No declarar una trayectoria por cada celda por costumbre.</p></section>
+<section id="recorrido"><h2>02 · Iterar dentro del recorrido</h2><svg viewBox="0 0 760 200" role="img" aria-label="Recorrido desde la trayectoria exterior hasta una manifestación interior"><g fill="#e7f5f1" stroke="#087e74" stroke-width="1.5"><rect x="10" y="20" width="170" height="76" rx="9"/><rect x="205" y="20" width="170" height="76" rx="9"/><rect x="400" y="20" width="170" height="76" rx="9"/><rect x="595" y="20" width="155" height="76" rx="9"/></g><g stroke="#587278" fill="none" stroke-width="2"><path d="M180 58h25m-8-5 8 5-8 5M375 58h25m-8-5 8 5-8 5M570 58h25m-8-5 8 5-8 5"/><path d="M672 98v38H95V98" stroke-dasharray="5 4"/></g><g font-family="system-ui" font-size="15" text-anchor="middle" fill="#18363d"><text x="95" y="48">Raíz</text><text x="95" y="72">[t,c,i]</text><text x="290" y="48">Trayectoria hija</text><text x="290" y="72">raíz interior</text><text x="485" y="48">Otra hija</text><text x="485" y="72">raíz interior</text><text x="672" y="48">Destino</text><text x="672" y="72">SET / ADD / SUB</text><text x="380" y="162">El motor compone APPEND desde dentro hacia fuera</text></g></svg>
+<p>La lectura sigue la ruta y entra automáticamente en cada trayectoria que encuentra. La escritura resuelve el mismo destino, construye el acontecimiento interior, y envuelve los sufijos necesarios hasta la raíz. En una instancia, se valida antes de consolidar un único marco exterior. No se mutan los binarios anteriores.</p><pre>write("SET", [1,0,0,0,1,0,0,0,0], "entregado")</pre><p>En el ejemplo de venta, los primeros tres componentes localizan la historia de venta, los siguientes tres la entrega y los últimos tres el estado de entrega. Los números dependen de la primera aparición, no del nombre convencional. La ruta apunta a una manifestación, no a un registro histórico.</p><p>El cursor suspendible conserva contexto. No tiene el antiguo límite de 32 claves; siguen existiendo límites de recursos y formato K5B. El mecanismo no observa ni cambia otras trayectorias solo por cruzar una frontera.</p></section>
+<section id="preguntas"><h2>03 · Atlas de preguntas</h2><table><thead><tr><th>Pregunta</th><th>Operación</th><th>Qué devuelve</th></tr></thead><tbody><tr><td>¿Qué existe aquí?</td><td>read(ruta)</td><td>Contexto, valor o ausencia.</td></tr><tr><td>¿Es una trayectoria?</td><td>read(ruta,{enterFinal:false})</td><td>Descriptor de frontera si termina allí; no entra en ella.</td></tr><tr><td>¿Qué acontecimientos componen esta historia?</td><td>history(rutaFrontera)</td><td>Registros locales, posiciones y cortes exteriores.</td></tr><tr><td>¿Qué ocurrió en un intervalo?</td><td>history(ruta,{from,to})</td><td>Intervalo local [from,to).</td></tr><tr><td>¿Qué se sabía antes?</td><td>at(corteExterior)</td><td>Reconstrucción independiente de un prefijo.</td></tr><tr><td>¿Cuáles son los bytes exactos?</td><td>export(scope,end)</td><td>Prefijo K5B, no un JSON de actualidad.</td></tr><tr><td>¿Cómo registro algo dentro?</td><td>write(tratamiento,ruta,contenido)</td><td>Un acontecimiento raíz; los APPEND interiores emergen de la ruta.</td></tr><tr><td>¿Cómo coordino varios efectos obligatorios?</td><td>transaction(origen,checks,events)</td><td>Admisión conjunta e idempotencia de TX.</td></tr></tbody></table><p>Preguntar no anexa. El corte local cuenta acontecimientos de esa trayectoria; el corte exterior cuenta acontecimientos reconocidos por la raíz. Pueden ser diferentes.</p></section>
+<section id="laboratorio"><h2>04 · Laboratorio ejecutable</h2><p>Usa el código real A.2 y K2P/K4B/K5B originales incorporados en este HTML. Sin dependencias de red. Web Crypto requiere un contexto seguro, por ejemplo localhost o HTTPS. Los escenarios son experimentales, no contratos de negocio completos.</p><div class="row"><label>Escenario <select id="scenario"></select></label><button id="reset" class="alt">Restablecer</button></div><p id="description"></p><div class="row"><button id="next">Siguiente intención</button><button id="all">Ejecutar todas</button><span id="stepLabel"></span></div><p id="status" class="status" role="status"></p><div class="row"><label>Consultar corte <input type="range" id="cut" min="0" value="0"></label><output id="cutLabel"></output><button class="alt" id="latest">Actualidad</button></div><div class="row"><label>Ruta sugerida <select id="routes"></select></label><label>Ruta <input id="route" value="[]"></label></div><div class="row"><button class="alt" id="read">Leer</button><button class="alt" id="descriptor">Frontera</button><button class="alt" id="history">Historia</button><button class="alt" id="up">Subir</button></div><div class="row" id="children"></div><div class="grid"><div class="tile"><h3>Respuesta</h3><pre id="answer"></pre></div><div class="tile"><h3>Último acontecimiento exterior del corte</h3><pre id="last"></pre></div></div><details><summary>Historia de la trayectoria raíz</summary><pre id="rootHistory"></pre></details><h3>Intención propia</h3><p>Se registra siempre en el corte actual, no en el histórico. La sintaxis es [tratamiento,ruta,contenido]. Las escrituras directas son explícitas, no utilizan DEPEND ni CAUSE.</p><textarea id="custom">["SET",[0,0,0,0,0,0],"Nueva manifestación"]</textarea><button id="customWrite">Registrar por ruta</button><button class="alt" id="download">Exportar binario raíz</button></section>
+<section id="comparacion"><h2>05 · Estructural frente a causal</h2><div class="grid"><div class="tile"><h3>Estructural · predeterminada</h3><p>La intención ya identifica el fenómeno que queremos transformar. Una única ruta. No hay reglas de observación ni pendientes por el hecho de navegar.</p></div><div class="tile"><h3>Causal · opcional</h3><p>Un acontecimiento reconocido activa una regla previamente constituida en una hija. Hace falta identidad de causa, orden, consumo, reanudación y tratamiento de bloqueos.</p></div></div><p class="note">No confundir recorrido estructural con admisión conjunta. Si una reserva y una confirmación deben ser indivisibles, TX expresa esa condición. Si son hechos sucesivos pero explícitos, se registran por separado. Si la segunda debe producirse automáticamente, se necesita una regla causal o un contrato equivalente.</p><button id="compare">Ejecutar comparación</button><pre id="comparison"></pre><p>En la comparación, dos escrituras explícitas y una escritura con una reacción causal producen el mismo valor final en la hija. Ambas anexan dos registros exteriores después de constituir la geometría. El flujo causal añade una regla y una referencia a causa; la estructural requiere que alguien emita la segunda intención. No se concluye equivalencia general ni que uno reduzca siempre los bytes.</p></section>
+<section id="evidencia"><h2>06 · Pruebas y límites</h2><button id="test">Ejecutar todas las comprobaciones</button><pre id="results"></pre><p>Las pruebas verifican CRM, venta, proyecto, vector con historia, seis fronteras, replay, rechazo, TX y comparación causal. No prueban pagos, envíos, contratos comerciales completos ni durabilidad física. A.2 opera sobre Map, un escritor lógico por instancia, no IndexedDB/PHP ni múltiples instancias. K5B y JSON/hex conservan sus límites. El historial se reconstruye de bytes exportados. No se ha sustituido ningún motor.</p><p>La alternativa estructural es el camino de uso recomendado; se conserva A.2 causal para necesidades explícitas. La UI pregunta y registra; no debe inventar consecuencias de negocio.</p></section>
+</main><script>
+'use strict';
+globalThis.Qipu = globalThis.Qipu || {};
+Qipu.K2P = (() => {
+    const need = (ok, msg = 'K2P inválido') => {
+        if (!ok)
+            throw Error(msg);
+    };
+    function encode(n, w = 4) {
+        need(Number.isSafeInteger(n) && n >= 0, 'Natural fuera de dominio');
+        need(Number.isInteger(w) && w >= 1 && w <= 8, 'Perfil W inválido');
+        const b = n.toString(2), k = b.length;
+        need(k <= 2 ** w, 'Natural fuera del perfil');
+        return (k - 1).toString(2).padStart(w, '0') + b;
+    }
+    class Writer {
+        constructor() {
+            this.parts = [];
+        }
+        n(n, w = 4) {
+            this.parts.push(encode(n, w));
+            return this;
+        }
+        text(s) {
+            need(typeof s === 'string', 'Texto requerido');
+            const b = new TextEncoder().encode(s);
+            need(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(b) === s, 'Unicode no válido');
+            this.n(b.length, 6);
+            for (const x of b)
+                this.parts.push(x.toString(2).padStart(8, '0'));
+            return this;
+        }
+        bytes() {
+            let s = this.parts.join('');
+            s = s.padEnd(Math.ceil(s.length / 8) * 8, '0');
+            return Uint8Array.from(s.match(/.{8}/g) || [], x => parseInt(x, 2));
+        }
+    }
+    class Reader {
+        constructor(bytes) {
+            need(bytes instanceof Uint8Array, 'Bytes requeridos');
+            this.b = bytes;
+            this.p = 0;
+        }
+        take(k) {
+            need(Number.isSafeInteger(k) && k >= 0 && this.p + k <= this.b.length * 8, 'Campo truncado');
+            let n = 0n;
+            for (let j = 0; j < k; j++, this.p++)
+                n = (n << 1n) | BigInt((this.b[this.p >> 3] >> (7 - (this.p & 7))) & 1);
+            return n;
+        }
+        n(w = 4) {
+            need(Number.isInteger(w) && w >= 1 && w <= 8, 'Perfil W inválido');
+            const k = Number(this.take(w)) + 1;
+            need(k <= 53, 'Natural fuera del dominio seguro');
+            const n = Number(this.take(k));
+            need(n.toString(2).length === k, 'Natural no canónico');
+            return n;
+        }
+        text() {
+            const k = this.n(6);
+            need(k <= Math.floor((this.b.length * 8 - this.p) / 8), 'Texto truncado');
+            const b = new Uint8Array(k);
+            for (let j = 0; j < k; j++)
+                b[j] = Number(this.take(8));
+            return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(b);
+        }
+        finish() {
+            const k = this.b.length * 8 - this.p;
+            need(k < 8 && this.take(k) === 0n, 'Padding no canónico');
+        }
+    }
+    return { encode, Writer, Reader, need };
+})();
+'use strict';
+Qipu.K4B = (() => {
+    const { need } = Qipu.K2P, MAX = 1048576;
+    const cat = (...parts) => {
+        const b = new Uint8Array(parts.reduce((a, p) => a + p.length, 0));
+        let i = 0;
+        for (const p of parts) {
+            b.set(p, i);
+            i += p.length;
+        }
+        return b;
+    };
+    const domain = s => new TextEncoder().encode(s + '\0');
+    const equal = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+    const hash = async (b) => {
+        need(globalThis.crypto?.subtle, 'Web Crypto no disponible: abra en localhost o HTTPS');
+        return new Uint8Array(await crypto.subtle.digest('SHA-256', b));
+    };
+    function lengthBytes(n) {
+        need(Number.isInteger(n) && n >= 0 && n <= MAX, 'Longitud fuera de límite');
+        let k = n <= 255 ? 1 : n <= 65535 ? 2 : 3;
+        const a = new Uint8Array(k + 1);
+        a[0] = k - 1;
+        for (let j = k; j > 0; j--) {
+            a[j] = n & 255;
+            n = Math.floor(n / 256);
+        }
+        return a;
+    }
+    async function seal(body, prefix = new Uint8Array(), d = 'QIPU-K4B-1') {
+        need(body instanceof Uint8Array, 'Cuerpo binario requerido');
+        const p = cat(prefix, lengthBytes(body.length), body);
+        return cat(p, await hash(cat(domain(d), p)));
+    }
+    async function read(bytes, offset = 0, prefixSize = 0, d = 'QIPU-K4B-1') {
+        need(bytes instanceof Uint8Array && Number.isSafeInteger(prefixSize) && prefixSize >= 0 && Number.isSafeInteger(offset) && offset >= 0 && offset <= bytes.length, 'Offset inválido');
+        const start = offset;
+        let p = offset + prefixSize;
+        need(p < bytes.length, 'Encabezado truncado');
+        const k = bytes[p++] + 1;
+        need(k <= 4 && p + k <= bytes.length, 'Ancho inválido o truncado');
+        let n = 0;
+        for (let j = 0; j < k; j++)
+            n = n * 256 + bytes[p++];
+        need(n <= MAX && lengthBytes(n)[0] === k - 1, 'Longitud no canónica');
+        const end = p + n, stop = end + 32;
+        need(stop <= bytes.length, 'Registro truncado');
+        const h = await hash(cat(domain(d), bytes.subarray(start, end)));
+        need(equal(h, bytes.subarray(end, stop)), 'Hash no coincide');
+        return { prefix: bytes.slice(start, start + prefixSize), body: bytes.slice(p, end), end: stop, hash: h };
+    }
+    return { seal, read, cat, equal, hash, MAX };
+})();
+'use strict';
+Qipu.K5B = (() => {
+    const { need } = Qipu.K2P;
+    return {
+        async seal(t, b) {
+            need(Number.isInteger(t) && t >= 0 && t <= 65535, 'Tratamiento inválido');
+            return Qipu.K4B.seal(b, Uint8Array.of(t >> 8, t & 255), 'QIPU-K5B-1');
+        },
+        async read(b, p = 0) {
+            const r = await Qipu.K4B.read(b, p, 2, 'QIPU-K5B-1');
+            return { ...r, t: r.prefix[0] * 256 + r.prefix[1] };
+        }
+    };
+})();
+'use strict';
+
+'use strict';
+const U=(()=>{
+ const MAX=64, need=(x,m)=>{if(!x)throw Error(m)}, cp=x=>JSON.parse(JSON.stringify(x)), eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b), nat=x=>Number.isSafeInteger(x)&&x>=0, name=x=>typeof x==='string'&&x.length>0&&x.length<=200, ar=(x,n)=>{need(Array.isArray(x)&&x.length===n,'Aridad inválida');return x}, route=r=>{need(Array.isArray(r)&&r.every(nat),'Ruta inválida');return r};
+ function value(x,d=0){need(d<=MAX,'Contenido demasiado profundo');if(x===null||typeof x==='boolean'||typeof x==='string'||Number.isSafeInteger(x))return;if(Array.isArray(x)){x.forEach(y=>value(y,d+1));return}need(x&&Object.getPrototypeOf(x)===Object.prototype,'Contenido JSON no admitido');for(const y of Object.values(x))value(y,d+1)}
+ function add(a,n){need(name(n),'Nombre inválido');let i=a.indexOf(n);if(i<0){need(a.length<65536,'Capacidad');i=a.length;a.push(n)}return i}
+ const find=(xs,i)=>xs.find(x=>x[0]===i)?.[1], put=(xs,i,x)=>{let j=xs.findIndex(x=>x[0]===i);if(j<0)xs.push([i,x]);else xs[j][1]=x};
+ function transform(old,op,x){value(x);if(op==='SET'){need(!old||old.kind==='value','No sustituir geometría constituida');return {kind:'value',value:cp(x)}}need(op==='ADD'||op==='SUB','Tratamiento inválido');need(old?.kind==='value'&&nat(old.value)&&nat(x),'Diferencial requiere natural existente');let y=old.value+(op==='ADD'?x:-x);need(nat(y),'Natural fuera de dominio');return {kind:'value',value:y}}
+ const summary=(n)=>!n?['absent']:n.kind==='value'?['value',cp(n.value)]:null;
+ const list=names=>['context',names.map((n,i)=>[i,n])];
+ const replay=(engine,log,n=log.length)=>{need(nat(n)&&n<=log.length,'Corte inválido');let s=engine.zero();for(let i=0;i<n;i++)s=engine.apply(s,log[i]);return s};
+ return {MAX,need,cp,eq,nat,name,ar,route,value,add,find,put,transform,summary,list,replay}
+})();
+/* Qipu RC.4 A/B — materialización dispersa experimental; no cambia la trayectoria. */
+'use strict';
+const Sparse=(()=>{
+ const {need,cp,eq,nat,ar,route,transform,summary}=U;
+ const key=(...x)=>JSON.stringify(x);
+ function zero(profile){need(profile==='A'||profile==='B','Perfil');const s=new Map();
+ const put=(x,...k)=>s.set(key(...k),x);
+ put(1,'seq');put(0,'count',0);put({kind:profile==='A'?'root':'context',id:0,axis:0},'root');
+ if(profile==='B'){put(1,'axisCount');put(0,'axisIndex',0);put(0,'axisName','root')}return s}
+ function view(base){const delta=new Map(),seen=new Set();
+  function get(...k){let p=key(...k);if(delta.has(p))return delta.get(p);seen.add(p);return base.get(p)}
+  function put(x,...k){let p=key(...k);if(!eq(get(...k),x))delta.set(p,x)}
+  return {get,put,delta,seen}}
+ function engine(profile){
+  function count(v,a){const n=v.get('count',a);need(nat(n),'Eje inexistente');return n}
+  function alloc(v){let id=v.get('seq');v.put(id+1,'seq');return id}
+  function newAxis(v){let id=alloc(v);v.put(0,'count',id);return id}
+  function introduce(v,a,n){need(U.name(n),'Nombre inválido');let i=v.get('pos',a,n);if(i!==undefined)return i;i=count(v,a);need(i<65536,'Capacidad');v.put(n,'name',a,i);v.put(i,'pos',a,n);v.put(i+1,'count',a);return i}
+  function node(v,kind,axis,rows){return {kind,id:alloc(v),axis,...(rows===undefined?{}:{rows})}}
+  function table(v){return node(v,'table',newAxis(v),newAxis(v))}
+  function vector(v){return node(v,'vector',newAxis(v))}
+  function resolve(v,r){route(r);let n=v.get('root'),parent=null,i;
+   for(const p of r){need(n&&n.kind!=='value'&&n.kind!=='trajectory','Contenido terminal, ausente o frontera de trayectoria');need(p<count(v,n.axis),'Posición inexistente');parent=n;i=p;n=v.get('slot',n.id,p)}
+   return {n,parent,i}}
+  function bound(v,c,x){need(c.parent,'Se requiere posición');v.put(x,'slot',c.parent.id,c.i)}
+  function axis(v,a){let k=typeof a==='string'?v.get('axisName',a):nat(a)?v.get('axisIndex',a):undefined;need(k!==undefined,'Eje inexistente');return k}
+  function one(v,e){const [op,r,x]=ar(e,3);
+   if(profile==='B'&&op==='AXIS'){need(Array.isArray(r)&&r.length===0&&U.name(x),'AXIS exige nombre');if(v.get('axisName',x)===undefined){let j=v.get('axisCount'),a=newAxis(v);need(j<65536,'Capacidad');v.put(a,'axisName',x);v.put(a,'axisIndex',j);v.put(j+1,'axisCount')}return}
+   if(profile==='B'&&op==='GROW'){ar(r,1);introduce(v,axis(v,r[0]),x);return}
+   const c=resolve(v,r),n=c.n;
+   if(op==='MOUNT_LOCAL'){need(c.parent&&(profile==='B'||['column','vector'].includes(c.parent.kind))&&!n,'Montaje exige celda ausente');const [id,p]=ar(x,2);need(nat(id)&&['A','B'].includes(p),'Descriptor inválido');bound(v,c,{kind:'trajectory',id,profile:p});return}
+   if(profile==='A'){
+    if(op==='TABLE'){need(n?.kind==='root','TABLE exige raíz');let i=introduce(v,n.axis,x);if(v.get('slot',n.id,i)===undefined)v.put(table(v),'slot',n.id,i);return}
+    if(op==='COL'){need(n?.kind==='table','COL exige tabla');let i=introduce(v,n.axis,x);if(v.get('slot',n.id,i)===undefined)v.put(node(v,'column',n.rows),'slot',n.id,i);return}
+    if(op==='ID'){need(n?.kind==='table','ID exige tabla');introduce(v,n.rows,x);return}
+    if(op==='ITEM'){need(n?.kind==='vector','ITEM exige vector');introduce(v,n.axis,x);return}
+    if(op==='OPEN'){need(c.parent&&['column','vector'].includes(c.parent.kind)&&['table','vector'].includes(x),'OPEN exige celda y clase');need(!n||n.kind===x,'Clase incompatible');if(!n)bound(v,c,x==='table'?table(v):vector(v));return}
+   }else{
+    if(op==='INTRO'){need(n?.kind==='context','INTRO exige contexto');let [nm,ref]=ar(x,2),i=introduce(v,n.axis,nm);if(ref!==null){let a=axis(v,ref),old=v.get('slot',n.id,i);need(!old||(old.kind==='context'&&old.axis===a),'Eje incompatible');if(!old)v.put(node(v,'context',a),'slot',n.id,i)}return}
+    if(op==='BIND'){need(c.parent,'BIND exige posición');let a=axis(v,x);need(!n||(n.kind==='context'&&n.axis===a),'Eje incompatible');if(!n)bound(v,c,node(v,'context',a));return}
+   }
+   need(['SET','ADD','SUB'].includes(op),'Tratamiento desconocido');need(c.parent&&(profile==='B'||['column','vector'].includes(c.parent.kind)),'Se requiere celda');bound(v,c,transform(n,op,x))
+  }
+  function plan(base,e){const v=view(base);if(profile==='B'&&e?.[0]==='BATCH'){ar(e,2);need(Array.isArray(e[1])&&e[1].length>0&&e[1].length<=256,'Lote inválido');for(const q of e[1])one(v,q)}else one(v,e);return {delta:v.delta,reads:v.seen.size,writes:v.delta.size}}
+  function commit(s,p){for(const [k,x] of p.delta)s.set(k,cp(x));return s}
+  function apply(s,e){return commit(s,plan(s,e))}
+  function read(s,r=[]){const v=view(s),n=resolve(v,r).n;let data=summary(n);if(!data){const a=n.axis,len=count(v,a);data=['context',Array.from({length:len},(_,i)=>[i,v.get('name',a,i)])]}return {data,reads:v.seen.size}}
+  function cell(s,r){const v=view(s),c=resolve(v,r);need(c.parent&&(profile==='B'||['column','vector'].includes(c.parent.kind)),'Se requiere celda');let n=c.n;return {data:!n?['absent']:n.kind==='value'?['value',cp(n.value)]:['context',n.kind],reads:v.seen.size}}
+  return {zero:()=>zero(profile),plan,commit,apply,read,cell,locate:(s,r)=>resolve(view(s),r)}
+ }
+ return {A:engine('A'),B:engine('B')}
+})();
+/* RC.4 experimental: typed binary trajectories; A and B reuse the same cursor.
+   K5B framing unchanged. No public type numbers assigned. */
+'use strict';
+const RC4=(()=>{
+ const {need,ar,nat,route,cp,value}=U,Q=globalThis.Qipu,types={A:65520,B:65521},enc=new TextEncoder(),dec=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true});
+ const key=(...a)=>JSON.stringify(a), local=(scope,k)=>key('state',scope,k), meta=(scope,k)=>key('meta',scope,k), hex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
+ function unhex(s){need(typeof s==='string'&&s.length%2===0&&/^[0-9a-f]*$/.test(s),'Hex canónico requerido');let b=new Uint8Array(s.length/2);for(let i=0;i<b.length;i++)b[i]=parseInt(s.slice(i*2,i*2+2),16);return b}
+ function profile(p){need(Object.hasOwn(types,p),'Perfil desconocido');return p}
+ async function encode(p,e){profile(p);value(e);return Q.K5B.seal(types[p],enc.encode(JSON.stringify(e)))}
+ async function decode(p,bytes,offset){const f=await Q.K5B.read(bytes,offset);need(f.t===types[p],'Perfil de marco incompatible');const str=dec.decode(f.body),e=JSON.parse(str);need(JSON.stringify(e)===str,'JSON de marco no canónico');value(e);return {event:e,end:f.end,raw:bytes.slice(offset,f.end)}}
+ function overlay(base){const delta=new Map();return {get:k=>delta.has(k)?delta.get(k):base.get(k),set:(k,x)=>delta.set(k,x),commit:()=>{for(const [k,x] of delta)base.set(k,x)},delta}}
+ function init(v,id,p){profile(p);v.set(meta(id,'profile'),p);v.set(meta(id,'count'),0);v.set(meta(id,'ruleCount'),0);for(const [k,x] of Sparse[p].zero())v.set(local(id,k),x)}
+ function state(v,id){return {get:k=>v.get(local(id,k))}}
+ function applyLocal(v,id,p,e){const pl=Sparse[p].plan(state(v,id),e);for(const [k,x] of pl.delta)v.set(local(id,k),cp(x))}
+ function locate(v,id,p,r){return Sparse[p].locate(state(v,id),r)}
+ // A recognized outer event may carry several local effects, but is one root record.
+ function syncQuestion(v,r){let gen=question(r),g=gen.next();while(!g.done)g=gen.next(v.get(g.value));return g.value.data}
+ // Causal dependency: a child observes recognized records of its immediate parent.
+ const direct=e=>e?.[0]==='TX'?e[2][2]:[e];
+ function sourceMatches(v,parent,i,rule,cut){
+  const c=v.get(meta(parent,'rootCut:'+i));
+  return nat(c)&&c>rule.born&&c<cut&&(v.get(meta(parent,'effective:'+i))||[]).some(e=>U.eq(e,rule.source));
+ }
+ function pending(v,id,k,cut){
+  const parent=v.get(meta(id,'parent')),rule=v.get(meta(id,'rule:'+k));
+  need(parent&&rule,'Dependencia inexistente');
+  const n=v.get(meta(parent.scope,'count'));
+  for(let i=0;i<n;i++)if(sourceMatches(v,parent.scope,i,rule,cut)&&v.get(meta(id,'consumed:'+k+':'+i))===undefined)return {id,k,i,parent,rootCut:v.get(meta(parent.scope,'rootCut:'+i)),rule};
+  return null
+ }
+ function candidate(v,cut){
+  let best=null;
+  for(let id=1;id<v.get(key('next'));id++)for(let k=0;k<v.get(meta(id,'ruleCount'));k++){
+   const x=pending(v,id,k,cut);if(x&&(!best||x.rootCut<best.rootCut||x.rootCut===best.rootCut&&(x.id<best.id||x.id===best.id&&(x.k<best.k||x.k===best.k&&x.i<best.i))))best=x
+  }return best
+ }
+ async function effect(v,id,p,e,rootCut,allowTx=false,raw){
+  need(Array.isArray(e),'Acontecimiento inválido');const op=e[0];let r,x;if(op==='BATCH'){ar(e,2);r=e[1]}else{[,r,x]=ar(e,3);route(r)}
+  if(op==='DEPEND'){
+   need(id!==0&&r.length===0&&v.get(meta(id,'parent')),'DEPEND exige trayectoria hija');
+   const [source,action]=ar(x,2);
+   for(const q of [source,action]){const [t,path,val]=ar(q,3);need(['SET','ADD','SUB'].includes(t),'Dependencia solo sobre manifestaciones');route(path);value(val)}
+   const n=v.get(meta(id,'ruleCount'));for(let i=0;i<n;i++){const old=v.get(meta(id,'rule:'+i));need(!(U.eq(old.source,source)&&U.eq(old.action,action)),'Dependencia duplicada')}
+   v.set(meta(id,'rule:'+n),{source:cp(source),action:cp(action),born:rootCut});v.set(meta(id,'ruleCount'),n+1);return
+  }
+  if(op==='CAUSE'){
+   need(id!==0&&r.length===0,'CAUSE exige trayectoria hija');const [k,i]=ar(x,2);need(nat(k)&&nat(i),'Referencia causal inválida');
+   const q=pending(v,id,k,rootCut);need(q&&q.i===i,'CAUSA_NO_RECONOCIDA_O_CONSUMIDA');
+   applyLocal(v,id,p,q.rule.action);v.set(meta(id,'consumed:'+k+':'+i),rootCut);return
+  }
+  if(op==='TX'){
+   need(allowTx&&id===0&&r.length===0,'TX solo en raíz exterior');
+   const [origin,checks,events]=ar(x,3);need(U.name(origin)&&Array.isArray(checks)&&Array.isArray(events)&&events.length>0,'TX inválida');
+   need(v.get(key('receipt',origin))===undefined,'Origen ya reconocido');
+   for(const c of checks){const [path,expected]=ar(c,2);route(path);need(U.eq(syncQuestion(v,path),expected),'PRECONDICION_NO_CUMPLIDA')}
+   for(const q of events){need(!['DEPEND','CAUSE'].includes(q?.[0]),'DEPEND/CAUSE requieren registro propio');await effect(v,id,p,q,rootCut,false);}
+   v.set(key('receipt',origin),{cut:rootCut,raw:raw.slice()});return
+  }
+  if(op==='MOUNT'){
+    const [childP,body]=ar(x,2);profile(childP);const bytes=unhex(body),c=locate(v,id,p,r);
+    need(c.parent&&!c.n,'Montaje exige celda ausente');
+    const child=v.get(key('next'));need(nat(child)&&Number.isSafeInteger(child+1),'Capacidad de identificador');v.set(key('next'),child+1);
+    applyLocal(v,id,p,['MOUNT_LOCAL',r,[child,childP]]);init(v,child,childP);v.set(meta(child,'parent'),{scope:id,path:r.slice()});
+    await fold(v,child,childP,bytes,rootCut)
+  }else if(op==='APPEND'){
+    const c=locate(v,id,p,r);need(c.n?.kind==='trajectory','APPEND exige trayectoria constituida');const bytes=unhex(x);need(bytes.length>0,'Sufijo vacío');
+    await fold(v,c.n.id,c.n.profile,bytes,rootCut)
+  }else{need(op!=='MOUNT_LOCAL','Tratamiento reservado');if(op==='BATCH'){need(p==='B'&&Array.isArray(r)&&r.every(q=>Array.isArray(q)&&!['TX','DEPEND','CAUSE','MOUNT_LOCAL','MOUNT','APPEND','BATCH'].includes(q[0])),'Lote contiene tratamiento de frontera');}applyLocal(v,id,p,e)}
+ }
+ async function fold(v,id,p,raw,rootCut,allowTx=false){
+  let offset=0;
+  while(offset<raw.length){const f=await decode(p,raw,offset);
+   await effect(v,id,p,f.event,rootCut,allowTx,f.raw);
+   const n=v.get(meta(id,'count'));v.set(meta(id,'record:'+n),f.raw);v.set(meta(id,'rootCut:'+n),rootCut);v.set(meta(id,'effective:'+n),f.event[0]==='CAUSE'?[cp(v.get(meta(id,'rule:'+f.event[2][0])).action)]:direct(f.event));v.set(meta(id,'count'),n+1);offset=f.end
+  }
+ }
+ // Generator continuation: each key is acquired once per request; no restart or full-state fallback.
+ function* navigate(r,scope=0,enterFinal=true){
+  route(r);let n=yield local(scope,key('root')),localPath=[],boundaries=[];
+  function* enter(){while(n?.kind==='trajectory'){boundaries.push({scope,path:localPath.slice(),child:n.id,profile:n.profile});scope=n.id;localPath=[];n=yield local(scope,key('root'))}}
+  for(const p of r){yield* enter();need(n&&n.kind!=='value','Ruta terminal o ausente');const len=yield local(scope,key('count',n.axis));need(nat(len)&&p<len,'Posición inexistente');n=yield local(scope,key('slot',n.id,p));localPath.push(p)}
+  if(enterFinal)yield* enter();
+  return {scope,n,localPath,boundaries}
+ }
+ function* question(r,enterFinal=true){const c=yield* navigate(r,0,enterFinal),n=c.n;let data;
+  if(!n)data=['absent'];else if(n.kind==='value')data=['value',cp(n.value)];else if(n.kind==='trajectory')data=['trajectory',n.profile,n.id];else{
+   const len=yield local(c.scope,key('count',n.axis));need(nat(len),'Eje inexistente');const xs=[];for(let i=0;i<len;i++)xs.push([i,yield local(c.scope,key('name',n.axis,i))]);data=['context',xs]
+  }
+  return {data,scope:c.scope,localPath:c.localPath,boundaries:c.boundaries}
+ }
+ async function cursor(get,gen,{signal}={}){
+  const cache=new Map();let steps=0,g=gen.next();
+  while(!g.done){if(signal?.aborted)throw Error('RECORRIDO_CANCELADO');const k=g.value;if(!cache.has(k))cache.set(k,await get(k));steps++;g=gen.next(cache.get(k))}
+  if(signal?.aborted)throw Error('RECORRIDO_CANCELADO');return {result:g.value,reads:cache.size,steps}
+ }
+ class World{
+  #s=new Map();#tail=Promise.resolve();#profile;
+  constructor(p){this.#profile=profile(p);this.#s.set(key('next'),1);init(this.#s,0,p)}
+  enqueue(fn){const j=this.#tail.then(fn);this.#tail=j.catch(()=>{});return j}
+  async #appendOwned(owned,strict=false){const f=await decode(this.#profile,owned,0);need(f.end===owned.length,'Un acontecimiento exterior por append');
+   if(f.event?.[0]==='TX'){const [,r,x]=ar(f.event,3);route(r);need(r.length===0,'TX solo raíz');const [origin]=ar(x,3);need(U.name(origin),'Origen inválido');const prior=this.#s.get(key('receipt',origin));if(prior){need(!strict,'Origen repetido físicamente en replay');need(Q.K4B.equal(prior.raw,owned),'CONFLICTO_ORIGEN');return {cut:prior.cut,replayed:true}}}
+   const v=overlay(this.#s),cut=this.#s.get(meta(0,'count'))+1;await fold(v,0,this.#profile,owned,cut,true);v.commit();
+   return f.event?.[0]==='TX'?{cut,replayed:false}:cut
+  }
+  append(raw){need(raw instanceof Uint8Array&&raw.length>0,'Marco requerido');const owned=raw.slice();return this.enqueue(()=>this.#appendOwned(owned))}
+  submit(e){value(e);const owned=cp(e);return this.enqueue(async()=>this.#appendOwned(await encode(this.#profile,owned)))}
+  read(r=[],opts={}){const p=r.slice(),options={...opts};return this.enqueue(async()=>{const x=await cursor(k=>this.#s.get(k),question(p,options.enterFinal!==false),options);return {...x.result,reads:x.reads,steps:x.steps,cut:this.#s.get(meta(0,'count'))}})}
+  // Route is transparent on reads. Write route is explicit: local treatments never cross a boundary.
+  // For convenience, compile a global target into nested APPEND frames in the same consistent cut.
+  async #compile(op,p,v){
+    need(!['TX','MOUNT_LOCAL','APPEND','AXIS','GROW','BATCH','CAUSE'].includes(op),'Tratamiento contextual o reservado');
+    const c=(await cursor(k=>this.#s.get(k),navigate(p,0,op!=='MOUNT'))).result;
+    const childP=this.#s.get(meta(c.scope,'profile'));let raw=await encode(childP,[op,c.localPath,v]);
+    for(let i=c.boundaries.length-1;i>=0;i--){const b=c.boundaries[i],p0=this.#s.get(meta(b.scope,'profile'));raw=await encode(p0,['APPEND',b.path,hex(raw)])}return raw
+  }
+  write(op,r,x){const p=r.slice(),v=cp(x);return this.enqueue(async()=>this.#appendOwned(await this.#compile(op,p,v)))}
+  async #resolve({signal,maxEffects=Infinity}={}){
+   need(maxEffects===Infinity||nat(maxEffects),'Presupuesto inválido');let resolved=[];
+   for(;;){const cut=this.#s.get(meta(0,'count')),q=candidate(this.#s,cut+1);
+    if(!q)return {kind:'settled',resolved,cut};
+    if(signal?.aborted||resolved.length>=maxEffects)return {kind:'pending',resolved,cut,next:{scope:q.id,rule:q.k,parentPosition:q.i}};
+    let id=q.id,raw=await encode(this.#s.get(meta(id,'profile')),['CAUSE',[],[q.k,q.i]]);
+    while(id!==0){const p=this.#s.get(meta(id,'parent'));raw=await encode(this.#s.get(meta(p.scope,'profile')),['APPEND',p.path,hex(raw)]);id=p.scope}
+    try{const admitted=await this.#appendOwned(raw);resolved.push({scope:q.id,rule:q.k,parentPosition:q.i,causeCut:q.rootCut,cut:admitted})}
+    catch(e){return {kind:'blocked',resolved,cut,next:{scope:q.id,rule:q.k,parentPosition:q.i},reason:e.message}}
+   }
+  }
+  resolve(opts={}){const o={...opts};return this.enqueue(()=>this.#resolve(o))}
+  record(e,opts={}){value(e);const owned=cp(e),o={...opts};return this.enqueue(async()=>{const admitted=await this.#appendOwned(await encode(this.#profile,owned));return {admitted,resolution:await this.#resolve(o)}})}
+  register(op,r,x,opts={}){const p=r.slice(),v=cp(x),o={...opts};return this.enqueue(async()=>{const admitted=await this.#appendOwned(await this.#compile(op,p,v));return {admitted,resolution:await this.#resolve(o)}})}
+  #bytes(scope,end){const n=this.#s.get(meta(scope,'count'));need(nat(n),'Trayectoria desconocida');const k=end===undefined?n:end;need(nat(k)&&k<=n,'Corte fuera de rango');let size=0;for(let i=0;i<k;i++)size+=this.#s.get(meta(scope,'record:'+i)).length;const bytes=new Uint8Array(size);let off=0;for(let i=0;i<k;i++){let r=this.#s.get(meta(scope,'record:'+i));bytes.set(r,off);off+=r.length}return bytes}
+  export(scope=0,end){return this.enqueue(()=>this.#bytes(scope,end))}
+  async at(cut){return World.replay(this.#profile,await this.export(0,cut))}
+  transaction(origin,checks,events){return this.submit(['TX',[],[origin,checks,events]])}
+  history(r=[],{from=0,to}={}){const path=r.slice();return this.enqueue(async()=>{
+   let id=0;if(path.length){const c=(await cursor(k=>this.#s.get(k),navigate(path,0,false))).result;need(c.n?.kind==='trajectory','Ruta no constituye trayectoria');id=c.n.id}
+   const p=this.#s.get(meta(id,'profile')),n=this.#s.get(meta(id,'count')),stop=to===undefined?n:to;need(nat(from)&&nat(stop)&&from<=stop&&stop<=n,'Rango histórico inválido');
+   const records=[];for(let i=from;i<stop;i++){const raw=this.#s.get(meta(id,'record:'+i)),f=await decode(p,raw,0);records.push({position:i,rootCut:this.#s.get(meta(id,'rootCut:'+i)),event:f.event,hex:hex(raw),effective:cp(this.#s.get(meta(id,'effective:'+i)))})}
+   return {scope:id,profile:p,cut:n,rootCut:this.#s.get(meta(0,'count')),from,to:stop,records}
+  })}
+  cut(scope=0){return this.enqueue(()=>{const n=this.#s.get(meta(scope,'count'));need(nat(n),'Trayectoria desconocida');return n})}
+  static async replay(p,bytes){const raw=bytes.slice(),w=new World(p);let offset=0;while(offset<raw.length){const f=await Q.K5B.read(raw,offset);await w.#appendOwned(raw.slice(offset,f.end),true);offset=f.end}return w}
+ }
+ return {World,encode,hex,unhex,cursor,question,navigate}
+})();
+/* Qipu A.2: structural scenarios. No causal resolver is required in these cases. */
+const Structural=(()=>{
+ const {World,encode,hex}=RC4,Q=globalThis.Qipu;
+ const S=(r,x)=>['SET',r,x], G=(...rs)=>rs.flat(), equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b), bytesEqual=Q.K4B.equal;
+ async function pack(es){return Q.K4B.cat(...await Promise.all(es.map(e=>encode('A',e))))}
+ const seed=(t,i,cols)=>[['TABLE',[],t],['ID',[0],i],...cols.map(c=>['COL',[0],c])];
+ const mount=async(r,es)=>['MOUNT',r,['A',hex(await pack(es))]];
+ const ext=async(r,es)=>['APPEND',r,hex(await pack(es))];
+ const value=async(w,r)=>(await w.read(r)).data;
+ async function create(es){let w=new World('A');for(const e of es)await w.submit(e);return w}
+ const c=[0,0,0],p=[0,1,0],n=[0,2,0],z=[0,0,0];
+ const definitions=[
+ {id:'crm',title:'CRM · Cliente, conversación y seguimiento',description:'Cada cliente tiene su propia conversación. El seguimiento es una trayectoria dentro de esa conversación. Los datos de contacto son manifestaciones terminales.',async build(){
+  const w=await create([...seed('Cliente','Ana',['Conversacion','Telefono']),['ID',[0],'Luis'],S(p,'3000000000')]);
+  const follow=[...seed('Seguimiento','Actual',['Estado']),S(z,'pendiente')];
+  const conversation=[...seed('Interaccion','M1',['Mensaje','Seguimiento']),S(z,'Consulta precio'),await mount(p,follow)];
+  await w.submit(await mount(c,conversation));await w.submit(await mount([0,0,1],[...seed('Interaccion','M1',['Mensaje']),S(z,'Consulta horario')]));
+  return {w,paths:[['Conversación Ana',c],['Seguimiento Ana',G(c,p)],['Mensaje actual',G(c,z)],['Estado seguimiento',G(c,p,z)],['Conversación Luis',[0,0,1]],['Teléfono',p]],steps:[
+   ['Responder a Ana','SET',G(c,z),'Precio 35000'],['Registrar seguimiento','SET',G(c,p,z),'contactada'],['Añadir interacción','ID',G(c,[0]),'M2'],['Registrar segunda interacción','SET',G(c,[0,0,1]),'Acepta cotización']
+  ],expected:[ [G(c,z),['value','Precio 35000']], [G(c,p,z),['value','contactada']], [G(c,[0,0,1]),['value','Acepta cotización']], [[0,0,1,0,0,0],['value','Consulta horario']], [p,['value','3000000000']]],histories:[c,G(c,p),[0,0,1]]}
+ }},
+ {id:'venta',title:'Comercio · Venta y entrega',description:'La venta y la entrega son historias locales. El stock pertenece a la raíz. El ejemplo registra estados explícitos, no inventa una reserva por cambiar el estado.',async build(){
+  const w=await create([...seed('Producto','SKU-A',['Stock']),S(z,10),['TABLE',[],'Venta'],['ID',[1],'V1'],['COL',[1],'Historia']]);
+  const sale=[1,0,0],delivery=G(sale,p);
+  await w.submit(await mount(sale,[...seed('Venta','Actual',['Estado','Entrega']),S(z,'solicitada'),await mount(p,[...seed('Envio','Actual',['Estado','Guia']),S(z,'esperando')])]));
+  return {w,paths:[['Stock',z],['Venta',sale],['Estado venta',G(sale,z)],['Entrega',delivery],['Estado entrega',G(delivery,z)],['Guía',G(delivery,p)]],steps:[
+   ['Registrar pago informado','SET',G(sale,z),'pagada'],['Registrar guía','SET',G(delivery,p),'GUIA-001'],['Registrar despacho','SET',G(delivery,z),'despachado'],['Registrar entrega','SET',G(delivery,z),'entregado']
+  ],expected:[[z,['value',10]],[G(sale,z),['value','pagada']],[G(delivery,z),['value','entregado']],[G(delivery,p),['value','GUIA-001']]],histories:[sale,delivery]}
+ }},
+ {id:'proyecto',title:'Proyecto · Colaboradores y tareas',description:'Una tabla interior comparte identidades. Una tarea es una trayectoria dentro de la historia del proyecto. Añadir colaboradores no exige crear otra trayectoria.',async build(){
+  const w=await create(seed('Proyecto','P1',['Historia']));
+  const task=[...seed('Tarea','T1',['Estado','Responsable']),S(z,'pendiente'),S(p,'Ana')];
+  const project=[...seed('Proyecto','Actual',['Estado','Colaboradores','Tarea']),S(z,'activo'),['OPEN',p,'table'],['ID',p,'Ana'],['COL',p,'Rol'],S(G(p,[0,0]),'investigacion'),await mount(n,task)];
+  await w.submit(await mount(c,project));
+  return {w,paths:[['Proyecto',c],['Colaboradores',G(c,p)],['Rol Ana',G(c,p,[0,0])],['Tarea',G(c,n)],['Estado tarea',G(c,n,z)],['Estado proyecto',G(c,z)]],steps:[
+   ['Añadir colaborador','ID',G(c,p),'Luis'],['Asignar rol','SET',G(c,p,[0,1]),'desarrollo'],['Reasignar tarea','SET',G(c,n,p),'Luis'],['Completar tarea','SET',G(c,n,z),'terminada'],['Registrar revisión','SET',G(c,z),'revision']
+  ],expected:[[G(c,p,[0,0]),['value','investigacion']],[G(c,p,[0,1]),['value','desarrollo']],[G(c,n,z),['value','terminada']],[G(c,n,p),['value','Luis']],[G(c,z),['value','revision']]],histories:[c,G(c,n)]}
+ }},
+ {id:'vector',title:'Vector · Materiales, revisiones e historia',description:'Un vector interior puede contener una trayectoria en una posición y un contenido terminal en otra. La naturaleza se descubre por el tratamiento, no por apariencia.',async build(){
+  const w=await create([...seed('Documento','D1',['Materiales','Contenido']),['OPEN',c,'vector'],['ITEM',c,'Versiones'],['ITEM',c,'Adjunto'],S(G(c,[1]),['lista','terminal']),S(p,0)]);
+  const v=G(c,[0]);await w.write('MOUNT',v,['A',hex(await pack([...seed('Revision','Actual',['Numero','Nota']),S(z,1),S(p,'borrador')]))]);
+  return {w,paths:[['Vector materiales',c],['Trayectoria versiones',v],['Número revisión',G(v,z)],['Nota',G(v,p)],['Lista terminal',G(c,[1])],['Cero terminal',p]],steps:[
+   ['Incrementar revisión','ADD',G(v,z),1],['Registrar nota','SET',G(v,p),'revisado'],['Actualizar adjunto','SET',G(c,[1]),['archivo','final']],['Añadir material','ITEM',c,'Portada'],['Registrar portada','SET',G(c,[2]),'portada.png']
+  ],expected:[[G(v,z),['value',2]],[G(v,p),['value','revisado']],[G(c,[1]),['value',['archivo','final']]],[G(c,[2]),['value','portada.png']],[p,['value',0]]],histories:[v]}
+ }}
+ ];
+ async function step(w,s){return w.write(s[1],s[2],s[3])}
+ async function compare(){
+  // Same final manifestations, distinct admitted histories. Explicit structural flow vs automatic causal flow.
+  const root=()=>create([...seed('Padre','P',['Estado','Hija']),S(z,'pendiente')]);
+  const child=[...seed('Hija','H',['Estado']),S(z,'esperando')],childPath=p;
+  const s=await root(),a=await root();
+  await s.submit(await mount(childPath,child));
+  await a.submit(await mount(childPath,[...child,['DEPEND',[],[S(z,'reconocido'),S(z,'continuar')]]]));
+  const sc=await s.cut(),ac=await a.cut();
+  await s.write('SET',z,'reconocido');const middle=await value(s,G(childPath,z));await s.write('SET',G(childPath,z),'continuar');
+  const r=await a.record(S(z,'reconocido'));
+  return {structural:{rootRecords:(await s.cut())-sc,childRecords:(await s.history(childPath)).records.map(x=>x.event),middle,final:await value(s,G(childPath,z))},causal:{rootRecords:(await a.cut())-ac,childRecords:(await a.history(childPath)).records.map(x=>x.event),resolved:r.resolution.resolved,final:await value(a,G(childPath,z))}}
+ }
+ async function run(){
+  const out=[],ck=(x,m)=>{if(!x)throw Error(m);out.push('PASS '+m)},reject=async f=>{try{await f();return false}catch{return true}};
+  let traversals=0,scenarios=[];
+  for(const d of definitions){
+   const {w,steps,expected,histories}=await d.build(),initial=await w.export(),cut0=await w.cut(),history0=await Promise.all(histories.map(r=>w.history(r)));
+   for(const s of steps){let old=await w.export(),count=await w.cut();await step(w,s);ck((await w.cut())===count+1&&bytesEqual((await w.export()).slice(0,old.length),old),d.id+' · '+s[0]+' anexa un único registro exterior')}
+   const final=await w.export(),end=await w.cut(),h=await Promise.all(histories.map(r=>w.history(r)));
+   ck((await Promise.all(expected.map(async ([r,x])=>equal(await value(w,r),x)))).every(Boolean),d.id+' · manifestaciones esperadas');
+   ck(h.every((x,i)=>history0[i].records.every((y,j)=>equal(y,x.records[j]))),d.id+' · historias locales conservan prefijos');
+   ck(h.every(x=>x.records.every(y=>!['DEPEND','CAUSE'].includes(y.event[0]))),d.id+' · ninguna regla causal necesaria');
+   let rep=await World.replay('A',final);ck(bytesEqual(await rep.export(),final)&&(await Promise.all(expected.map(async ([r,x])=>equal(await value(rep,r),x)))).every(Boolean),d.id+' · replay exacto');
+   for(let k=cut0;k<=end;k++){let a=await w.at(k),b=await World.replay('A',await w.export(0,k));for(const r of histories){ck(equal(await a.history(r),await b.history(r)),d.id+' · corte '+k+' historia '+JSON.stringify(r));traversals++}}
+   const bad=await reject(()=>w.write('SET',[99999],1));ck(bad&&bytesEqual(final,await w.export()),d.id+' · ruta inválida no modifica prefijo');
+   ck(bytesEqual(final.slice(0,initial.length),initial),d.id+' · prefijo inicial intacto');
+   scenarios.push({id:d.id,steps:steps.length,initialCut:cut0,finalCut:end,histories:histories.length})
+  }
+  const {w}=await definitions[3].build(),before=await w.export();ck(await reject(()=>w.write('SET',G(c,[1,0]),'no'))&&bytesEqual(before,await w.export()),'lista terminal no se recorre como geometría');
+  // Structural writing at several levels; deepest target receives SET and each ancestor receives one APPEND.
+  const deep=await create(seed('T','I',['H']));let dest=c;const branches=[];
+  for(let i=0;i<6;i++){await deep.write('MOUNT',dest,['A',hex(await pack([...seed('Nivel','I',['H','Valor']),S(p,0)]))]);branches.push(dest.slice());dest=G(dest,c)}
+  const target=G(branches.at(-1),p),old=await deep.export(),counts=await Promise.all(branches.map(r=>deep.history(r)));
+  await deep.write('ADD',target,7);
+  ck(equal(await value(deep,target),['value',7])&&(await deep.read(target)).boundaries.length===6,'seis fronteras estructurales en una intención');
+  for(let i=0;i<branches.length;i++){const h=await deep.history(branches[i]);ck(h.cut===counts[i].cut+1&&h.records.at(-1).event[0]===(i===5?'ADD':'APPEND'),'nivel '+(i+1)+' recibe un solo marco pertinente')}
+  ck(bytesEqual((await deep.export()).slice(0,old.length),old),'profundidad conserva bytes exteriores');
+  // Direct writes do not magically establish business invariants: explicitly test stock coordination via TX.
+  const v=await definitions[1].build(),sale=[1,0,0],rootBefore=await v.w.export();
+  const ev=[['SUB',z,2],await ext(sale,[S(z,'confirmada')])],checks=[[z,['value',10]],[G(sale,z),['value','solicitada']]];
+  const tx=await v.w.transaction('confirmar-V1',checks,ev),txBytes=await v.w.export();
+  ck(!tx.replayed&&equal(await value(v.w,z),['value',8])&&equal(await value(v.w,G(sale,z)),['value','confirmada']),'TX estructural coordina dos efectos cuando el contrato lo exige');
+  ck((await v.w.transaction('confirmar-V1',checks,ev)).replayed&&bytesEqual(txBytes,await v.w.export()),'TX reintento exacto no duplica efectos');
+  ck(await reject(async()=>v.w.transaction('fallo',[],[await ext(sale,[S(z,'pagada')]),['SUB',z,99]]))&&bytesEqual(txBytes,await v.w.export()),'TX rechazo tardío no altera hija ni raíz');
+  ck(bytesEqual(txBytes.slice(0,rootBefore.length),rootBefore),'TX conserva prefijo');
+  const comp=await compare();ck(equal(comp.structural.final,comp.causal.final)&&comp.structural.rootRecords===2&&comp.causal.rootRecords===2&&equal(comp.structural.middle,['value','esperando'])&&comp.causal.resolved.length===1,'comparación mismo estado final, diferente responsabilidad y registro causal');
+  return {checks:out.length,out,scenarios,traversals,comparison:comp}
+ }
+ return {definitions,step,run,compare}
+})();
+const $=id=>document.getElementById(id),show=(id,x)=>$(id).textContent=typeof x==='string'?x:JSON.stringify(x,null,2);let ex,idx=0,busy=false;
+const controls=['scenario','reset','next','all','cut','latest','routes','route','read','descriptor','history','up','customWrite','download','compare','test'];
+function lock(b){busy=b;controls.forEach(k=>$(k).disabled=b)}
+async function action(fn){if(busy)return;lock(true);try{await fn()}catch(e){show('status','Error: '+e.message)}finally{lock(false);if(ex){$('next').disabled=idx>=ex.steps.length;$('all').disabled=idx>=ex.steps.length}}}
+async function current(){return ex.w.at(+$('cut').value)}
+async function render(kind='read'){const v=await current(),r=JSON.parse($('route').value),h=await v.history();show('cutLabel',h.cut+' / '+await ex.w.cut());show('stepLabel',idx+' / '+ex.steps.length+' · '+(ex.steps[idx]?.[0]||'finalizado'));show('last',h.records.at(-1)?.event??'—');show('rootHistory',h.records.map(x=>({position:x.position,event:x.event})));$('children').replaceChildren();try{let a=kind==='history'?await v.history(r):await v.read(r,{enterFinal:kind!=='descriptor'});show('answer',a);if(a.data?.[0]==='context')for(const [i,n] of a.data[1]){let b=document.createElement('button');b.className='alt';b.textContent=i+' · '+n;b.onclick=()=>action(async()=>{$('route').value=JSON.stringify([...r,i]);await render()});$('children').append(b)}}catch(e){show('answer',{error:e.message})}}
+async function latest(){let n=await ex.w.cut();$('cut').max=n;$('cut').value=n;await render()}
+async function reset(){const d=Structural.definitions[+$('scenario').value];ex=await d.build();idx=0;show('description',d.description);$('routes').replaceChildren();for(const [name,r] of [['Raíz',[]],...ex.paths]){let o=document.createElement('option');o.textContent=name;o.value=JSON.stringify(r);$('routes').append(o)}$('route').value='[]';$('custom').value=JSON.stringify(ex.steps[0].slice(1));$('cut').min=0;show('status','Escenario constituido.');await latest()}
+async function next(){if(idx>=ex.steps.length)return;let s=ex.steps[idx];await Structural.step(ex.w,s);idx++;show('status','Reconocido: '+s[0]);$('route').value=JSON.stringify(s[2]);await latest()}
+for(let i=0;i<Structural.definitions.length;i++){let o=document.createElement('option');o.value=i;o.textContent=Structural.definitions[i].title;$('scenario').append(o)}
+$('scenario').onchange=()=>action(reset);$('reset').onclick=()=>action(reset);$('next').onclick=()=>action(next);$('all').onclick=()=>action(async()=>{while(idx<ex.steps.length)await next()});$('cut').onchange=()=>action(()=>render());$('latest').onclick=()=>action(latest);$('routes').onchange=()=>action(async()=>{$('route').value=$('routes').value;await render()});$('read').onclick=()=>action(()=>render());$('descriptor').onclick=()=>action(()=>render('descriptor'));$('history').onclick=()=>action(()=>render('history'));$('up').onclick=()=>action(async()=>{$('route').value=JSON.stringify(JSON.parse($('route').value).slice(0,-1));await render()});$('customWrite').onclick=()=>action(async()=>{let [op,r,x]=JSON.parse($('custom').value);if(['DEPEND','CAUSE'].includes(op))throw Error('Laboratorio estructural: tratamiento causal excluido');await ex.w.write(op,r,x);$('route').value=JSON.stringify(r);show('status','Intención reconocida.');await latest()});$('download').onclick=()=>action(async()=>{const b=await ex.w.export(),u=URL.createObjectURL(new Blob([b],{type:'application/octet-stream'}));let a=document.createElement('a');a.href=u;a.download='qipu-estructural.k5b';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)});$('compare').onclick=()=>action(async()=>show('comparison',await Structural.compare()));$('test').onclick=()=>action(async()=>{try{const x=await Structural.run();show('results',x.out.join('\n')+'\nTOTAL '+x.checks);document.body.dataset.test='pass'}catch(e){show('results','FAIL '+e.message);document.body.dataset.test='fail';throw e}});action(async()=>{await reset();document.body.dataset.ready='yes'});
+</script></html>

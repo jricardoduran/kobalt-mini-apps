@@ -1,0 +1,103 @@
+Commit probado: 28f6ffc1589270af21c9d677060cbc299308483b
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45750930047
+PASS crm · Responder a Ana anexa un único registro exterior
+PASS crm · Registrar seguimiento anexa un único registro exterior
+PASS crm · Añadir interacción anexa un único registro exterior
+PASS crm · Registrar segunda interacción anexa un único registro exterior
+PASS crm · manifestaciones esperadas
+PASS crm · historias locales conservan prefijos
+PASS crm · ninguna regla causal necesaria
+PASS crm · replay exacto
+PASS crm · corte 8 historia [0,0,0]
+PASS crm · corte 8 historia [0,0,0,0,1,0]
+PASS crm · corte 8 historia [0,0,1]
+PASS crm · corte 9 historia [0,0,0]
+PASS crm · corte 9 historia [0,0,0,0,1,0]
+PASS crm · corte 9 historia [0,0,1]
+PASS crm · corte 10 historia [0,0,0]
+PASS crm · corte 10 historia [0,0,0,0,1,0]
+PASS crm · corte 10 historia [0,0,1]
+PASS crm · corte 11 historia [0,0,0]
+PASS crm · corte 11 historia [0,0,0,0,1,0]
+PASS crm · corte 11 historia [0,0,1]
+PASS crm · corte 12 historia [0,0,0]
+PASS crm · corte 12 historia [0,0,0,0,1,0]
+PASS crm · corte 12 historia [0,0,1]
+PASS crm · ruta inválida no modifica prefijo
+PASS crm · prefijo inicial intacto
+PASS venta · Registrar pago informado anexa un único registro exterior
+PASS venta · Registrar guía anexa un único registro exterior
+PASS venta · Registrar despacho anexa un único registro exterior
+PASS venta · Registrar entrega anexa un único registro exterior
+PASS venta · manifestaciones esperadas
+PASS venta · historias locales conservan prefijos
+PASS venta · ninguna regla causal necesaria
+PASS venta · replay exacto
+PASS venta · corte 8 historia [1,0,0]
+PASS venta · corte 8 historia [1,0,0,0,1,0]
+PASS venta · corte 9 historia [1,0,0]
+PASS venta · corte 9 historia [1,0,0,0,1,0]
+PASS venta · corte 10 historia [1,0,0]
+PASS venta · corte 10 historia [1,0,0,0,1,0]
+PASS venta · corte 11 historia [1,0,0]
+PASS venta · corte 11 historia [1,0,0,0,1,0]
+PASS venta · corte 12 historia [1,0,0]
+PASS venta · corte 12 historia [1,0,0,0,1,0]
+PASS venta · ruta inválida no modifica prefijo
+PASS venta · prefijo inicial intacto
+PASS proyecto · Añadir colaborador anexa un único registro exterior
+PASS proyecto · Asignar rol anexa un único registro exterior
+PASS proyecto · Reasignar tarea anexa un único registro exterior
+PASS proyecto · Completar tarea anexa un único registro exterior
+PASS proyecto · Registrar revisión anexa un único registro exterior
+PASS proyecto · manifestaciones esperadas
+PASS proyecto · historias locales conservan prefijos
+PASS proyecto · ninguna regla causal necesaria
+PASS proyecto · replay exacto
+PASS proyecto · corte 4 historia [0,0,0]
+PASS proyecto · corte 4 historia [0,0,0,0,2,0]
+PASS proyecto · corte 5 historia [0,0,0]
+PASS proyecto · corte 5 historia [0,0,0,0,2,0]
+PASS proyecto · corte 6 historia [0,0,0]
+PASS proyecto · corte 6 historia [0,0,0,0,2,0]
+PASS proyecto · corte 7 historia [0,0,0]
+PASS proyecto · corte 7 historia [0,0,0,0,2,0]
+PASS proyecto · corte 8 historia [0,0,0]
+PASS proyecto · corte 8 historia [0,0,0,0,2,0]
+PASS proyecto · corte 9 historia [0,0,0]
+PASS proyecto · corte 9 historia [0,0,0,0,2,0]
+PASS proyecto · ruta inválida no modifica prefijo
+PASS proyecto · prefijo inicial intacto
+PASS vector · Incrementar revisión anexa un único registro exterior
+PASS vector · Registrar nota anexa un único registro exterior
+PASS vector · Actualizar adjunto anexa un único registro exterior
+PASS vector · Añadir material anexa un único registro exterior
+PASS vector · Registrar portada anexa un único registro exterior
+PASS vector · manifestaciones esperadas
+PASS vector · historias locales conservan prefijos
+PASS vector · ninguna regla causal necesaria
+PASS vector · replay exacto
+PASS vector · corte 10 historia [0,0,0,0]
+PASS vector · corte 11 historia [0,0,0,0]
+PASS vector · corte 12 historia [0,0,0,0]
+PASS vector · corte 13 historia [0,0,0,0]
+PASS vector · corte 14 historia [0,0,0,0]
+PASS vector · corte 15 historia [0,0,0,0]
+PASS vector · ruta inválida no modifica prefijo
+PASS vector · prefijo inicial intacto
+PASS lista terminal no se recorre como geometría
+PASS seis fronteras estructurales en una intención
+PASS nivel 1 recibe un solo marco pertinente
+PASS nivel 2 recibe un solo marco pertinente
+PASS nivel 3 recibe un solo marco pertinente
+PASS nivel 4 recibe un solo marco pertinente
+PASS nivel 5 recibe un solo marco pertinente
+PASS nivel 6 recibe un solo marco pertinente
+PASS profundidad conserva bytes exteriores
+PASS TX estructural coordina dos efectos cuando el contrato lo exige
+PASS TX reintento exacto no duplica efectos
+PASS TX rechazo tardío no altera hija ni raíz
+PASS TX conserva prefijo
+PASS comparación mismo estado final, diferente responsabilidad y registro causal
+ESTRUCTURAL_RESULT {"checks":99,"scenarios":[{"id":"crm","steps":4,"initialCut":8,"finalCut":12,"histories":3},{"id":"venta","steps":4,"initialCut":8,"finalCut":12,"histories":2},{"id":"proyecto","steps":5,"initialCut":4,"finalCut":9,"histories":2},{"id":"vector","steps":5,"initialCut":10,"finalCut":15,"histories":1}],"traversals":43,"comparison":{"structural":{"rootRecords":2,"childRecords":[["TABLE",[],"Hija"],["ID",[0],"H"],["COL",[0],"Estado"],["SET",[0,0,0],"esperando"],["SET",[0,0,0],"continuar"]],"middle":["value","esperando"],"final":["value","continuar"]},"causal":{"rootRecords":2,"childRecords":[["TABLE",[],"Hija"],["ID",[0],"H"],["COL",[0],"Estado"],["SET",[0,0,0],"esperando"],["DEPEND",[],[["SET",[0,0,0],"reconocido"],["SET",[0,0,0],"continuar"]]],["CAUSE",[],[0,6]]],"resolved":[{"scope":1,"rule":0,"parentPosition":6,"causeCut":7,"cut":8}],"final":["value","continuar"]}}}
+PASS LABORATORIO HTML Chrome: arranque, escritura por ruta, preguntas, pruebas, comparación
