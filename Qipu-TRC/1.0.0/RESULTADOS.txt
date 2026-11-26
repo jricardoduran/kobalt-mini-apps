@@ -1,0 +1,11 @@
+Qipu TRC 1.0.0
+Commit probado: ade576eec8deaddbafc716c38c8d41404eee0741
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45752370302
+PASS JS_PHP_EXACT 213 solicitudes; 16 rechazos; semilla 90 eventos
+PASS PHP_STORE 26 operaciones; 8 escritores concurrentes, reenvío, prefijo, temporal abandonado, corrupción y hueco
+TRC_RESULT {"parity":213,"rejections":16,"seed":90,"phpStorage":26,"bytes":21028}
+PASS CHROME IndexedDB 2 conexiones, 8 CAS, reapertura, rechazo, reenvío, corte e historia; equivalencia PHP HTTP y bytes
+FIN
+
+PASS UI local arranque y lectura real
+PASS UI servidor arranque y lectura real

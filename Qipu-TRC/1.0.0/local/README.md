@@ -1,0 +1,2 @@
+# Local — Qipu TRC 1.0.0
+Abrir index.html desde localhost o HTTPS. qipu-trc.js contiene el motor y K5B, almacenamiento.js IndexedDB/CAS, ejemplos.js intenciones, ui.js la interfaz, documentacion.html la explicación completa. El motor no depende de IndexedDB. Usar QipuTRC.plan(raw,q) para obtener resultado, corte y sufijo sin escribir. TRCLocal.open(nombre) y run(q) realizan la persistencia. No hay Service Worker.

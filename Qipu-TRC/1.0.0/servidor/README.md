@@ -1,0 +1,2 @@
+# Servidor — Qipu TRC 1.0.0
+PHP >= 8.1 de 64 bits, Linux, datos fuera de docroot. QipuTRC.php contiene el motor, TRCStore.php la persistencia, api.php el adaptador HTTP. La UI no carga el motor JS: realiza solicitudes POST JSON a api.php. ejemplo y UI son idénticos a local/. QIPU_TRC_DATA es obligatorio; QIPU_TRC_TOKEN es opcional para laboratorio; sin token solo localhost. Configurar HTTPS, autenticación y políticas antes de exponer. Ver documentacion.html y README superior.

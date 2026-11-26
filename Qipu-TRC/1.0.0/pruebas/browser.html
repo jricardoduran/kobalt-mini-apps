@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>TRC physical browser test</title><pre id="out"></pre><script src="../local/qipu-trc.js"></script><script src="../local/almacenamiento.js"></script><script src="../local/ejemplos.js"></script><script>
+(async()=>{const out=document.getElementById('out'),log=x=>out.textContent+=x+'\n',ck=(b,m)=>{if(!b)throw Error(m)},Q=QipuTRC,E=TRCExamples;
+ const name='trc-test-'+crypto.randomUUID(),a=await TRCLocal.open(name),b=await TRCLocal.open(name);
+ const http=async q=>{const r=await fetch('../servidor/api.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(q)}),j=await r.json();if(!j.ok)throw Error(j.error);return j};
+ for(const e of E.events){const x=await a.run(e),y=await http(e);ck(JSON.stringify(x.result)===JSON.stringify(y.result),'recibos divergentes')}
+ const route=[0,0,0],get={op:'read',route},ex={op:'export',route:[]},base=(await a.run(ex)).result.hex;
+ ck(base===(await http(ex)).result.hex,'semilla bytes');
+ const writes=Array.from({length:8},(_,i)=>({op:'write',origin:'browser-'+i,treatment:'ADD',route,content:1}));
+ await Promise.all(writes.map((q,i)=>(i%2?a:b).run(q)));
+ ck((await a.run(get)).result.data[1]===18,'CAS concurrente');const final=(await a.run(ex)).result.hex;ck(final.startsWith(base),'prefijo');
+ const h=(await a.run({op:'history'})).result.records.slice(-8);for(const r of h){const q=writes.find(x=>x.origin===r.event[2][0]);await http(q)}
+ ck(final===(await http(ex)).result.hex,'bytes post concurrencia');
+ const retry=await b.run(writes[0]);ck(retry.result.replayed&&(await a.run(ex)).result.hex===final,'reintento');
+ let failed=false;try{await b.run({op:'write',origin:'invalid',treatment:'SUB',route,content:99})}catch{failed=true}ck(failed&&(await a.run(ex)).result.hex===final,'rechazo');
+ a.close();b.close();const c=await TRCLocal.open(name);ck((await c.run(ex)).result.hex===final,'reapertura');
+ const hq={op:'history',route:[1,0,0,0,1,0]},q1=(await c.run(hq)).result,q2=(await http(hq)).result;ck(JSON.stringify(q1)===JSON.stringify(q2),'historia hija');
+ const cut={op:'read',route,cut:E.events.length};ck((await c.run(cut)).result.data[1]===10,'corte histórico');c.close();
+ log('PASS CHROME IndexedDB 2 conexiones, 8 CAS, reapertura, rechazo, reenvío, corte e historia; equivalencia PHP HTTP y bytes');log('FIN')
+})().catch(e=>document.getElementById('out').textContent+='FAIL '+e.stack);
+</script>
