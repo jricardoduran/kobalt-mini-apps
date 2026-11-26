@@ -1,0 +1,152 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Qipu RC.4 · Dos geometrías</title><style>*{box-sizing:border-box}body{margin:0;background:#f1f6f6;color:#17343e;font:16px/1.6 system-ui}main{max-width:1100px;margin:auto;padding:16px}header,section{padding:22px;border:1px solid #cfdddd;border-radius:12px;background:white;margin-bottom:15px}header{background:#14333f;color:white;border-top:5px solid #43b9a3}h1{font-size:clamp(28px,5vw,44px);line-height:1.1}h2{font-size:23px}p{margin:8px 0 14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.tile{border:1px solid #cfdddd;border-radius:8px;padding:12px}button,input,select,textarea{font:inherit;padding:8px;border:1px solid #afc3c6;border-radius:6px;max-width:100%}button{cursor:pointer;background:#087d73;color:white}button.alt{background:#fff;color:#17343e}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;font:13px/1.5 monospace;background:#edf4f4;padding:10px;border-radius:6px}textarea{width:100%;min-height:90px;font:13px monospace}.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.note{border-left:4px solid #087d73;background:#e8f5f2;padding:10px}small{color:#58717a}header small{color:#a5dfd7}table{border-collapse:collapse;width:100%;font-size:14px}td,th{border-bottom:1px solid #cfdddd;padding:8px;text-align:left}.bad{color:#a12c36}.good{color:#087d73}#children button{margin:4px}</style><main><header><small>Qipu / RC.4-A y RC.4-B · Experimentos independientes · 25 nov 2026</small><h1>Una sintaxis sencilla.<br>Dos geometrías emergentes.</h1><p>Tabla, columna, celda recursiva frente a contextos y ejes compartibles. Ambas separan ruta de contenido, conservan primeras apariciones y reconstruyen desde la trayectoria.</p></header><section><h2>1 · Dos mecanismos</h2><div class="grid"><div class="tile"><h3>A · Celda recursiva</h3><p>Una tabla mantiene un eje común de identidades y columnas dispersas. La celda puede ser terminal, vector o tabla. Una celda tabla admite directamente columna, celda; una celda vector admite posición. Ningún índice se reserva antes de su aparición.</p><pre>[0,3,0]     Variantes de SKU-A (tabla)
+[0,3,0,0]   Stock de variantes (columna)
+[0,3,0,0,0] Stock Rojo-M (celda)
+[0,2,0,1]   Foto detalle (vector interno)</pre></div><div class="tile"><h3>B · Contextos composables</h3><p>Un contexto refiere un eje ordenado de identidades. Cada posición puede carecer de manifestación, contener valor o conducir a otro contexto. Dos contextos pueden compartir un eje sin compartir sus valores. El eje no depende de la profundidad.</p><pre>AXIS: constituir eje
+GROW: añadir identidad al eje
+INTRO: introducir identidad y enlace local
+BIND: constituir contexto en posición
+SET/ADD/SUB: transformar contenido</pre></div></div><p class="note">En A no se copia una tabla completa al modificar una celda; la intención indica el destino específico. Sin embargo, este prototipo puro clona el estado de ensayo para aislar rechazos: no es todavía un almacenamiento disperso incremental real. B usa ejes explícitos, y el traductor de comparación agrupa constituciones en lotes.</p></section><section><h2>2 · Recorrer y preguntar</h2><div class="row"><label>Experimento <select id="mode"><option value="pair">Comercio equivalente A/B</option><option value="B">B · bodegas con eje compartido</option></select></label><button class="alt" id="prev">Anterior</button><button class="alt" id="next">Siguiente</button><button class="alt" id="end">Último</button><input id="cut" type="range" min="0"><output id="label"></output></div><div class="row"><label>Ruta <input id="path" value="[]"></label><button id="read">Preguntar</button><button class="alt" id="up">Subir</button><button class="alt" id="root">Raíz</button></div><div id="children"></div><div class="grid"><div class="tile"><b>A · respuesta</b><pre id="ansA"></pre><b>Último acontecimiento</b><pre id="evtA"></pre></div><div class="tile"><b>B · respuesta</b><pre id="ansB"></pre><b>Último acontecimiento</b><pre id="evtB"></pre></div></div><p id="status"></p><details><summary>Trayectorias del corte</summary><div class="grid"><pre id="logA"></pre><pre id="logB"></pre></div></details></section><section><h2>3 · Experimentar con transformaciones</h2><p>Las intenciones en modo equivalente son A y se traducen a B. En el segundo modo son B. Se anexan al corte final del ejemplo actual, nunca se altera el pasado. En rechazo no se anexa nada. RESET recupera ejemplos.</p><textarea id="input">["SET",[0,3,0,0,0],9]</textarea><div class="row"><button id="append">Admitir y anexar</button><button class="alt" id="reset">Restablecer</button></div></section><section><h2>4 · Evidencia y comparación</h2><button id="test">Ejecutar pruebas</button><pre id="results">PASS equivalencia de todas las rutas en los 35 cortes de Comercio
+PASS eje común aun cuando SKU-B recibe precio antes que SKU-A
+PASS vector dentro de celda: modificación selectiva de una foto
+PASS tabla dentro de celda: diferencial de variante
+PASS tabla recursiva con vector interno de profundidad seis
+PASS ausencia, cero, null y false inequívocos
+PASS lista de contenido no es ruta A
+PASS no sobrescribir una geometría A
+PASS saldo negativo no muta A
+PASS posición futura no se inventa A
+PASS lista de contenido no es ruta B
+PASS no sobrescribir una geometría B
+PASS saldo negativo no muta B
+PASS posición futura no se inventa B
+PASS clase recursiva incompatible rechazada
+PASS reafirmación de identidad conserva posiciones
+PASS replay completo exacto
+PASS reconstrucción incremental desde todo corte
+PASS eje compartido entre contextos independientes y manifestaciones distintas
+PASS crecimiento de eje compartido sin rellenar celdas
+PASS lote B atómico ante rechazo tardío
+PASS ruta de 28 coordenadas sin aridad fija
+PASS 100 transformaciones adicionales equivalentes en cada corte
+: 34,
+  "cuts": 35,
+  "routeComparisons": 573,
+  "bytesA": 802,
+  "bytesB": 1116,
+  "updateA": 30,
+  "updateB": 30
+}</pre><p>Longitud comparada: JSON compacto de acontecimientos decodificados, caracteres ASCII en este ejemplo; no bytes de K5B, ni benchmark de disco/RAM. B conserva más información sobre ejes en esta traducción. Las escrituras posteriores en rutas iguales tienen representación idéntica. La flexibilidad adicional no demuestra menor coste universal.</p><p>RC.3 sigue intacto. Este prototipo no implementa DEF/ACT completos, T120/T101, PAO, CAS, IndexedDB, PHP o Q/R/C. La generalización se prueba sobre geometría y transformaciones, no sobre distribución. Los valores JSON (enteros seguros, texto, booleanos, null, listas y objetos) son terminales; no se navegan automáticamente. Límite técnico de ruta 64, no aridad fija. No se ha verificado la interfaz visual en navegador.</p></section></main><script>
+'use strict';
+const U=(()=>{
+ const MAX=64, need=(x,m)=>{if(!x)throw Error(m)}, cp=x=>JSON.parse(JSON.stringify(x)), eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b), nat=x=>Number.isSafeInteger(x)&&x>=0, name=x=>typeof x==='string'&&x.length>0&&x.length<=200, ar=(x,n)=>{need(Array.isArray(x)&&x.length===n,'Aridad inválida');return x}, route=r=>{need(Array.isArray(r)&&r.length<=MAX&&r.every(nat),'Ruta inválida');return r};
+ function value(x,d=0){need(d<=MAX,'Contenido demasiado profundo');if(x===null||typeof x==='boolean'||typeof x==='string'||Number.isSafeInteger(x))return;if(Array.isArray(x)){x.forEach(y=>value(y,d+1));return}need(x&&Object.getPrototypeOf(x)===Object.prototype,'Contenido JSON no admitido');for(const y of Object.values(x))value(y,d+1)}
+ function add(a,n){need(name(n),'Nombre inválido');let i=a.indexOf(n);if(i<0){need(a.length<65536,'Capacidad');i=a.length;a.push(n)}return i}
+ const find=(xs,i)=>xs.find(x=>x[0]===i)?.[1], put=(xs,i,x)=>{let j=xs.findIndex(x=>x[0]===i);if(j<0)xs.push([i,x]);else xs[j][1]=x};
+ function transform(old,op,x){value(x);if(op==='SET'){need(!old||old.kind==='value','No sustituir geometría constituida');return {kind:'value',value:cp(x)}}need(op==='ADD'||op==='SUB','Tratamiento inválido');need(old?.kind==='value'&&nat(old.value)&&nat(x),'Diferencial requiere natural existente');let y=old.value+(op==='ADD'?x:-x);need(nat(y),'Natural fuera de dominio');return {kind:'value',value:y}}
+ const summary=(n)=>!n?['absent']:n.kind==='value'?['value',cp(n.value)]:null;
+ const list=names=>['context',names.map((n,i)=>[i,n])];
+ const replay=(engine,log,n=log.length)=>{need(nat(n)&&n<=log.length,'Corte inválido');let s=engine.zero();for(let i=0;i<n;i++)s=engine.apply(s,log[i]);return s};
+ return {MAX,need,cp,eq,nat,name,ar,route,value,add,find,put,transform,summary,list,replay}
+})();
+/* Qipu A — tabla, columna/vector, celda recursiva. */
+const A=(()=>{
+ const {need,cp,ar,route,nat,add,find,put,transform,summary,list}=U;
+ const table=()=>({kind:'table',ids:[],names:[],cols:[]}), vector=()=>({kind:'vector',ids:[],slots:[]});
+ const zero=()=>({count:0,root:{kind:'root',names:[],tables:[]}});
+ const unwrap=c=>c.kind==='cell'?c.node:c;
+ function resolve(s,r){route(r);let c=s.root;
+  for(const p of r){c=unwrap(c);need(c,'Ruta sin manifestación');switch(c.kind){
+   case 'root':need(p<c.tables.length,'Tabla inexistente');c=c.tables[p];break;
+   case 'table':need(p<c.cols.length,'Columna inexistente');c={kind:'column',ids:c.ids,slots:c.cols[p]};break;
+   case 'column':case 'vector':need(p<c.ids.length,'Posición inexistente');c={kind:'cell',slots:c.slots,i:p,node:find(c.slots,p)};break;
+   default:throw Error('Contenido terminal');
+  }}return c}
+ function read(s,r=[]){let c=resolve(s,r),n=unwrap(c),z=summary(n);if(z)return z;
+  if(n.kind==='root'||n.kind==='table')return list(n.names);if(n.kind==='column'||n.kind==='vector')return list(n.ids);throw Error('Contexto inválido')}
+ function apply(base,e){let [op,r,x]=ar(e,3),s=cp(base),c=resolve(s,r),n=unwrap(c);
+  if(op==='TABLE'){need(n?.kind==='root','TABLE exige colección de tablas');let i=add(n.names,x);if(!n.tables[i])n.tables.push(table())}
+  else if(op==='COL'){need(n?.kind==='table','COL exige tabla');let i=add(n.names,x);if(!n.cols[i])n.cols.push([])}
+  else if(op==='ID'){need(n?.kind==='table','ID exige tabla');add(n.ids,x)}
+  else if(op==='ITEM'){need(n?.kind==='vector','ITEM exige vector');add(n.ids,x)}
+  else if(op==='OPEN'){need(c.kind==='cell'&&['table','vector'].includes(x),'OPEN exige celda y clase');need(!n||n.kind===x,'Clase constituida incompatible');if(!n)put(c.slots,c.i,x==='table'?table():vector())}
+  else if(['SET','ADD','SUB'].includes(op)){need(c.kind==='cell','Tratamiento exige celda');put(c.slots,c.i,transform(n,op,x))}
+  else throw Error('Tratamiento A desconocido');s.count++;return s}
+ return {zero,resolve,read,apply}
+})();
+/* Qipu B — ámbitos arbitrarios y ejes compartibles. */
+const B=(()=>{
+ const {need,cp,ar,route,nat,name,add,find,put,transform,summary,list}=U;
+ const context=axis=>({kind:'context',axis,slots:[]});
+ const zero=()=>({count:0,axes:[{name:'root',ids:[]}],root:context(0)});
+ const unwrap=c=>c.kind==='cell'?c.node:c;
+ function axis(s,a){let i=typeof a==='string'?s.axes.findIndex(x=>x.name===a):a;need(nat(i)&&i<s.axes.length,'Eje inexistente');return i}
+ function resolve(s,r){route(r);let c=s.root;for(const p of r){let n=unwrap(c);need(n?.kind==='context','No hay transición');need(p<s.axes[n.axis].ids.length,'Posición inexistente');c={kind:'cell',slots:n.slots,i:p,node:find(n.slots,p)}}return c}
+ function read(s,r=[]){let n=unwrap(resolve(s,r)),z=summary(n);return z||list(s.axes[n.axis].ids)}
+ function one(s,e){const [op,r,x]=ar(e,3);
+  if(op==='AXIS'){need(Array.isArray(r)&&r.length===0&&name(x),'AXIS exige nombre');if(!s.axes.some(a=>a.name===x)){need(s.axes.length<65536,'Capacidad');s.axes.push({name:x,ids:[]})}return}
+  if(op==='GROW'){ar(r,1);add(s.axes[axis(s,r[0])].ids,x);return}
+  let c=resolve(s,r),n=unwrap(c);
+  if(op==='INTRO'){need(n?.kind==='context','INTRO exige contexto');const [label,ref]=ar(x,2),i=add(s.axes[n.axis].ids,label);if(ref!==null){const j=axis(s,ref),old=find(n.slots,i);need(!old||(old.kind==='context'&&old.axis===j),'Eje constituido incompatible');if(!old)put(n.slots,i,context(j))}}
+  else if(op==='BIND'){need(c.kind==='cell','BIND exige posición');const j=axis(s,x);need(!n||(n.kind==='context'&&n.axis===j),'Eje constituido incompatible');if(!n)put(c.slots,c.i,context(j))}
+  else if(['SET','ADD','SUB'].includes(op)){need(c.kind==='cell','Tratamiento exige posición');put(c.slots,c.i,transform(n,op,x))}
+  else throw Error('Tratamiento B desconocido')
+ }
+ function apply(base,e){let s=cp(base);if(Array.isArray(e)&&e[0]==='BATCH'){ar(e,2);need(Array.isArray(e[1])&&e[1].length>0&&e[1].length<=256,'Lote inválido');e[1].forEach(q=>one(s,q))}else one(s,e);s.count++;return s}
+ return {zero,axis,resolve,read,apply}
+})();
+/* Comparison: an explicit specialization A -> B, same admitted logical cuts. */
+const Compare=(()=>{
+ const {need,cp,eq,replay}=U, axisName=(p,k)=>JSON.stringify(p)+':'+k, axisRef=(s,n)=>s.axes.findIndex(x=>x.name===n)>=0?B.axis(s,n):n;
+ function translate(sa,sb,e){let [op,p,x]=e, r=A.resolve(sa,p),n=r.kind==='cell'?r.node:r;
+  const ax=(path,k)=>axisName(path,k), make=(n)=>['AXIS',[],n];
+  if(op==='TABLE'){let i=n.names.indexOf(x);if(i<0)i=n.names.length;let q=[...p,i],cols=ax(q,'cols'),rows=ax(q,'rows');return ['BATCH',[make(cols),make(rows),['INTRO',p,[x,axisRef(sb,cols)]]]]}
+  if(op==='COL'){return ['INTRO',p,[x,B.axis(sb,ax(p,'rows'))]]}
+  if(op==='ID')return ['GROW',[B.axis(sb,ax(p,'rows'))],x];
+  if(op==='ITEM')return ['INTRO',p,[x,null]];
+  if(op==='OPEN'){let nm=ax(p,x==='table'?'cols':'items'),ops=[make(nm)];if(x==='table')ops.push(make(ax(p,'rows')));ops.push(['BIND',p,axisRef(sb,nm)]);return ['BATCH',ops]}
+  return cp(e)
+ }
+ const fixture=[
+ ['TABLE',[],'Producto'],['ID',[0],'SKU-A'],['ID',[0],'SKU-B'],['COL',[0],'Precio'],['SET',[0,0,1],65000],['SET',[0,0,0],35000],
+ ['COL',[0],'Stock'],['SET',[0,1,0],10],['COL',[0],'Fotos'],['OPEN',[0,2,0],'vector'],['ITEM',[0,2,0],'principal'],['SET',[0,2,0,0],'foto-a.jpg'],['ITEM',[0,2,0],'detalle'],['SET',[0,2,0,1],'foto-b.jpg'],
+ ['COL',[0],'Variantes'],['OPEN',[0,3,0],'table'],['ID',[0,3,0],'Rojo-M'],['ID',[0,3,0],'Azul-L'],['COL',[0,3,0],'Stock'],['SET',[0,3,0,0,1],8],['SET',[0,3,0,0,0],2],['ADD',[0,3,0,0,0],3],
+ ['COL',[0,3,0],'Medidas'],['OPEN',[0,3,0,1,0],'vector'],['ITEM',[0,3,0,1,0],'ancho'],['SET',[0,3,0,1,0,0],24],
+ ['COL',[0],'Datos'],['SET',[0,4,0],[1,2,3]],['SET',[0,4,1],false],['ID',[0],'SKU-C'],['SUB',[0,1,0],10],['SET',[0,0,2],0],['SET',[0,4,2],null],['SET',[0,2,0,1],'foto-c.jpg']
+ ];
+ function pair(log=fixture){let a=A.zero(),b=B.zero(),lb=[],cuts=[[a,b]];for(const e of log){const f=translate(a,b,e);a=A.apply(a,e);b=B.apply(b,f);lb.push(f);cuts.push([a,b])}return {a,b,lb,cuts}}
+ function enumerate(engine,s,r=[],out=[]){let x=engine.read(s,r);out.push([r,x]);if(x[0]==='context')for(const [i] of x[1])enumerate(engine,s,[...r,i],out);return out}
+ const independent=[
+ ['AXIS',[],'Productos'],['GROW',[1],'SKU-A'],['GROW',[1],'SKU-B'],
+ ['AXIS',[],'Bodegas'],['INTRO',[],['Bodegas',2]],['INTRO',[0],['Norte',1]],['INTRO',[0],['Sur',1]],
+ ['SET',[0,0,0],10],['SET',[0,1,1],7],['GROW',[1],'SKU-C'],['SET',[0,1,0],2]
+ ];
+ function run(){const out=[],ck=(x,m)=>{need(x,m);out.push('PASS '+m)},reject=(fn)=>{try{fn();return false}catch{return true}},p=pair();
+  ck(p.cuts.every(([a,b])=>eq(enumerate(A,a),enumerate(B,b))),'equivalencia de todas las rutas en los 35 cortes de Comercio');
+  ck(eq(A.read(p.a,[0,0]),['context',[[0,'SKU-A'],[1,'SKU-B'],[2,'SKU-C']]]),'eje común aun cuando SKU-B recibe precio antes que SKU-A');
+  ck(eq(A.read(p.a,[0,2,0,1]),['value','foto-c.jpg']),'vector dentro de celda: modificación selectiva de una foto');
+  ck(eq(A.read(p.a,[0,3,0,0,0]),['value',5]),'tabla dentro de celda: diferencial de variante');
+  ck(eq(A.read(p.a,[0,3,0,1,0,0]),['value',24]),'tabla recursiva con vector interno de profundidad seis');
+  ck(eq(A.read(p.a,[0,1,0]),['value',0])&&eq(A.read(p.a,[0,1,2]),['absent'])&&eq(A.read(p.a,[0,4,2]),['value',null])&&eq(A.read(p.a,[0,4,1]),['value',false]),'ausencia, cero, null y false inequívocos');
+  for(const [eng,s] of [[A,p.a],[B,p.b]]){
+   const before=cp(s);ck(reject(()=>eng.read(s,[0,4,0,0])),'lista de contenido no es ruta '+(eng===A?'A':'B'));
+   ck(reject(()=>eng.apply(s,['SET',[0,3,0],99]))&&eq(s,before),'no sobrescribir una geometría '+(eng===A?'A':'B'));
+   ck(reject(()=>eng.apply(s,['SUB',[0,1,0],1]))&&eq(s,before),'saldo negativo no muta '+(eng===A?'A':'B'));
+   ck(reject(()=>eng.apply(s,['SET',[0,1,99],2]))&&eq(s,before),'posición futura no se inventa '+(eng===A?'A':'B'));
+  }
+  ck(reject(()=>A.apply(p.a,['OPEN',[0,2,0],'table'])),'clase recursiva incompatible rechazada');
+  const repeat=A.apply(p.a,['ID',[0],'SKU-A']);ck(eq(A.read(repeat,[0,0]),A.read(p.a,[0,0])),'reafirmación de identidad conserva posiciones');
+  ck(eq(replay(A,fixture),p.a)&&eq(replay(B,p.lb),p.b),'replay completo exacto');
+  ck(p.cuts.every(([a,b],i)=>{for(let j=i;j<fixture.length;j++){a=A.apply(a,fixture[j]);b=B.apply(b,p.lb[j])}return eq(a,p.a)&&eq(b,p.b)}),'reconstrucción incremental desde todo corte');
+  const bs=replay(B,independent);ck(eq(B.read(bs,[0,0]),B.read(bs,[0,1]))&&eq(B.read(bs,[0,0,1]),['absent'])&&eq(B.read(bs,[0,1,1]),['value',7]),'eje compartido entre contextos independientes y manifestaciones distintas');
+  ck(eq(B.read(bs,[0,0,2]),['absent'])&&eq(B.read(bs,[0,1,2]),['absent']),'crecimiento de eje compartido sin rellenar celdas');
+  ck(reject(()=>B.apply(bs,['BATCH',[['SET',[0,0,0],20],['SUB',[0,1,1],99]]]))&&eq(B.read(bs,[0,0,0]),['value',10]),'lote B atómico ante rechazo tardío');
+  let aa=A.zero(),bb=B.zero(),deep=[['TABLE',[],'T'],['ID',[0],'I'],['COL',[0],'C'],['OPEN',[0,0,0],'vector']],r=[0,0,0];
+  for(let i=0;i<25;i++){deep.push(['ITEM',r,'x']);r=[...r,0];if(i<24)deep.push(['OPEN',r,'vector']);else deep.push(['SET',r,123])}
+  let dp=pair(deep);ck(r.length===28&&eq(A.read(dp.a,r),B.read(dp.b,r))&&eq(A.read(dp.a,r),['value',123]),'ruta de 28 coordenadas sin aridad fija');
+  const extra=[];for(let i=0;i<100;i++)extra.push(['SET',[0,0,i%3],1000+i]);let ep=pair(fixture.concat(extra));ck(ep.cuts.every(([a,b])=>eq(enumerate(A,a),enumerate(B,b))),'100 transformaciones adicionales equivalentes en cada corte');
+  let n=0;for(const [a,b] of p.cuts)n+=enumerate(A,a).length;
+  return {out,events:fixture.length,cuts:p.cuts.length,routeComparisons:n,bytesA:JSON.stringify(fixture).length,bytesB:JSON.stringify(p.lb).length,updateA:JSON.stringify(fixture.at(-1)).length,updateB:JSON.stringify(p.lb.at(-1)).length}
+ }
+ return {fixture,independent,translate,pair,enumerate,run}
+})();
+const $=id=>document.getElementById(id),show=(id,v)=>$(id).textContent=typeof v==='string'?v:JSON.stringify(v,null,2);let la=U.cp(Compare.fixture),li=U.cp(Compare.independent),mode='pair';function logs(){return mode==='pair'?{a:la,b:Compare.pair(la).lb}:{a:[],b:li}}function draw(){try{let l=logs(),n=Number($('cut').value),p=JSON.parse($('path').value),sa=mode==='pair'?U.replay(A,l.a,n):null,sb=U.replay(B,l.b,n),va,vb;try{va=sa?A.read(sa,p):'No aplica'}catch(e){va=['error',e.message]}try{vb=B.read(sb,p)}catch(e){vb=['error',e.message]}show('ansA',va);show('ansB',vb);show('evtA',l.a[n-1]||'—');show('evtB',l.b[n-1]||'—');show('logA',l.a.slice(0,n));show('logB',l.b.slice(0,n));$('label').textContent=n+' / '+l.b.length;$('children').replaceChildren();if(vb[0]==='context')for(const [i,nm] of vb[1]){let b=document.createElement('button');b.className='alt';b.textContent=i+' · '+nm;b.onclick=()=>{$('path').value=JSON.stringify([...p,i]);draw()};$('children').append(b)}$('status').textContent=mode==='pair'?'Respuestas iguales: '+U.eq(va,vb):'Eje de identidades de productos compartido por Norte y Sur'}catch(e){$('status').textContent=e.message}}function end(){let l=logs();$('cut').max=l.b.length;$('cut').value=l.b.length;draw()}$('mode').onchange=()=>{mode=$('mode').value;$('path').value='[]';$('input').value=mode==='pair'?'["SET",[0,3,0,0,0],9]':'["SET",[0,1,0],9]';end()};$('cut').oninput=draw;$('read').onclick=draw;$('prev').onclick=()=>{$('cut').value=Math.max(0,+$('cut').value-1);draw()};$('next').onclick=()=>{$('cut').value=Math.min(+$('cut').max,+$('cut').value+1);draw()};$('end').onclick=end;$('root').onclick=()=>{$('path').value='[]';draw()};$('up').onclick=()=>{try{$('path').value=JSON.stringify(JSON.parse($('path').value).slice(0,-1));draw()}catch(e){$('status').textContent=e.message}};$('append').onclick=()=>{try{let e=JSON.parse($('input').value);if(mode==='pair'){let l=[...la,e];Compare.pair(l);la=l}else{B.apply(U.replay(B,li),e);li.push(e)}end()}catch(e){$('status').textContent='Rechazo: '+e.message}};$('reset').onclick=()=>{la=U.cp(Compare.fixture);li=U.cp(Compare.independent);$('path').value='[]';end()};$('test').onclick=()=>{try{show('results',Compare.run())}catch(e){show('results','FAIL '+e.message)}};end();</script></html>

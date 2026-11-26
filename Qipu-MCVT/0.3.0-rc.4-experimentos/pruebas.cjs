@@ -1,0 +1,1 @@
+const fs=require('node:fs');const code=['comun.js','qipu-a.js','qipu-b.js','comparacion.js'].map(n=>fs.readFileSync(__dirname+'/'+n,'utf8')).join('\n');const result=new Function(code+'\nreturn Compare.run();')();console.log(JSON.stringify(result,null,2));
