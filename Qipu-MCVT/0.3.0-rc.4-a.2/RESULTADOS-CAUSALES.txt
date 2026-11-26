@@ -1,0 +1,24 @@
+Commit probado: 55cbf4f51c5dbec364524826fab55f0a62863025
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45750291372
+PASS montar dependencias no fabrica acontecimientos
+PASS primero se reconoce causa, sin efecto simultáneo
+PASS corte causal intermedio reproducible
+PASS primera consecuencia no requiere simultaneidad de nieta
+PASS resolver recursivo tras reapertura
+PASS orden causal estricto de tres cortes
+PASS prefijo conservado y trayectoria hermana no afectada
+PASS resolver repetido no anexa duplicados
+PASS reintento de causa reconocida no repite stock ni consecuencias
+PASS historia conserva referencia causal y efecto derivado
+PASS CAUSE duplicada rechazada aun por append explícito
+PASS causa de hermana incompatible rechazada
+PASS registro global atraviesa dos fronteras automáticamente
+PASS dependencia nueva no reacciona retroactivamente
+PASS consecuencia bloqueada no revierte causa reconocida
+PASS bloqueo observable, no bucle ni escritura parcial
+PASS pendiente bloqueado reconstruible desde binarios
+PASS dos acontecimientos iguales tienen dos identidades causales distintas
+PASS referencia futura rechazada
+PASS causa rechazada no dispara consecuencia
+TOTAL CAUSAL 20
+CAUSAL_EXAMPLE {"cause":13,"child":14,"grandchild":15,"stock":8}
