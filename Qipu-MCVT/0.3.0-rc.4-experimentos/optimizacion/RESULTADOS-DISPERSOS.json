@@ -1,0 +1,63 @@
+{
+  "pass": [
+    "PASS Materialización dispersa A equivale al original en todos los cortes",
+    "PASS Rechazo sin efecto A",
+    "PASS Geometría no sobrescrita A",
+    "PASS Plan puro y una sola clave de efecto en tabla anidada A",
+    "PASS Manifestación anidada actualizada A",
+    "PASS Una clave de efecto en vector anidado A",
+    "PASS Materialización dispersa B equivale al original en todos los cortes",
+    "PASS Rechazo sin efecto B",
+    "PASS Geometría no sobrescrita B",
+    "PASS Plan puro y una sola clave de efecto en tabla anidada B",
+    "PASS Manifestación anidada actualizada B",
+    "PASS Una clave de efecto en vector anidado B",
+    "PASS B conserva ejes compartidos entre contextos independientes",
+    "PASS Lote disperso B no muta ante rechazo tardío",
+    "PASS Ruta de 28 coordenadas, un efecto disperso",
+    "PASS Dependencias de ruta constantes con aumento de cardinalidad",
+    "PASS Nueva identidad escribe tres claves sin rellenar columnas"
+  ],
+  "comparisons": 1146,
+  "workloads": [
+    {
+      "products": 10,
+      "variants": 10,
+      "keys": 128,
+      "flatReads": 7,
+      "flatWrites": 1,
+      "nestedReads": 11,
+      "nestedWrites": 1,
+      "vectorReads": 9,
+      "vectorWrites": 1,
+      "newIdWrites": 3,
+      "queryNested": 11
+    },
+    {
+      "products": 1000,
+      "variants": 100,
+      "keys": 4628,
+      "flatReads": 7,
+      "flatWrites": 1,
+      "nestedReads": 11,
+      "nestedWrites": 1,
+      "vectorReads": 9,
+      "vectorWrites": 1,
+      "newIdWrites": 3,
+      "queryNested": 11
+    },
+    {
+      "products": 10000,
+      "variants": 1000,
+      "keys": 46028,
+      "flatReads": 7,
+      "flatWrites": 1,
+      "nestedReads": 11,
+      "nestedWrites": 1,
+      "vectorReads": 9,
+      "vectorWrites": 1,
+      "newIdWrites": 3,
+      "queryNested": 11
+    }
+  ]
+}

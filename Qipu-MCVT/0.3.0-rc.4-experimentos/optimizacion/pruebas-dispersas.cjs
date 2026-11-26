@@ -1,0 +1,1 @@
+const fs=require('node:fs'),p=require('node:path');const code=['../comun.js','../qipu-a.js','../qipu-b.js','../comparacion.js','sparse.js','sparse-tests.js'].map(n=>fs.readFileSync(p.join(__dirname,n),'utf8')).join('\n');console.log(JSON.stringify(new Function(code+'\nreturn SparseTests.run();')(),null,2));
