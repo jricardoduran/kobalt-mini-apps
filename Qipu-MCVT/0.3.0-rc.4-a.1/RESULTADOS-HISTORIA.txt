@@ -1,0 +1,27 @@
+Commit probado: 2e52104a2de573472d95527f150e91c897eef431
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45748355861
+PASS dos ventas constituyen historias separadas
+PASS confirmación y descuento de stock en un acontecimiento exterior
+PASS prefijos exterior e interior intactos
+PASS reenvío exacto no descuenta dos veces
+PASS origen reutilizado con otros bytes rechazado
+PASS precondición de negocio rechaza transición no permitida
+PASS rechazo exterior tardío revierte extensión hija
+PASS venta con trayectoria de envío dentro de su propia trayectoria
+PASS historia de estados completa y ordenada
+PASS historia de envío se deriva independientemente
+PASS cada acontecimiento interior conserva corte exterior de admisión
+PASS consulta histórica por rango
+PASS reconstrucción exacta de un corte anterior
+PASS historia de segunda venta no cambia
+PASS manifestación ordinaria no se confunde con trayectoria histórica
+PASS dos intenciones con misma precondición: solo una admitida
+PASS geometría de colaboradores y trayectoria de tareas coexisten
+PASS replay integral reproduce geometría e historial con procedencia de corte
+PASS reconocimiento de origen reconstruido tras replay
+PASS replay estricto detecta origen duplicado físicamente
+PASS corrupción de una hija no consolida otra hija
+PASS TX es un solo registro exterior, no duplica efectos interiores
+PASS K5B real conserva frontera de TX
+TOTAL HISTORIA 23
+HISTORIA_EXAMPLE {"sale":[{"state":"solicitada","position":6,"rootCut":12},{"state":"confirmada","position":8,"rootCut":14},{"state":"pagada","position":9,"rootCut":15},{"state":"despachada","position":13,"rootCut":17},{"state":"entregada","position":15,"rootCut":18}],"delivery":[{"state":"preparado","position":4,"rootCut":16},{"state":"despachado","position":5,"rootCut":17},{"state":"entregado","position":7,"rootCut":18}],"rootRecords":22,"stock":8}
