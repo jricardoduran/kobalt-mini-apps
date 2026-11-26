@@ -1,0 +1,39 @@
+{
+  "commit": "368ceffdcd20e75eb4cf6f3e7405b78b762095a7",
+  "ci": 45746324121,
+  "checks": 4,
+  "measurements": [
+    {
+      "identities": 10,
+      "deltaBody": 6,
+      "deltaK5B": 42,
+      "columnSnapshotK5B": 50,
+      "nestedTableSnapshotK5B": 151,
+      "untouchedColumnK5B": 65
+    },
+    {
+      "identities": 100,
+      "deltaBody": 7,
+      "deltaK5B": 43,
+      "columnSnapshotK5B": 163,
+      "nestedTableSnapshotK5B": 514,
+      "untouchedColumnK5B": 314
+    },
+    {
+      "identities": 1000,
+      "deltaBody": 7,
+      "deltaK5B": 43,
+      "columnSnapshotK5B": 1289,
+      "nestedTableSnapshotK5B": 4115,
+      "untouchedColumnK5B": 2789
+    },
+    {
+      "identities": 10000,
+      "deltaBody": 7,
+      "deltaK5B": 43,
+      "columnSnapshotK5B": 12540,
+      "nestedTableSnapshotK5B": 40117,
+      "untouchedColumnK5B": 27540
+    }
+  ]
+}
