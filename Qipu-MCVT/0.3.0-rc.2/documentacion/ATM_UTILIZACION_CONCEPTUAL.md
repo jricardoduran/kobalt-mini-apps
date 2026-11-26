@@ -1,0 +1,31 @@
+# ATM — claridad conceptual de utilización
+25 de noviembre de 2026 · complemento de Qipu MCVT 0.3.0-rc.2
+No cambia el motor, el perfil QIPU-META-1 ni los registros. Distingue comportamiento existente de decisiones propuestas.
+
+## 1. Definición
+La API de una trayectoria es su universo de utilización derivado del metacontrato y la metaestructura reconocidos. El intérprete y la gramática permanecen; los dominios, las acciones y las coordenadas pueden crecer. El metacontrato expresa posibilidades; la metaestructura, posiciones efectivamente constituidas. Una definición puede existir sin vector y una entidad puede existir sin todos sus valores. La mutabilidad actual es aditiva: una definición incompatible requiere otra identidad/versionado. Las capacidades de un usuario y las vistas las impone el adaptador.
+
+## 2. Conocimiento de la API
+La raíz [] ya devuelve tipos, posiciones, identidades, parámetros (dominio, operaciones, indicador constitutivo) y acciones con entradas, efectos y medida. [t] describe una tabla, no descarga todos sus valores. [t,i] devuelve pares dispersos [v,x]; [t,i,v] una manifestación (null si ausente); [t,null,v] pares [i,x] existentes. El perfil actual no admite null como valor, por tanto no se confunde con cero o false. JSON nominal es una proyección derivada. La raíz actual usa objetos nominales y lista todas las entidades: no es la forma mínima para grandes comercios. Propuesta: separar vocabulario contractual, directorios posicionales y valores; consultar solo la porción pertinente y conservar su corte. No crear otro esquema autoritativo ni generar endpoints. La gramática requiere un intérprete previamente conocido: la metaestructura no explica por sí sola el significado humano de todos los nombres.
+
+## 3. Gramática de transformación
+DEF declara tipos, campos y acciones. Campo: [tabla,nombre,dominio,operaciones,constitutivo]. Acción: [nombre,tabla,entradas,efectos,medida]. ID constituye identidad explícita. SET asigna, ADD/SUB transforman naturales. ACT invoca una acción por nombre o posición de declaración; las filas son [entidad,...entradas] en el orden declarado. No repetir etiquetas de significado determinado. El perfil actual admite text (1–200 bytes UTF-8), natural (0–10^9), boolean; las operaciones diferenciales son de naturales. Los valores no se coercionan. Nombres declarados permiten primeras apariciones; las coordenadas solo existen después de constituirse. ID explícito no requiere campo constitutivo. SET constitutivo puede crear identidad. No confundir contrato admisible y acontecimiento admitido.
+
+## 4. Escritura y autoridad
+Distinguir intención, resolución, plan, admisión y reconocimiento. En una autoridad propia la intención T120 tiene origen estable y se conserva antes de anexar; MCVT valida y CAS confirma sobre el corte. En cooperación L contiene hechos privados T102 y solicitudes T101, Q conserva recepción, C incorpora solo lo admitido, R reconoce aceptación o rechazo. Un reenvío no crea nueva intención. Un rechazo no elimina L/Q. No presentar stock provisional como firme. Una orden enviada no es una venta admitida.
+
+## 5. Contexto de resolución
+Una posición pertenece a una geometría. En RC.2 DurableNode.request interpreta contra privateState de L, mientras canonical lee la réplica C. Una coordenada obtenida de C no puede entregarse indiscriminadamente a request: podría referirse a otra identidad. Propuesta para siguiente iteración: elegir explícitamente la geometría fuente (privada, réplica canónica o proyección identificada); resolver allí y cruzar a la autoridad con identidad inequívoca. No duplicar catálogo canónico en L para simular el mismo espacio. Nunca reutilizar posiciones. Un corte antiguo conserva identificaciones bajo extensión conservativa, pero no garantiza disponibilidad o vigencia económica.
+
+## 6. Comercio como contrato, no como motor
+Primera experiencia: declarar Producto (Nombre constitutivo, Precio, Stock, Habilitado), constituir SKU y asignar valores. Consultar metacontrato antes y después. Una sucesión SET no es transacción de producto completo: una primera afirmación puede dejar una entidad parcialmente constituida. Decidir si se permite borrador/proyección que exige campos o se necesita acción atómica constitutiva nueva. El ACT actual exige identidad existente; no atribuirle alta múltiple.
+Para vender, declarar Venta-v1 con entradas cantidad y precio, efecto SUB Stock y medida cantidad por precio. ACT permite varias filas y planifica de forma atómica; repetir el producto evalúa efecto acumulado. La medida toma el precio suministrado: no hay comparación contra Precio vigente. Es una limitación para ventas reales; decidir contrato de cotización/precio reconocido, nunca confiar en precio arbitrario del cliente. Tampoco existe aquí pago, reserva ni identidad de cliente obligatoria.
+
+## 7. API autoexplicativa
+Mínimo: vocabulario, dominios, tratamientos, posiciones, entradas/efectos y corte; el intérprete sabe leerlos y la UI puede manifestar campos genéricos. Etiquetas humanas, unidades, agrupaciones y ayudas son proyecciones opcionales, no condiciones de cada escritura. Las restricciones cruzadas o semántica no expresable en el metacontrato no deben inventarse desde un nombre. OpenAPI o JSON tradicional son derivados de conveniencia, no fuentes de verdad. No añadir generadores ni configuración duplicada hasta demostrar necesidad.
+
+## 8. Decisión propuesta
+Pasar a uso de ATM y no optimizar por anticipado. La UI consume metageometría, el usuario formula intención, el adaptador delimita contexto y autoridad, el motor valida y constituye, la UI reconoce. Primero probar catálogo, acciones, ampliación de API, reconstrucción y equivalencia JS/PHP. Después diseñar UI mínima de catálogo/POS con misma gramática. RC.2 reduce claves y residuos en escenarios medidos, aún recorre L/prefijos y PHP en partes del flujo. Las 63 verificaciones previas sustentan base experimental, no producción.
+
+## 9. Evidencia
+La suite pruebas/uso-atm.cjs ejecuta el mismo escenario en JavaScript y en PHP/PAO, compara estados y metageometrías por corte y bytes finales. 13/13 comprobaciones (76 PASS incluyendo la regresión RC.2). Véase [RESULTADOS-USO-ATM.txt](../pruebas/RESULTADOS-USO-ATM.txt). La aceptación del precio arbitrario es una observación de límite, no una garantía comercial.

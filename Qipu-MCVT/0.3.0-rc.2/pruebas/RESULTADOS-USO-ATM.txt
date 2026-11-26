@@ -1,0 +1,22 @@
+25-nov-2026 (UTC-5)
+Commit probado: 857b91f02f9ad045883461fe8435059df977facd
+CI: https://github.com/jricardoduran/Kobalt-research-private/actions/runs/45737511390
+Job 139634203103
+63 verificaciones RC.2 repetidas + 13 de uso: 76 PASS.
+
+PASS raíz vacía antes de declarar
+PASS declaración no constituye posiciones
+PASS SET constitutivo crea producto parcial
+PASS false no es ausencia
+PASS vector existente con celda ausente
+PASS ACT admite dos productos
+PASS ACT inválida revierte todos los efectos
+PASS precio suministrado 1 admitido: límite contractual actual
+PASS API mutable: declarar y constituir Peso
+PASS rechazo de dominio y parámetro no declarado
+PASS equivalencia estado y metaestructura JS/PHP por corte
+PASS trayectoria JS/PHP idéntica byte a byte
+PASS reconstrucción de toda la experiencia
+TOTAL USO ATM 13/13
+
+La aceptación de precio 1 confirma una limitación contractual, no una propiedad comercial deseable. No se modificó el motor. Equivalencia exacta para este escenario, no prueba exhaustiva de todos los valores.
